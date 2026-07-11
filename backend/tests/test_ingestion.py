@@ -47,7 +47,7 @@ def test_upload_zip_file(client: TestClient) -> None:
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
         zip_file.writestr("doc1.pdf", b"pdf content 1")
         zip_file.writestr("doc2.docx", b"docx content 2")
-    
+
     zip_buffer.seek(0)
     response = client.post(
         "/api/v1/ingestion/upload",
@@ -162,7 +162,9 @@ def test_review_and_document_details(client: TestClient) -> None:
     # 1. Create a document and set it to needs_review
     res = client.post(
         "/api/v1/ingestion/upload",
-        files=[("files", ("test_uncertain.pdf", io.BytesIO(b"content"), "application/pdf"))],
+        files=[
+            ("files", ("test_uncertain.pdf", io.BytesIO(b"content"), "application/pdf"))
+        ],
         headers={"X-User-UID": "review-001", "X-User-Org": org_id},
     )
     doc_id = res.json()[0]["document_id"]
@@ -170,7 +172,11 @@ def test_review_and_document_details(client: TestClient) -> None:
     # Explicitly set document state to needs review
     client.patch(
         f"/api/v1/ingestion/documents/{doc_id}/stage",
-        json={"stage": "needs_review", "needs_review": True, "review_reason": "Low confidence"},
+        json={
+            "stage": "needs_review",
+            "needs_review": True,
+            "review_reason": "Low confidence",
+        },
         headers={"X-User-UID": "review-001", "X-User-Org": org_id},
     )
 

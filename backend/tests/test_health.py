@@ -9,16 +9,16 @@ from fastapi.testclient import TestClient
 
 # All health endpoints that must return 200 (FR-0.4.1)
 HEALTH_ENDPOINTS = [
-    "/healthz",                           # Gateway
-    "/api/v1/auth/healthz",               # Auth Service
-    "/api/v1/ingestion/healthz",          # Ingestion Service
-    "/api/v1/graph/healthz",              # Graph Service
-    "/api/v1/copilot/healthz",            # Copilot Service
-    "/api/v1/maintenance/healthz",        # Maintenance & RCA Service
-    "/api/v1/compliance/healthz",         # Compliance Service
-    "/api/v1/lessons/healthz",            # Lessons Learned Service
-    "/api/v1/notifications/healthz",      # Notification Service
-    "/api/v1/admin/healthz",              # Admin Service
+    "/healthz",  # Gateway
+    "/api/v1/auth/healthz",  # Auth Service
+    "/api/v1/ingestion/healthz",  # Ingestion Service
+    "/api/v1/graph/healthz",  # Graph Service
+    "/api/v1/copilot/healthz",  # Copilot Service
+    "/api/v1/maintenance/healthz",  # Maintenance & RCA Service
+    "/api/v1/compliance/healthz",  # Compliance Service
+    "/api/v1/lessons/healthz",  # Lessons Learned Service
+    "/api/v1/notifications/healthz",  # Notification Service
+    "/api/v1/admin/healthz",  # Admin Service
 ]
 
 SERVICE_NAMES = [

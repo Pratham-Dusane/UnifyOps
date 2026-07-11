@@ -39,7 +39,7 @@ class DataStore:
         self._chunks: dict[str, DocumentChunk] = {}  # keyed by chunk id
         self._connections: dict[str, PIDConnection] = {}  # keyed by connection id
         self._candidate_merges: dict[str, CandidateMerge] = {}  # keyed by merge id
-        
+
         # Load persisted data on initialization (unless running tests)
         if os.environ.get("TESTING") != "1":
             self._load()
@@ -55,15 +55,20 @@ class DataStore:
                 "documents": [d.model_dump() for d in self._documents.values()],
                 "entities": [e.model_dump() for e in self._entities.values()],
                 "chunks": [c.model_dump() for c in self._chunks.values()],
-                "connections": [conn.model_dump() for conn in self._connections.values()],
-                "candidate_merges": [m.model_dump() for m in self._candidate_merges.values()],
+                "connections": [
+                    conn.model_dump() for conn in self._connections.values()
+                ],
+                "candidate_merges": [
+                    m.model_dump() for m in self._candidate_merges.values()
+                ],
             }
+
             # Custom datetime serializer to ISO format
             def datetime_serializer(obj):
                 if isinstance(obj, datetime):
                     return obj.isoformat()
                 raise TypeError("Type not serializable")
-                
+
             with open(DB_FILE, "w", encoding="utf-8") as f:
                 json.dump(data, f, default=datetime_serializer, indent=2)
         except Exception as e:
@@ -76,7 +81,7 @@ class DataStore:
         try:
             with open(DB_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                
+
             def parse_dt(s: str) -> datetime:
                 return datetime.fromisoformat(s)
 
@@ -111,8 +116,10 @@ class DataStore:
                 item["created_at"] = parse_dt(item["created_at"])
                 merge = CandidateMerge(**item)
                 self._candidate_merges[merge.id] = merge
-                
-            print(f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges)")
+
+            print(
+                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges)"
+            )
         except Exception as e:
             print(f"[DataStore] Failed to load state from db.json: {e}")
 
@@ -247,9 +254,7 @@ class DataStore:
 
     def get_review_queue(self, org_id: str) -> list[DocumentRecord]:
         return [
-            d
-            for d in self._documents.values()
-            if d.org_id == org_id and d.needs_review
+            d for d in self._documents.values() if d.org_id == org_id and d.needs_review
         ]
 
     # ──────────────────────────── Entities (FR-1.5) ───────────────────────
@@ -327,9 +332,21 @@ class DataStore:
         """Deletes all entities, chunks, and connections associated with a document ID (FR-2.3.3)."""
         with self._lock:
             # Filter dicts keeping items not belonging to the document ID
-            self._entities = {eid: ent for eid, ent in self._entities.items() if ent.document_id != doc_id}
-            self._chunks = {cid: chk for cid, chk in self._chunks.items() if chk.document_id != doc_id}
-            self._connections = {conn_id: conn for conn_id, conn in self._connections.items() if conn.document_id != doc_id}
+            self._entities = {
+                eid: ent
+                for eid, ent in self._entities.items()
+                if ent.document_id != doc_id
+            }
+            self._chunks = {
+                cid: chk
+                for cid, chk in self._chunks.items()
+                if chk.document_id != doc_id
+            }
+            self._connections = {
+                conn_id: conn
+                for conn_id, conn in self._connections.items()
+                if conn.document_id != doc_id
+            }
             self._save()
 
     # ──────────────────────────── Candidate Merges (FR-2.2) ──────────────────
@@ -346,7 +363,9 @@ class DataStore:
     def list_candidate_merges(self, org_id: str) -> list[CandidateMerge]:
         return [m for m in self._candidate_merges.values() if m.org_id == org_id]
 
-    def update_candidate_merge(self, merge_id: str, status: str) -> CandidateMerge | None:
+    def update_candidate_merge(
+        self, merge_id: str, status: str
+    ) -> CandidateMerge | None:
         with self._lock:
             merge = self._candidate_merges.get(merge_id)
             if merge:
@@ -364,8 +383,10 @@ class DataStore:
         with self._lock:
             # Gather all documents and entities for the organization
             org_docs = {d.id: d for d in self._documents.values() if d.org_id == org_id}
-            org_entities = {e.id: e for e in self._entities.values() if e.org_id == org_id}
-            
+            org_entities = {
+                e.id: e for e in self._entities.values() if e.org_id == org_id
+            }
+
             # Helper to build a node dict from DocumentRecord or ExtractedEntity
             def make_node(item) -> dict:
                 if isinstance(item, DocumentRecord):
@@ -374,96 +395,138 @@ class DataStore:
                         "label": item.original_filename,
                         "type": "Document",
                         "properties": {
-                            "doc_type": item.doc_type.value if hasattr(item.doc_type, 'value') else str(item.doc_type),
+                            "doc_type": item.doc_type.value
+                            if hasattr(item.doc_type, "value")
+                            else str(item.doc_type),
                             "status": getattr(item, "status", "active"),
-                            "pipeline_stage": item.pipeline_stage.value if hasattr(item.pipeline_stage, 'value') else str(item.pipeline_stage),
+                            "pipeline_stage": item.pipeline_stage.value
+                            if hasattr(item.pipeline_stage, "value")
+                            else str(item.pipeline_stage),
                             "plant_id": item.plant_id,
-                            "unit": item.unit
-                        }
+                            "unit": item.unit,
+                        },
                     }
                 else:
-                    clean_type = item.entity_type.value if hasattr(item.entity_type, 'value') else str(item.entity_type)
-                    clean_type = "".join([part.capitalize() for part in clean_type.split("_")])
+                    clean_type = (
+                        item.entity_type.value
+                        if hasattr(item.entity_type, "value")
+                        else str(item.entity_type)
+                    )
+                    clean_type = "".join(
+                        [part.capitalize() for part in clean_type.split("_")]
+                    )
                     return {
                         "id": item.id,
                         "label": item.value,
                         "type": clean_type,
                         "properties": {
-                            "entity_type": item.entity_type.value if hasattr(item.entity_type, 'value') else str(item.entity_type),
+                            "entity_type": item.entity_type.value
+                            if hasattr(item.entity_type, "value")
+                            else str(item.entity_type),
                             "confidence": item.confidence,
                             "canonical_id": item.canonical_id,
-                            "aliases": getattr(item, "aliases", [])
-                        }
+                            "aliases": getattr(item, "aliases", []),
+                        },
                     }
 
             # Gather all candidate edges dynamically
             all_edges = []
-            
+
             # (a) Document -> ExtractedEntity (has_entity) OR specific semantic edges
             for ent in org_entities.values():
                 doc = org_docs.get(ent.document_id)
                 if not doc:
                     continue
-                
-                doc_type_str = doc.doc_type.value if hasattr(doc.doc_type, 'value') else str(doc.doc_type)
-                ent_type_str = ent.entity_type.value if hasattr(ent.entity_type, 'value') else str(ent.entity_type)
-                
+
+                doc_type_str = (
+                    doc.doc_type.value
+                    if hasattr(doc.doc_type, "value")
+                    else str(doc.doc_type)
+                )
+                ent_type_str = (
+                    ent.entity_type.value
+                    if hasattr(ent.entity_type, "value")
+                    else str(ent.entity_type)
+                )
+
                 if doc_type_str == "work_order" and ent_type_str == "equipment_tag":
                     edge_type = "PERFORMED_ON"
-                    all_edges.append({
-                        "id": f"edge-wo-eq-{doc.id}-{ent.id}",
-                        "source": doc.id,
-                        "target": ent.canonical_id or ent.id,
-                        "type": edge_type
-                    })
-                elif doc_type_str == "incident_report" and ent_type_str == "equipment_tag":
+                    all_edges.append(
+                        {
+                            "id": f"edge-wo-eq-{doc.id}-{ent.id}",
+                            "source": doc.id,
+                            "target": ent.canonical_id or ent.id,
+                            "type": edge_type,
+                        }
+                    )
+                elif (
+                    doc_type_str == "incident_report"
+                    and ent_type_str == "equipment_tag"
+                ):
                     edge_type = "INVOLVED_IN"
-                    all_edges.append({
-                        "id": f"edge-inc-eq-{doc.id}-{ent.id}",
-                        "source": doc.id,
-                        "target": ent.canonical_id or ent.id,
-                        "type": edge_type
-                    })
-                elif doc_type_str == "safety_procedure" and ent_type_str == "equipment_tag":
+                    all_edges.append(
+                        {
+                            "id": f"edge-inc-eq-{doc.id}-{ent.id}",
+                            "source": doc.id,
+                            "target": ent.canonical_id or ent.id,
+                            "type": edge_type,
+                        }
+                    )
+                elif (
+                    doc_type_str == "safety_procedure"
+                    and ent_type_str == "equipment_tag"
+                ):
                     edge_type = "GOVERNED_BY_SOP"
-                    all_edges.append({
-                        "id": f"edge-sop-eq-{ent.canonical_id or ent.id}-{doc.id}",
-                        "source": ent.canonical_id or ent.id,
-                        "target": doc.id,
-                        "type": edge_type
-                    })
-                elif doc_type_str == "regulatory" and ent_type_str == "regulatory_clause":
+                    all_edges.append(
+                        {
+                            "id": f"edge-sop-eq-{ent.canonical_id or ent.id}-{doc.id}",
+                            "source": ent.canonical_id or ent.id,
+                            "target": doc.id,
+                            "type": edge_type,
+                        }
+                    )
+                elif (
+                    doc_type_str == "regulatory" and ent_type_str == "regulatory_clause"
+                ):
                     edge_type = "GOVERNED_BY"
-                    all_edges.append({
-                        "id": f"edge-reg-cl-{doc.id}-{ent.id}",
-                        "source": doc.id,
-                        "target": ent.id,
-                        "type": edge_type
-                    })
+                    all_edges.append(
+                        {
+                            "id": f"edge-reg-cl-{doc.id}-{ent.id}",
+                            "source": doc.id,
+                            "target": ent.id,
+                            "type": edge_type,
+                        }
+                    )
                 elif doc_type_str == "work_order" and ent_type_str == "person":
                     edge_type = "ASSIGNED_TO"
-                    all_edges.append({
-                        "id": f"edge-wo-person-{doc.id}-{ent.id}",
-                        "source": doc.id,
-                        "target": ent.id,
-                        "type": edge_type
-                    })
+                    all_edges.append(
+                        {
+                            "id": f"edge-wo-person-{doc.id}-{ent.id}",
+                            "source": doc.id,
+                            "target": ent.id,
+                            "type": edge_type,
+                        }
+                    )
                 else:
-                    all_edges.append({
-                        "id": f"edge-has-{doc.id}-{ent.id}",
-                        "source": doc.id,
-                        "target": ent.id,
-                        "type": "HAS_ENTITY"
-                    })
+                    all_edges.append(
+                        {
+                            "id": f"edge-has-{doc.id}-{ent.id}",
+                            "source": doc.id,
+                            "target": ent.id,
+                            "type": "HAS_ENTITY",
+                        }
+                    )
 
                 # If resolved, we link the extraction node to its canonical node
                 if ent.canonical_id and ent.canonical_id != ent.id:
-                    all_edges.append({
-                        "id": f"edge-alias-{ent.id}-{ent.canonical_id}",
-                        "source": ent.id,
-                        "target": ent.canonical_id,
-                        "type": "RESOLVED_TO"
-                    })
+                    all_edges.append(
+                        {
+                            "id": f"edge-alias-{ent.id}-{ent.canonical_id}",
+                            "source": ent.id,
+                            "target": ent.canonical_id,
+                            "type": "RESOLVED_TO",
+                        }
+                    )
 
             # (b) PIDConnections (CONNECTS_TO between equipment)
             for conn in self._connections.values():
@@ -471,7 +534,7 @@ class DataStore:
                     continue
                 source_id = None
                 target_id = None
-                
+
                 for ent in org_entities.values():
                     if ent.value.upper() == conn.source_tag.upper():
                         source_id = ent.canonical_id or ent.id
@@ -480,15 +543,20 @@ class DataStore:
                     if ent.value.upper() == conn.target_tag.upper():
                         target_id = ent.canonical_id or ent.id
                         break
-                        
+
                 if source_id and target_id:
-                    all_edges.append({
-                        "id": conn.id,
-                        "source": source_id,
-                        "target": target_id,
-                        "type": "CONNECTS_TO",
-                        "properties": {"status": conn.status, "confidence": conn.confidence}
-                    })
+                    all_edges.append(
+                        {
+                            "id": conn.id,
+                            "source": source_id,
+                            "target": target_id,
+                            "type": "CONNECTS_TO",
+                            "properties": {
+                                "status": conn.status,
+                                "confidence": conn.confidence,
+                            },
+                        }
+                    )
 
             # Check if requested node_id exists (as canonical id or regular id)
             start_node_id = node_id
@@ -498,24 +566,31 @@ class DataStore:
 
             visited_nodes = set()
             active_edges = []
-            
+
             queue = [(start_node_id, 0)]
             visited_nodes.add(start_node_id)
-            
+
             while queue:
                 current_id, current_hop = queue.pop(0)
                 if current_hop >= hops:
                     continue
-                    
+
                 for edge in all_edges:
                     neighbor = None
                     if edge["source"] == current_id:
                         neighbor = edge["target"]
                     elif edge["target"] == current_id:
                         neighbor = edge["source"]
-                        
+
                     if neighbor and neighbor not in visited_nodes:
-                        if neighbor in org_docs or neighbor in org_entities or any(e.canonical_id == neighbor for e in org_entities.values()):
+                        if (
+                            neighbor in org_docs
+                            or neighbor in org_entities
+                            or any(
+                                e.canonical_id == neighbor
+                                for e in org_entities.values()
+                            )
+                        ):
                             visited_nodes.add(neighbor)
                             queue.append((neighbor, current_hop + 1))
                             active_edges.append(edge)
@@ -533,7 +608,9 @@ class DataStore:
                 else:
                     # Could be a canonical_id representing multiple merged tags
                     # Let's find any entity that has canonical_id equal to nid
-                    matching_ents = [e for e in org_entities.values() if e.canonical_id == nid]
+                    matching_ents = [
+                        e for e in org_entities.values() if e.canonical_id == nid
+                    ]
                     if matching_ents:
                         # Use the first matching entity but representing the canonical view
                         rep_ent = matching_ents[0]
@@ -541,7 +618,7 @@ class DataStore:
                         all_aliases = list(set([e.value for e in matching_ents]))
                         rep_ent.aliases = all_aliases
                         nodes_list.append(make_node(rep_ent))
-                    
+
             return {"nodes": nodes_list, "edges": active_edges}
 
     def search_graph_nodes(self, org_id: str, query: str) -> list[dict]:
@@ -551,27 +628,39 @@ class DataStore:
         with self._lock:
             results = []
             q = query.lower()
-            
+
             # Search documents
             for doc in self._documents.values():
-                if doc.org_id == org_id and (q in doc.original_filename.lower() or q in doc.filename.lower()):
-                    results.append({
-                        "id": doc.id,
-                        "label": doc.original_filename,
-                        "type": "Document"
-                    })
-                    
+                if doc.org_id == org_id and (
+                    q in doc.original_filename.lower() or q in doc.filename.lower()
+                ):
+                    results.append(
+                        {
+                            "id": doc.id,
+                            "label": doc.original_filename,
+                            "type": "Document",
+                        }
+                    )
+
             # Search entities
             for ent in self._entities.values():
                 if ent.org_id == org_id and q in ent.value.lower():
-                    clean_type = ent.entity_type.value if hasattr(ent.entity_type, 'value') else str(ent.entity_type)
-                    clean_type = "".join([part.capitalize() for part in clean_type.split("_")])
-                    results.append({
-                        "id": ent.canonical_id or ent.id,
-                        "label": ent.value,
-                        "type": clean_type
-                    })
-                    
+                    clean_type = (
+                        ent.entity_type.value
+                        if hasattr(ent.entity_type, "value")
+                        else str(ent.entity_type)
+                    )
+                    clean_type = "".join(
+                        [part.capitalize() for part in clean_type.split("_")]
+                    )
+                    results.append(
+                        {
+                            "id": ent.canonical_id or ent.id,
+                            "label": ent.value,
+                            "type": clean_type,
+                        }
+                    )
+
             # Deduplicate by id
             seen = set()
             unique_results = []
@@ -586,28 +675,33 @@ class DataStore:
         Compute completeness score (linked entities / total entities) and historical metrics (FR-2.5.2).
         """
         from app.models.ingestion import EntityType
+
         with self._lock:
             org_entities = [e for e in self._entities.values() if e.org_id == org_id]
             if not org_entities:
-                return {"score": 0.0, "linked": 0, "total": 0, "trend": [80, 82, 85, 87, 90]}
-                
+                return {
+                    "score": 0.0,
+                    "linked": 0,
+                    "total": 0,
+                    "trend": [80, 82, 85, 87, 90],
+                }
+
             total = len(org_entities)
             linked = 0
-            
+
             for ent in org_entities:
                 if ent.canonical_id or ent.entity_type == EntityType.EQUIPMENT_TAG:
                     linked += 1
                 elif ent.reviewed:
                     linked += 1
-                    
+
             score = round((linked / total) * 100, 1) if total > 0 else 100.0
             return {
                 "score": score,
                 "linked": linked,
                 "total": total,
-                "trend": [75.0, 78.5, 81.2, 84.0, score]
+                "trend": [75.0, 78.5, 81.2, 84.0, score],
             }
-
 
 
 # Singleton instance

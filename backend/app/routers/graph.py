@@ -42,10 +42,14 @@ async def get_neighborhood(
     Traverse the knowledge graph starting from node_id and return connected nodes and edges (FR-2.4).
     """
     try:
-        neighborhood = store.get_neighborhood(org_id=x_user_org, node_id=node_id, hops=hops)
+        neighborhood = store.get_neighborhood(
+            org_id=x_user_org, node_id=node_id, hops=hops
+        )
         return neighborhood
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to traverse graph: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to traverse graph: {str(e)}"
+        )
 
 
 @router.get("/search")
@@ -93,7 +97,7 @@ async def resolve_candidate_merge(
     merge = store.get_candidate_merge(merge_id)
     if not merge or merge.org_id != x_user_org:
         raise HTTPException(status_code=404, detail="Candidate merge not found")
-        
+
     if merge.status != "pending":
         raise HTTPException(status_code=400, detail="Candidate merge already resolved")
 
@@ -101,39 +105,45 @@ async def resolve_candidate_merge(
         # 1. Update source entity's canonical_id to the target entity
         source_ent = store.get_entity(merge.source_entity_id)
         target_ent = store.get_entity(merge.target_entity_id)
-        
+
         if source_ent and target_ent:
             canonical_id = target_ent.canonical_id or target_ent.id
             store.update_entity(source_ent.id, canonical_id=canonical_id)
-            
+
             # 2. Add source value to canonical aliases
             existing_aliases = getattr(target_ent, "aliases", [])
             if source_ent.value not in existing_aliases:
                 existing_aliases.append(source_ent.value)
                 store.update_entity(target_ent.id, aliases=existing_aliases)
-                
+
         store.update_candidate_merge(merge_id, "approved")
-        print(f"[GraphService] Approved merge: {merge.source_value} -> {merge.target_value}")
-        
+        print(
+            f"[GraphService] Approved merge: {merge.source_value} -> {merge.target_value}"
+        )
+
     elif body.action == ReviewAction.REJECT:
         # Keep them separate, mark merge status as rejected
         store.update_candidate_merge(merge_id, "rejected")
-        print(f"[GraphService] Rejected merge: {merge.source_value} -> {merge.target_value}")
-        
+        print(
+            f"[GraphService] Rejected merge: {merge.source_value} -> {merge.target_value}"
+        )
+
     elif body.action == ReviewAction.EDIT:
         # Custom merge name or target edit
         source_ent = store.get_entity(merge.source_entity_id)
         target_ent = store.get_entity(merge.target_entity_id)
-        
+
         if source_ent and target_ent and body.corrected_entity_value:
             # Update target value to new name
             store.update_entity(target_ent.id, value=body.corrected_entity_value)
             canonical_id = target_ent.canonical_id or target_ent.id
             store.update_entity(source_ent.id, canonical_id=canonical_id)
-            
+
         store.update_candidate_merge(merge_id, "approved")
-        
+
     resolved = store.get_candidate_merge(merge_id)
     if not resolved:
-        raise HTTPException(status_code=500, detail="Failed to retrieve resolved candidate merge")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve resolved candidate merge"
+        )
     return resolved

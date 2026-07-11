@@ -12,8 +12,9 @@ dotenv.load_dotenv(dotenv_path=backend_dir / ".env")
 if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
     sa_path = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
     if not os.path.isabs(sa_path):
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str((backend_dir / sa_path).resolve())
-
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(
+            (backend_dir / sa_path).resolve()
+        )
 
 
 class Settings(BaseSettings):
@@ -30,9 +31,7 @@ class Settings(BaseSettings):
     port: int = Field(default=8000, alias="PORT")
 
     # CORS
-    cors_origins: str = Field(
-        default="http://localhost:3000", alias="CORS_ORIGINS"
-    )
+    cors_origins: str = Field(default="http://localhost:3000", alias="CORS_ORIGINS")
 
     # Firebase
     firebase_service_account_key_path: str = Field(
@@ -49,9 +48,7 @@ class Settings(BaseSettings):
     )
 
     # Document AI Processor IDs
-    docai_ocr_processor_id: str = Field(
-        default="", alias="DOCAI_OCR_PROCESSOR_ID"
-    )
+    docai_ocr_processor_id: str = Field(default="", alias="DOCAI_OCR_PROCESSOR_ID")
     docai_classifier_processor_id: str = Field(
         default="", alias="DOCAI_CLASSIFIER_PROCESSOR_ID"
     )

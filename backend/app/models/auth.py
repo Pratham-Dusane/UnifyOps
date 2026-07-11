@@ -14,13 +14,13 @@ from pydantic import BaseModel, Field
 class UserRole(str, Enum):
     """PRD Section 4 — Persona-mapped roles."""
 
-    FIELD_TECHNICIAN = "field_technician"        # Rajesh
-    MAINTENANCE_ENGINEER = "maintenance_engineer" # Priya
-    COMPLIANCE_OFFICER = "compliance_officer"      # Anita
-    SENIOR_ENGINEER = "senior_engineer"            # Vikram
-    PLATFORM_ADMIN = "platform_admin"              # Deepak
-    PLANT_HEAD = "plant_head"                      # Mr. Iyer
-    VIEWER = "viewer"                              # Read-only default
+    FIELD_TECHNICIAN = "field_technician"  # Rajesh
+    MAINTENANCE_ENGINEER = "maintenance_engineer"  # Priya
+    COMPLIANCE_OFFICER = "compliance_officer"  # Anita
+    SENIOR_ENGINEER = "senior_engineer"  # Vikram
+    PLATFORM_ADMIN = "platform_admin"  # Deepak
+    PLANT_HEAD = "plant_head"  # Mr. Iyer
+    VIEWER = "viewer"  # Read-only default
 
 
 class Organisation(BaseModel):

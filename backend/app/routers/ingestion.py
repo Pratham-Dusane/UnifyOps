@@ -12,7 +12,15 @@ import io
 import mimetypes
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException, Header, UploadFile, File, Form, BackgroundTasks
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Header,
+    UploadFile,
+    File,
+    Form,
+    BackgroundTasks,
+)
 
 from app.core.config import settings
 from app.core.store import store
@@ -96,7 +104,11 @@ _ENTITY_TEMPLATES: dict[DocumentType, list[tuple[EntityType, str, float]]] = {
         (EntityType.EQUIPMENT_TAG, "FCV-105", 0.93),
         (EntityType.DATE, "2025-09-02", 0.99),
         (EntityType.LOCATION, "Flare Header Section B", 0.90),
-        (EntityType.FAILURE_MODE, "Valve stuck open — actuator air supply failure", 0.85),
+        (
+            EntityType.FAILURE_MODE,
+            "Valve stuck open — actuator air supply failure",
+            0.85,
+        ),
         (EntityType.PERSON, "Operator B-Shift", 0.88),
     ],
     DocumentType.REGULATORY: [
@@ -155,29 +167,42 @@ _CHUNK_HEADINGS: dict[DocumentType, list[str]] = {
 }
 
 
-def resolve_equipment_entity(entity: ExtractedEntity, org_id: str, plant_id: str) -> None:
+def resolve_equipment_entity(
+    entity: ExtractedEntity, org_id: str, plant_id: str
+) -> None:
     """
     Applies deterministic normalisation, embedding similarity, and string similarity
     to resolve newly extracted equipment tags against existing ones (FR-2.2).
     """
     from difflib import SequenceMatcher
-    
+
     # 1. Deterministic normalisation
-    val = entity.value.strip().upper().replace(" ", "").replace("-", "").replace("_", "")
-    
+    val = (
+        entity.value.strip().upper().replace(" ", "").replace("-", "").replace("_", "")
+    )
+
     # Fetch all existing equipment entities for the same organization
     all_ents = store.get_entities_by_org(org_id)
-    existing_equip = [e for e in all_ents if e.entity_type == EntityType.EQUIPMENT_TAG and e.id != entity.id]
-    
+    existing_equip = [
+        e
+        for e in all_ents
+        if e.entity_type == EntityType.EQUIPMENT_TAG and e.id != entity.id
+    ]
+
     # Check matching normalised names or existing aliases
     for eq in existing_equip:
-        eq_norm = eq.value.strip().upper().replace(" ", "").replace("-", "").replace("_", "")
-        aliases_norm = [a.strip().upper().replace(" ", "").replace("-", "").replace("_", "") for a in getattr(eq, "aliases", [])]
+        eq_norm = (
+            eq.value.strip().upper().replace(" ", "").replace("-", "").replace("_", "")
+        )
+        aliases_norm = [
+            a.strip().upper().replace(" ", "").replace("-", "").replace("_", "")
+            for a in getattr(eq, "aliases", [])
+        ]
         if val == eq_norm or val in aliases_norm:
             # Match found! Merge under canonical ID
             canonical_id = eq.canonical_id or eq.id
             entity.canonical_id = canonical_id
-            
+
             # Add to aliases list if not already present
             existing_aliases = getattr(eq, "aliases", [])
             if entity.value not in existing_aliases:
@@ -188,20 +213,24 @@ def resolve_equipment_entity(entity: ExtractedEntity, org_id: str, plant_id: str
     # 2. String Similarity and/or Embedding Similarity
     best_match = None
     max_sim = 0.0
-    
+
     for eq in existing_equip:
         sim = SequenceMatcher(None, entity.value.upper(), eq.value.upper()).ratio()
         if sim > max_sim:
             max_sim = sim
             best_match = eq
-            
+
     # Try embedding similarity if we have gemini service enabled and similarity is moderate
     if 0.70 <= max_sim < 0.90 and best_match:
         try:
             from app.services.gemini import gemini_service
-            embeddings = gemini_service.generate_embeddings([entity.value, best_match.value])
+
+            embeddings = gemini_service.generate_embeddings(
+                [entity.value, best_match.value]
+            )
             if embeddings and len(embeddings) == 2:
                 import math
+
                 v1, v2 = embeddings[0], embeddings[1]
                 dot = sum(a * b for a, b in zip(v1, v2))
                 norm1 = math.sqrt(sum(a * a for a in v1))
@@ -221,7 +250,9 @@ def resolve_equipment_entity(entity: ExtractedEntity, org_id: str, plant_id: str
         if entity.value not in existing_aliases:
             existing_aliases.append(entity.value)
             store.update_entity(best_match.id, aliases=existing_aliases)
-        print(f"[EntityResolution] Auto-merged {entity.value} with canonical {best_match.value} (similarity {max_sim:.2f})")
+        print(
+            f"[EntityResolution] Auto-merged {entity.value} with canonical {best_match.value} (similarity {max_sim:.2f})"
+        )
     elif 0.75 <= max_sim < 0.90 and best_match:
         # Moderate confidence -> create candidate merge for review queue (FR-2.2.3)
         merge_id = str(uuid.uuid4())[:12]
@@ -233,11 +264,13 @@ def resolve_equipment_entity(entity: ExtractedEntity, org_id: str, plant_id: str
             target_value=best_match.value,
             similarity=max_sim,
             status="pending",
-            org_id=org_id
+            org_id=org_id,
         )
         store.create_candidate_merge(merge)
         entity.canonical_id = None
-        print(f"[EntityResolution] Proposed candidate merge: {entity.value} <-> {best_match.value} (similarity {max_sim:.2f})")
+        print(
+            f"[EntityResolution] Proposed candidate merge: {entity.value} <-> {best_match.value} (similarity {max_sim:.2f})"
+        )
     else:
         # New canonical equipment node
         entity.canonical_id = entity.id
@@ -279,8 +312,10 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
         if doc.mime_type == "application/pdf":
             try:
                 import io
+
                 try:
                     import pdfplumber
+
                     with pdfplumber.open(io.BytesIO(file_content)) as pdf:
                         pages = len(pdf.pages)
                         page_texts = []
@@ -288,7 +323,9 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
                             txt = p.extract_text() or ""
                             page_texts.append(txt)
                         full_text = "\n".join(page_texts)
-                        print(f"[Pipeline] pdfplumber extracted {pages} pages, {len(full_text)} chars")
+                        print(
+                            f"[Pipeline] pdfplumber extracted {pages} pages, {len(full_text)} chars"
+                        )
                 except ImportError:
                     # pdfplumber not installed, use basic fallback
                     print("[Pipeline] pdfplumber not available for text PDF fallback")
@@ -309,10 +346,11 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
     layout_path = f"gs://{settings.gcs_bucket_name}/{org_id}/{doc_id}/layout.json"
     try:
         import json as json_mod
+
         storage_service.upload_file(
             json_mod.dumps(ocr_data).encode("utf-8"),
             f"{org_id}/{doc_id}/layout.json",
-            "application/json"
+            "application/json",
         )
     except Exception as e:
         print(f"[Pipeline] Failed to save layout JSON: {e}")
@@ -336,11 +374,15 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
         confidence = 1.0
     else:
         # Try Document AI classifier first
-        inferred_type, confidence = document_ai_service.classify_document(file_content, doc.mime_type)
+        inferred_type, confidence = document_ai_service.classify_document(
+            file_content, doc.mime_type
+        )
 
         # If Document AI classifier fails, use Groq LLM to classify from OCR text
         if confidence == 0.0 or inferred_type == DocumentType.UNKNOWN:
-            groq_type_str, groq_conf = gemini_service.classify_text_via_groq(full_text, filename)
+            groq_type_str, groq_conf = gemini_service.classify_text_via_groq(
+                full_text, filename
+            )
             try:
                 inferred_type = DocumentType(groq_type_str)
                 confidence = groq_conf
@@ -351,19 +393,35 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
         # Final filename-based fallback if all AI classifiers fail
         if confidence == 0.0 or inferred_type == DocumentType.UNKNOWN:
             fn_lower = filename.lower()
-            if "p&id" in fn_lower or "drawing" in fn_lower or "dwg" in fn_lower or "pid" in fn_lower:
+            if (
+                "p&id" in fn_lower
+                or "drawing" in fn_lower
+                or "dwg" in fn_lower
+                or "pid" in fn_lower
+            ):
                 inferred_type = DocumentType.ENGINEERING_DRAWING
             elif "work" in fn_lower or "order" in fn_lower or "wo-" in fn_lower:
                 inferred_type = DocumentType.WORK_ORDER
             elif "sop" in fn_lower or "safety" in fn_lower or "procedure" in fn_lower:
                 inferred_type = DocumentType.SAFETY_PROCEDURE
-            elif "inspect" in fn_lower or "report" in fn_lower or "check" in fn_lower or "ir-" in fn_lower:
+            elif (
+                "inspect" in fn_lower
+                or "report" in fn_lower
+                or "check" in fn_lower
+                or "ir-" in fn_lower
+            ):
                 inferred_type = DocumentType.INSPECTION_REPORT
-            elif "operate" in fn_lower or "instruction" in fn_lower or "oi-" in fn_lower:
+            elif (
+                "operate" in fn_lower or "instruction" in fn_lower or "oi-" in fn_lower
+            ):
                 inferred_type = DocumentType.OPERATING_INSTRUCTION
             elif "incident" in fn_lower or "accident" in fn_lower or "miss" in fn_lower:
                 inferred_type = DocumentType.INCIDENT_REPORT
-            elif "regulatory" in fn_lower or "compliance" in fn_lower or "standard" in fn_lower:
+            elif (
+                "regulatory" in fn_lower
+                or "compliance" in fn_lower
+                or "standard" in fn_lower
+            ):
                 inferred_type = DocumentType.REGULATORY
 
             if inferred_type != DocumentType.UNKNOWN:
@@ -418,10 +476,13 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
                     normalised_value=tag["value"].upper().replace(" ", "_"),
                     confidence=tag["confidence"],
                     source_page=tag["source_page"],
-                    needs_review=tag["confidence"] < settings.entity_confidence_threshold,
-                    review_reason="Confidence below threshold" if tag["confidence"] < settings.entity_confidence_threshold else None,
+                    needs_review=tag["confidence"]
+                    < settings.entity_confidence_threshold,
+                    review_reason="Confidence below threshold"
+                    if tag["confidence"] < settings.entity_confidence_threshold
+                    else None,
                     org_id=org_id,
-                    bounding_box=tag["bounding_box"]
+                    bounding_box=tag["bounding_box"],
                 )
                 resolve_equipment_entity(entity, org_id, doc.plant_id)
                 store.create_entity(entity)
@@ -432,15 +493,20 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
 
     # NO static template fallback — if AI extraction returns nothing, we log it
     if not extracted_entities:
-        print(f"[Pipeline] Warning: No entities extracted for document {doc_id} ({filename}). "
-              f"Text length: {len(full_text)} chars. This may indicate API issues.")
+        print(
+            f"[Pipeline] Warning: No entities extracted for document {doc_id} ({filename}). "
+            f"Text length: {len(full_text)} chars. This may indicate API issues."
+        )
 
     # Collect equipment tags for topology generation
     equipment_tags: list[str] = []
 
     for ent in extracted_entities:
         # Skip duplicate equipment_tag entities if they were already added by P&ID extractor
-        if inferred_type == DocumentType.ENGINEERING_DRAWING and ent.get("entity_type") == "equipment_tag":
+        if (
+            inferred_type == DocumentType.ENGINEERING_DRAWING
+            and ent.get("entity_type") == "equipment_tag"
+        ):
             # Still collect for topology but don't duplicate the entity record
             equipment_tags.append(ent.get("value", ""))
             continue
@@ -458,14 +524,21 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
             document_id=doc_id,
             entity_type=etype_enum,
             value=ent["value"],
-            normalised_value=ent.get("normalised_value") or ent["value"].upper().replace(" ", "_"),
+            normalised_value=ent.get("normalised_value")
+            or ent["value"].upper().replace(" ", "_"),
             confidence=conf_val,
             source_page=random.randint(1, max(1, pages)),
             source_span_start=random.randint(0, max(1, len(full_text))),
             source_span_end=random.randint(0, max(1, len(full_text))),
-            needs_review=conf_val < settings.entity_confidence_threshold or ent.get("review_reason") is not None,
-            review_reason=ent.get("review_reason") or ("Entity confidence below threshold" if conf_val < settings.entity_confidence_threshold else None),
-            org_id=org_id
+            needs_review=conf_val < settings.entity_confidence_threshold
+            or ent.get("review_reason") is not None,
+            review_reason=ent.get("review_reason")
+            or (
+                "Entity confidence below threshold"
+                if conf_val < settings.entity_confidence_threshold
+                else None
+            ),
+            org_id=org_id,
         )
         if etype_enum == EntityType.EQUIPMENT_TAG:
             resolve_equipment_entity(entity, org_id, doc.plant_id)
@@ -486,7 +559,7 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
                 source_tag=equipment_tags[i],
                 target_tag=equipment_tags[i + 1],
                 confidence=0.85,
-                org_id=org_id
+                org_id=org_id,
             )
             store.create_connection(conn)
 
@@ -540,11 +613,23 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
     if inferred_type == DocumentType.INCIDENT_REPORT:
         try:
             all_docs_list, _ = store.list_documents(org_id=org_id, page_size=1000)
-            other_incidents = [d for d in all_docs_list if d.doc_type == DocumentType.INCIDENT_REPORT and d.id != doc_id]
-            this_eq_tags = {e.canonical_id or e.id for e in store.get_entities_by_document(doc_id) if e.entity_type == EntityType.EQUIPMENT_TAG}
-            
+            other_incidents = [
+                d
+                for d in all_docs_list
+                if d.doc_type == DocumentType.INCIDENT_REPORT and d.id != doc_id
+            ]
+            this_eq_tags = {
+                e.canonical_id or e.id
+                for e in store.get_entities_by_document(doc_id)
+                if e.entity_type == EntityType.EQUIPMENT_TAG
+            }
+
             for other_inc in other_incidents:
-                other_eq_tags = {e.canonical_id or e.id for e in store.get_entities_by_document(other_inc.id) if e.entity_type == EntityType.EQUIPMENT_TAG}
+                other_eq_tags = {
+                    e.canonical_id or e.id
+                    for e in store.get_entities_by_document(other_inc.id)
+                    if e.entity_type == EntityType.EQUIPMENT_TAG
+                }
                 shared = this_eq_tags.intersection(other_eq_tags)
                 if shared:
                     conn_id = str(uuid.uuid4())[:12]
@@ -556,7 +641,7 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
                         connection_type="SIMILAR_TO",
                         confidence=0.90 if len(shared) > 1 else 0.75,
                         status="pending",
-                        org_id=org_id
+                        org_id=org_id,
                     )
                     store.create_connection(conn)
         except Exception as e:
@@ -566,19 +651,18 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
     try:
         all_docs_list, _ = store.list_documents(org_id=org_id, page_size=1000)
         for other_doc in all_docs_list:
-            if (other_doc.id != doc_id and 
-                other_doc.original_filename == doc.original_filename and 
-                other_doc.plant_id == doc.plant_id and
-                other_doc.unit == doc.unit and
-                getattr(other_doc, "status", "active") == "active"):
-                
+            if (
+                other_doc.id != doc_id
+                and other_doc.original_filename == doc.original_filename
+                and other_doc.plant_id == doc.plant_id
+                and other_doc.unit == doc.unit
+                and getattr(other_doc, "status", "active") == "active"
+            ):
                 # Update status of the older document to superseded
                 store.update_document_stage(
-                    other_doc.id,
-                    other_doc.pipeline_stage,
-                    status="superseded"
+                    other_doc.id, other_doc.pipeline_stage, status="superseded"
                 )
-                
+
                 # Create a superseding edge
                 conn_id = str(uuid.uuid4())[:12]
                 conn = PIDConnection(
@@ -589,10 +673,12 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
                     connection_type="SUPERSEDES",
                     confidence=1.0,
                     status="approved",
-                    org_id=org_id
+                    org_id=org_id,
                 )
                 store.create_connection(conn)
-                print(f"[Pipeline] Supersession completed: {doc_id} supersedes {other_doc.id}")
+                print(
+                    f"[Pipeline] Supersession completed: {doc_id} supersedes {other_doc.id}"
+                )
     except Exception as e:
         print(f"[Pipeline] Supersession check failed: {e}")
 
@@ -665,7 +751,9 @@ async def upload_documents(
                     for zinfo in z.infolist():
                         if zinfo.is_dir():
                             continue
-                        if zinfo.filename.startswith("__MACOSX/") or zinfo.filename.split("/")[-1].startswith("."):
+                        if zinfo.filename.startswith(
+                            "__MACOSX/"
+                        ) or zinfo.filename.split("/")[-1].startswith("."):
                             continue
 
                         sub_doc_id = str(uuid.uuid4())
@@ -675,7 +763,9 @@ async def upload_documents(
 
                         # Extract bytes and save to Cloud Storage (FR-1.1.3)
                         file_data = z.read(zinfo)
-                        storage_path = storage_service.upload_file(file_data, f"{sub_doc_id}_{sub_filename}", mime_type)
+                        storage_path = storage_service.upload_file(
+                            file_data, f"{sub_doc_id}_{sub_filename}", mime_type
+                        )
 
                         doc = DocumentRecord(
                             id=sub_doc_id,
@@ -693,7 +783,9 @@ async def upload_documents(
                             updated_at=datetime.now(timezone.utc),
                         )
                         store.create_document(doc)
-                        background_tasks.add_task(simulate_pipeline_task, sub_doc_id, org_id, sub_filename)
+                        background_tasks.add_task(
+                            simulate_pipeline_task, sub_doc_id, org_id, sub_filename
+                        )
 
                         results.append(
                             DocumentUploadResponse(
@@ -716,7 +808,11 @@ async def upload_documents(
             doc_id = str(uuid.uuid4())
             content = await file.read()
             # Save raw document content to Cloud Storage (FR-1.1.3)
-            storage_path = storage_service.upload_file(content, f"{doc_id}_{file.filename}", file.content_type or "application/octet-stream")
+            storage_path = storage_service.upload_file(
+                content,
+                f"{doc_id}_{file.filename}",
+                file.content_type or "application/octet-stream",
+            )
 
             doc = DocumentRecord(
                 id=doc_id,
@@ -734,7 +830,9 @@ async def upload_documents(
                 updated_at=datetime.now(timezone.utc),
             )
             store.create_document(doc)
-            background_tasks.add_task(simulate_pipeline_task, doc_id, org_id, file.filename or "")
+            background_tasks.add_task(
+                simulate_pipeline_task, doc_id, org_id, file.filename or ""
+            )
 
             results.append(
                 DocumentUploadResponse(
@@ -920,10 +1018,10 @@ async def reprocess_document(
     doc = store.get_document(document_id)
     if not doc or doc.org_id != x_user_org:
         raise HTTPException(status_code=404, detail="Document not found")
-        
+
     # 1. Clear old data
     store.delete_document_data(document_id)
-    
+
     # 2. Reset stage to queued
     store.update_document_stage(
         document_id,
@@ -932,17 +1030,20 @@ async def reprocess_document(
         entity_count=0,
         chunk_count=0,
         needs_review=False,
-        review_reason=None
+        review_reason=None,
     )
-    
+
     # 3. Add background task
-    background_tasks.add_task(simulate_pipeline_task, document_id, x_user_org, doc.original_filename)
-    
+    background_tasks.add_task(
+        simulate_pipeline_task, document_id, x_user_org, doc.original_filename
+    )
+
     updated = store.get_document(document_id)
     if not updated:
-        raise HTTPException(status_code=500, detail="Failed to retrieve reprocessed document")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve reprocessed document"
+        )
     return updated
-
 
 
 @router.post("/entities/{entity_id}/review", response_model=ExtractedEntity)
@@ -965,7 +1066,9 @@ async def review_entity(
         updates: dict[str, object] = {"reviewed": True, "needs_review": False}
         if body.corrected_entity_value:
             updates["value"] = body.corrected_entity_value
-            updates["normalised_value"] = body.corrected_entity_value.upper().replace(" ", "_")
+            updates["normalised_value"] = body.corrected_entity_value.upper().replace(
+                " ", "_"
+            )
         store.update_entity(entity_id, **updates)
 
     updated = store.get_entity(entity_id)
@@ -983,7 +1086,7 @@ async def review_connection(
     """Submit a review decision on a P&ID candidate connection (FR-1.4.3, FR-1.7.3)."""
     conn = store.update_connection(
         connection_id,
-        status="approved" if body.action == ReviewAction.APPROVE else "rejected"
+        status="approved" if body.action == ReviewAction.APPROVE else "rejected",
     )
     if not conn or conn.org_id != x_user_org:
         raise HTTPException(status_code=404, detail="Connection not found")

@@ -31,11 +31,20 @@ class StorageService:
                 self.use_gcs = True
             except Exception as e:
                 # Log or handle fallback
-                print(f"[StorageService] Failed to initialize GCS client: {e}. Falling back to local storage.")
+                print(
+                    f"[StorageService] Failed to initialize GCS client: {e}. Falling back to local storage."
+                )
         else:
-            print("[StorageService] GOOGLE_APPLICATION_CREDENTIALS not set. Falling back to local storage.")
+            print(
+                "[StorageService] GOOGLE_APPLICATION_CREDENTIALS not set. Falling back to local storage."
+            )
 
-    def upload_file(self, file_content: bytes, destination_blob_name: str, content_type: str = "application/octet-stream") -> str:
+    def upload_file(
+        self,
+        file_content: bytes,
+        destination_blob_name: str,
+        content_type: str = "application/octet-stream",
+    ) -> str:
         """
         Uploads a file's raw content to storage (GCS or local fallback).
         Returns the URI path (e.g. gs://... or local file path).
@@ -46,7 +55,9 @@ class StorageService:
                 blob.upload_from_string(file_content, content_type=content_type)
                 return f"gs://{self.bucket_name}/{destination_blob_name}"
             except Exception as e:
-                print(f"[StorageService] GCS Upload failed: {e}. Falling back to local write.")
+                print(
+                    f"[StorageService] GCS Upload failed: {e}. Falling back to local write."
+                )
 
         # Local fallback
         local_path = LOCAL_STORAGE_DIR / destination_blob_name

@@ -15,13 +15,13 @@ class DocumentType(str, Enum):
     """PRD Section 9.2 — Seven core document types plus catch-all."""
 
     ENGINEERING_DRAWING = "engineering_drawing"  # P&IDs, engineering drawings
-    WORK_ORDER = "work_order"                    # Maintenance work orders
-    SAFETY_PROCEDURE = "safety_procedure"        # SOPs, safety procedures
-    INSPECTION_REPORT = "inspection_report"      # Inspection reports
+    WORK_ORDER = "work_order"  # Maintenance work orders
+    SAFETY_PROCEDURE = "safety_procedure"  # SOPs, safety procedures
+    INSPECTION_REPORT = "inspection_report"  # Inspection reports
     OPERATING_INSTRUCTION = "operating_instruction"
-    INCIDENT_REPORT = "incident_report"          # Incident / near-miss reports
-    REGULATORY = "regulatory"                    # Regulatory documents
-    UNKNOWN = "unknown"                          # Unclassified
+    INCIDENT_REPORT = "incident_report"  # Incident / near-miss reports
+    REGULATORY = "regulatory"  # Regulatory documents
+    UNKNOWN = "unknown"  # Unclassified
 
 
 class PipelineStage(str, Enum):
@@ -107,19 +107,29 @@ class ExtractedEntity(BaseModel):
     normalised_value: str = Field(default="", description="Normalised/canonical form")
     confidence: float = Field(description="0-1 confidence score (FR-1.5.3)")
     source_page: int | None = Field(default=None, description="Source page number")
-    source_span_start: int | None = Field(default=None, description="Char offset start (FR-1.5.3)")
+    source_span_start: int | None = Field(
+        default=None, description="Char offset start (FR-1.5.3)"
+    )
     source_span_end: int | None = Field(default=None, description="Char offset end")
     needs_review: bool = Field(default=False, description="FR-1.5.4")
     review_reason: str | None = Field(default=None)
     reviewed: bool = Field(default=False)
     org_id: str = Field(default="")
-    bounding_box: list[float] | None = Field(default=None, description="[x_min, y_min, x_max, y_max] bounding box (FR-1.4.1)")
-    canonical_id: str | None = Field(default=None, description="Canonical entity ID after resolution (FR-2.2)")
-    aliases: list[str] = Field(default_factory=list, description="Aliases mapped to this canonical node (FR-2.2.4)")
+    bounding_box: list[float] | None = Field(
+        default=None, description="[x_min, y_min, x_max, y_max] bounding box (FR-1.4.1)"
+    )
+    canonical_id: str | None = Field(
+        default=None, description="Canonical entity ID after resolution (FR-2.2)"
+    )
+    aliases: list[str] = Field(
+        default_factory=list,
+        description="Aliases mapped to this canonical node (FR-2.2.4)",
+    )
 
 
 class CandidateMerge(BaseModel):
     """Candidate entity merge under review (FR-2.2.3)."""
+
     id: str
     source_entity_id: str
     target_entity_id: str
@@ -133,6 +143,7 @@ class CandidateMerge(BaseModel):
 
 class GraphNode(BaseModel):
     """Graph node representation for explorer (FR-2.4)."""
+
     id: str
     label: str
     type: str  # Document | Equipment | Location | Person | Procedure | Incident | RegulatoryClause etc.
@@ -141,6 +152,7 @@ class GraphNode(BaseModel):
 
 class GraphEdge(BaseModel):
     """Graph edge representation for explorer (FR-2.4)."""
+
     id: str
     source: str
     target: str
@@ -150,6 +162,7 @@ class GraphEdge(BaseModel):
 
 class GraphDataResponse(BaseModel):
     """Visual graph payload (FR-2.4)."""
+
     nodes: list[GraphNode]
     edges: list[GraphEdge]
 
@@ -160,12 +173,18 @@ class DocumentChunk(BaseModel):
     id: str = Field(description="Unique chunk ID")
     document_id: str
     chunk_index: int = Field(description="Sequential chunk number within document")
-    text: str = Field(description="Chunk text with heading context prepended (FR-1.6.1)")
+    text: str = Field(
+        description="Chunk text with heading context prepended (FR-1.6.1)"
+    )
     heading_context: str = Field(default="", description="Ancestral heading hierarchy")
     source_page: int | None = Field(default=None)
     source_section: str = Field(default="")
-    token_count: int = Field(default=0, description="Approximate token count (target 200-500)")
-    embedding_status: str = Field(default="pending", description="pending|generated|failed")
+    token_count: int = Field(
+        default=0, description="Approximate token count (target 200-500)"
+    )
+    embedding_status: str = Field(
+        default="pending", description="pending|generated|failed"
+    )
     org_id: str = Field(default="")
 
 

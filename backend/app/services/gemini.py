@@ -25,9 +25,13 @@ class GeminiService:
                 genai.configure(api_key=api_key)
                 self.enabled = True
             except Exception as e:
-                print(f"[GeminiService] Failed to configure Gemini API client: {e}. Falling back to simulation.")
+                print(
+                    f"[GeminiService] Failed to configure Gemini API client: {e}. Falling back to simulation."
+                )
         else:
-            print("[GeminiService] GEMINI_API_KEY not set. Running in simulation/fallback mode.")
+            print(
+                "[GeminiService] GEMINI_API_KEY not set. Running in simulation/fallback mode."
+            )
 
     def extract_entities(self, doc_text: str, doc_type: str) -> list[dict]:
         """
@@ -41,12 +45,11 @@ class GeminiService:
             try:
                 model = genai.GenerativeModel("gemini-2.0-flash")
                 prompt = self._build_extraction_prompt(doc_text, doc_type)
-                
+
                 response = model.generate_content(
-                    prompt,
-                    generation_config={"response_mime_type": "application/json"}
+                    prompt, generation_config={"response_mime_type": "application/json"}
                 )
-                
+
                 try:
                     entities = json.loads(response.text)
                     if isinstance(entities, list):
@@ -54,7 +57,9 @@ class GeminiService:
                     elif isinstance(entities, dict) and "entities" in entities:
                         llm_entities = entities["entities"]
                 except Exception as parse_err:
-                    print(f"[GeminiService] Failed to parse Gemini extraction JSON response: {parse_err}. Raw text: {response.text}")
+                    print(
+                        f"[GeminiService] Failed to parse Gemini extraction JSON response: {parse_err}. Raw text: {response.text}"
+                    )
             except Exception as e:
                 print(f"[GeminiService] Gemini Entity Extraction failed: {e}")
 
@@ -62,12 +67,14 @@ class GeminiService:
         if not llm_entities:
             groq_entities = self.extract_entities_via_groq(doc_text, doc_type)
             if groq_entities is not None:
-                print(f"[GeminiService] Successfully extracted {len(groq_entities)} entities via Groq.")
+                print(
+                    f"[GeminiService] Successfully extracted {len(groq_entities)} entities via Groq."
+                )
                 llm_entities = groq_entities
 
         # Always run regex to catch equipment tags/dates/regulations the LLM might miss
         regex_entities = self._extract_regex_entities(doc_text)
-        
+
         # Merge: add regex entities whose values aren't already in the LLM results
         existing_values = {e.get("value", "").upper() for e in llm_entities}
         for re_ent in regex_entities:
@@ -76,44 +83,53 @@ class GeminiService:
                 existing_values.add(re_ent["value"].upper())
 
         if llm_entities:
-            print(f"[GeminiService] Total entities after merge: {len(llm_entities)} (LLM + regex)")
+            print(
+                f"[GeminiService] Total entities after merge: {len(llm_entities)} (LLM + regex)"
+            )
 
         return llm_entities
 
     def _extract_regex_entities(self, doc_text: str) -> list[dict]:
         """Extract equipment tags, dates, and regulatory refs via regex patterns."""
         import re
+
         entities = []
 
         # Equipment tags: P-204A, HE-301, PSV-301A, V-102, M-08 etc.
-        tags = re.findall(r'\b[A-Z]{1,4}-\d{2,4}[A-Z]?\b', doc_text)
+        tags = re.findall(r"\b[A-Z]{1,4}-\d{2,4}[A-Z]?\b", doc_text)
         for t in set(tags):
-            entities.append({
-                "entity_type": "equipment_tag",
-                "value": t,
-                "normalised_value": t.upper().replace(" ", "_"),
-                "confidence": 0.90
-            })
+            entities.append(
+                {
+                    "entity_type": "equipment_tag",
+                    "value": t,
+                    "normalised_value": t.upper().replace(" ", "_"),
+                    "confidence": 0.90,
+                }
+            )
 
         # Dates: 2025-06-15, 7/7/86
-        dates = re.findall(r'\b\d{4}-\d{2}-\d{2}\b', doc_text)
+        dates = re.findall(r"\b\d{4}-\d{2}-\d{2}\b", doc_text)
         for d in set(dates):
-            entities.append({
-                "entity_type": "date",
-                "value": d,
-                "normalised_value": d,
-                "confidence": 0.95
-            })
+            entities.append(
+                {
+                    "entity_type": "date",
+                    "value": d,
+                    "normalised_value": d,
+                    "confidence": 0.95,
+                }
+            )
 
         # Regulatory clauses: OISD-STD-154, API 510, PNGRB-xxx
-        regs = re.findall(r'\b(?:OISD|API|PNGRB)[-\s][\w\d-]+\b', doc_text)
+        regs = re.findall(r"\b(?:OISD|API|PNGRB)[-\s][\w\d-]+\b", doc_text)
         for r in set(regs):
-            entities.append({
-                "entity_type": "regulatory_clause",
-                "value": r.strip(),
-                "normalised_value": r.strip().upper().replace(" ", "_"),
-                "confidence": 0.92
-            })
+            entities.append(
+                {
+                    "entity_type": "regulatory_clause",
+                    "value": r.strip(),
+                    "normalised_value": r.strip().upper().replace(" ", "_"),
+                    "confidence": 0.92,
+                }
+            )
 
         return entities
 
@@ -156,7 +172,9 @@ Return ONLY a JSON object with key "entities" containing a list. Each entity:
 {doc_text[:8000]}
 === END DOCUMENT TEXT ==="""
 
-    def extract_entities_via_groq(self, doc_text: str, doc_type: str) -> list[dict] | None:
+    def extract_entities_via_groq(
+        self, doc_text: str, doc_type: str
+    ) -> list[dict] | None:
         """Fallback extraction using Groq (llama-3.3-70b-versatile in JSON mode)."""
         api_key = settings.groq_api_key
         if not api_key:
@@ -169,20 +187,20 @@ Return ONLY a JSON object with key "entities" containing a list. Each entity:
 
             headers = {
                 "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
             payload = {
                 "model": "llama-3.3-70b-versatile",
                 "messages": [{"role": "user", "content": prompt}],
                 "response_format": {"type": "json_object"},
-                "temperature": 0.0
+                "temperature": 0.0,
             }
 
             response = httpx.post(
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers=headers,
                 json=payload,
-                timeout=20.0
+                timeout=20.0,
             )
 
             if response.status_code == 200:
@@ -194,7 +212,9 @@ Return ONLY a JSON object with key "entities" containing a list. Each entity:
                 elif isinstance(parsed, dict) and "entities" in parsed:
                     return parsed["entities"]
             else:
-                print(f"[GroqFallback] Groq API returned status {response.status_code}: {response.text}")
+                print(
+                    f"[GroqFallback] Groq API returned status {response.status_code}: {response.text}"
+                )
         except Exception as e:
             print(f"[GroqFallback] Groq API Call failed: {e}")
 
@@ -209,7 +229,7 @@ Return ONLY a JSON object with key "entities" containing a list. Each entity:
                 response = genai.embed_content(
                     model="models/gemini-embedding-exp-03-07",
                     content=text_chunks,
-                    task_type="retrieval_document"
+                    task_type="retrieval_document",
                 )
                 if "embedding" in response:
                     return response["embedding"]  # type: ignore
@@ -256,20 +276,20 @@ Return ONLY a JSON object with key "entities" containing a list. Each entity:
 
             headers = {
                 "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
             payload = {
                 "model": "llama-3.3-70b-versatile",
                 "messages": [{"role": "user", "content": prompt}],
                 "response_format": {"type": "json_object"},
-                "temperature": 0.1
+                "temperature": 0.1,
             }
 
             response = httpx.post(
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers=headers,
                 json=payload,
-                timeout=10.0
+                timeout=10.0,
             )
 
             if response.status_code == 200:
@@ -278,10 +298,14 @@ Return ONLY a JSON object with key "entities" containing a list. Each entity:
                 parsed = json.loads(content_str)
                 doc_type = parsed.get("doc_type", "unknown")
                 confidence = float(parsed.get("confidence", 0.85))
-                print(f"[GroqClassifier] Classified as '{doc_type}' with confidence {confidence}: {parsed.get('reasoning', '')}")
+                print(
+                    f"[GroqClassifier] Classified as '{doc_type}' with confidence {confidence}: {parsed.get('reasoning', '')}"
+                )
                 return (doc_type, confidence)
             else:
-                print(f"[GroqClassifier] Groq returned status {response.status_code}: {response.text}")
+                print(
+                    f"[GroqClassifier] Groq returned status {response.status_code}: {response.text}"
+                )
         except Exception as e:
             print(f"[GroqClassifier] Classification failed: {e}")
 

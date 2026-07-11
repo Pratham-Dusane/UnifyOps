@@ -45,10 +45,11 @@ def test_entity_resolution_deterministic_and_fuzzy(client: TestClient) -> None:
         value="HE-301",
         normalised_value="HE-301",
         confidence=0.95,
-        org_id=org_id
+        org_id=org_id,
     )
     # resolve_equipment_entity helper from ingestion.py is used in ingestion flow
     from app.routers.ingestion import resolve_equipment_entity
+
     resolve_equipment_entity(ent1, org_id, "plant-1")
     store.create_entity(ent1)
 
@@ -64,14 +65,14 @@ def test_entity_resolution_deterministic_and_fuzzy(client: TestClient) -> None:
         value="HE 301",
         normalised_value="HE_301",
         confidence=0.95,
-        org_id=org_id
+        org_id=org_id,
     )
     resolve_equipment_entity(ent2, org_id, "plant-1")
     store.create_entity(ent2)
 
     # Should deterministic resolve to ent-1
     assert ent2.canonical_id == "ent-1"
-    
+
     # Verify aliases updated on canonical entity
     canon = store.get_entity("ent-1")
     assert "HE 301" in canon.aliases
@@ -84,7 +85,7 @@ def test_entity_resolution_deterministic_and_fuzzy(client: TestClient) -> None:
         value="HE-301-B",
         normalised_value="HE-301-B",
         confidence=0.90,
-        org_id=org_id
+        org_id=org_id,
     )
     resolve_equipment_entity(ent3, org_id, "plant-1")
     store.create_entity(ent3)
@@ -93,8 +94,9 @@ def test_entity_resolution_deterministic_and_fuzzy(client: TestClient) -> None:
     assert ent3.canonical_id is None or ent3.canonical_id == "ent-3"
     merges = store.list_candidate_merges(org_id)
     assert len(merges) >= 1
-    assert any(m.source_value == "HE-301-B" and m.target_value == "HE-301" for m in merges)
-
+    assert any(
+        m.source_value == "HE-301-B" and m.target_value == "HE-301" for m in merges
+    )
 
 
 def test_document_supersession_logic(client: TestClient) -> None:
@@ -117,7 +119,7 @@ def test_document_supersession_logic(client: TestClient) -> None:
         uploaded_by="guser-002",
         plant_id="plant-1",
         unit="unit-a",
-        status="active"
+        status="active",
     )
     store.create_document(old_doc)
 
@@ -134,26 +136,24 @@ def test_document_supersession_logic(client: TestClient) -> None:
         uploaded_by="guser-002",
         plant_id="plant-1",
         unit="unit-a",
-        status="active"
+        status="active",
     )
     store.create_document(new_doc)
-
 
     # Directly trigger pipeline's supersession check logic
     all_docs, _ = store.list_documents(org_id=org_id, page_size=100)
     for other_doc in all_docs:
-        if (other_doc.id != "new-doc-id" and 
-            other_doc.original_filename == "plant_safety.pdf" and 
-            other_doc.plant_id == "plant-1" and
-            other_doc.unit == "unit-a" and
-            getattr(other_doc, "status", "active") == "active"):
-            
+        if (
+            other_doc.id != "new-doc-id"
+            and other_doc.original_filename == "plant_safety.pdf"
+            and other_doc.plant_id == "plant-1"
+            and other_doc.unit == "unit-a"
+            and getattr(other_doc, "status", "active") == "active"
+        ):
             store.update_document_stage(
-                other_doc.id,
-                other_doc.pipeline_stage,
-                status="superseded"
+                other_doc.id, other_doc.pipeline_stage, status="superseded"
             )
-            
+
             conn = PIDConnection(
                 id="super-conn-id",
                 document_id="new-doc-id",
@@ -162,7 +162,7 @@ def test_document_supersession_logic(client: TestClient) -> None:
                 connection_type="SUPERSEDES",
                 confidence=1.0,
                 status="approved",
-                org_id=org_id
+                org_id=org_id,
             )
             store.create_connection(conn)
 
@@ -197,7 +197,7 @@ def test_graph_endpoints(client: TestClient) -> None:
         org_id=org_id,
         uploaded_by="guser-003",
         plant_id="plant-1",
-        unit="unit-a"
+        unit="unit-a",
     )
     store.create_document(doc)
 
@@ -209,7 +209,7 @@ def test_graph_endpoints(client: TestClient) -> None:
         normalised_value="V-102",
         confidence=0.98,
         org_id=org_id,
-        canonical_id="ent-node-1"
+        canonical_id="ent-node-1",
     )
     store.create_entity(ent)
 
@@ -221,7 +221,9 @@ def test_graph_endpoints(client: TestClient) -> None:
     assert data_search[0]["label"] == "V-102"
 
     # 2. Test Neighborhood Endpoint
-    res_neigh = client.get("/api/v1/graph/neighborhood?node_id=ent-node-1&hops=1", headers=headers)
+    res_neigh = client.get(
+        "/api/v1/graph/neighborhood?node_id=ent-node-1&hops=1", headers=headers
+    )
     assert res_neigh.status_code == 200
     data_neigh = res_neigh.json()
     assert "nodes" in data_neigh
@@ -245,7 +247,7 @@ def test_graph_endpoints(client: TestClient) -> None:
         target_value="V-102",
         similarity=0.86,
         status="pending",
-        org_id=org_id
+        org_id=org_id,
     )
     store.create_candidate_merge(merge)
 
@@ -253,7 +255,7 @@ def test_graph_endpoints(client: TestClient) -> None:
     res_res = client.post(
         "/api/v1/graph/merges/merge-id-1/resolve",
         json={"action": "approve"},
-        headers=headers
+        headers=headers,
     )
     assert res_res.status_code == 200
     assert res_res.json()["status"] == "approved"
