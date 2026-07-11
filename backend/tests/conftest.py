@@ -18,6 +18,10 @@ def _reset_store() -> None:
     store._entities.clear()
     store._chunks.clear()
     store._connections.clear()
+    store._candidate_merges.clear()
+    store._sessions.clear()
+    store._feedback.clear()
+    store._query_logs.clear()
 
 
 @pytest.fixture

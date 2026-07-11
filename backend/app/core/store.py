@@ -1,5 +1,5 @@
 """
-UnifyOps — In-Memory Data Store (With Local JSON File Persistence)
+UnifyOps - In-Memory Data Store (With Local JSON File Persistence)
 
 Local development data store. Replaced by Firestore/Spanner when deployed to GCP.
 Thread-safe for single-process uvicorn with --reload.
@@ -23,6 +23,13 @@ from app.models.ingestion import (
     PIDConnection,
     CandidateMerge,
 )
+from app.models.copilot import (
+    ConversationSession,
+    ConversationTurn,
+    QueryLogEntry,
+    FeedbackRequest,
+    FeedbackVote,
+)
 
 DB_FILE = "db.json"
 
@@ -39,6 +46,10 @@ class DataStore:
         self._chunks: dict[str, DocumentChunk] = {}  # keyed by chunk id
         self._connections: dict[str, PIDConnection] = {}  # keyed by connection id
         self._candidate_merges: dict[str, CandidateMerge] = {}  # keyed by merge id
+        # Phase 3 - Copilot collections
+        self._sessions: dict[str, ConversationSession] = {}  # keyed by session_id
+        self._feedback: list[dict] = []  # feedback entries
+        self._query_logs: list[QueryLogEntry] = []  # query analytics
 
         # Load persisted data on initialization (unless running tests)
         if os.environ.get("TESTING") != "1":
@@ -60,6 +71,13 @@ class DataStore:
                 ],
                 "candidate_merges": [
                     m.model_dump() for m in self._candidate_merges.values()
+                ],
+                "sessions": [
+                    s.model_dump() for s in self._sessions.values()
+                ],
+                "feedback": self._feedback,
+                "query_logs": [
+                    q.model_dump() for q in self._query_logs
                 ],
             }
 
@@ -117,8 +135,22 @@ class DataStore:
                 merge = CandidateMerge(**item)
                 self._candidate_merges[merge.id] = merge
 
+            for item in data.get("sessions", []):
+                item["created_at"] = parse_dt(item["created_at"])
+                item["updated_at"] = parse_dt(item["updated_at"])
+                for turn in item.get("turns", []):
+                    turn["timestamp"] = parse_dt(turn["timestamp"])
+                session = ConversationSession(**item)
+                self._sessions[session.session_id] = session
+
+            self._feedback = data.get("feedback", [])
+
+            for item in data.get("query_logs", []):
+                item["timestamp"] = parse_dt(item["timestamp"])
+                self._query_logs.append(QueryLogEntry(**item))
+
             print(
-                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges)"
+                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges, {len(self._sessions)} sessions)"
             )
         except Exception as e:
             print(f"[DataStore] Failed to load state from db.json: {e}")
@@ -702,6 +734,132 @@ class DataStore:
                 "total": total,
                 "trend": [75.0, 78.5, 81.2, 84.0, score],
             }
+
+
+    # ──────────────────────────── Copilot Sessions (FR-3.6) ────────────────
+
+    def create_session(
+        self, session_id: str, org_id: str, user_uid: str
+    ) -> ConversationSession:
+        with self._lock:
+            session = ConversationSession(
+                session_id=session_id,
+                org_id=org_id,
+                user_uid=user_uid,
+            )
+            self._sessions[session_id] = session
+            self._save()
+            return session
+
+    def get_session(self, session_id: str) -> ConversationSession | None:
+        return self._sessions.get(session_id)
+
+    def add_turn_to_session(
+        self, session_id: str, turn: ConversationTurn
+    ) -> ConversationSession | None:
+        with self._lock:
+            session = self._sessions.get(session_id)
+            if session:
+                session.turns.append(turn)
+                session.updated_at = datetime.now(timezone.utc)
+                self._save()
+                return session
+            return None
+
+    def list_sessions(self, org_id: str, user_uid: str) -> list[ConversationSession]:
+        sessions = [
+            s
+            for s in self._sessions.values()
+            if s.org_id == org_id and s.user_uid == user_uid
+        ]
+        sessions.sort(key=lambda s: s.updated_at, reverse=True)
+        return sessions
+
+    def delete_session(self, session_id: str) -> bool:
+        with self._lock:
+            if session_id in self._sessions:
+                del self._sessions[session_id]
+                self._save()
+                return True
+            return False
+
+    # ──────────────────────────── Copilot Feedback (FR-3.4.3) ─────────────
+
+    def add_feedback(self, feedback: dict) -> dict:
+        with self._lock:
+            self._feedback.append(feedback)
+            self._save()
+            return feedback
+
+    def get_feedback_by_session(self, session_id: str) -> list[dict]:
+        return [f for f in self._feedback if f.get("session_id") == session_id]
+
+    # ──────────────────────────── Query Logging (FR-3.7.1) ────────────────
+
+    def log_query(self, entry: QueryLogEntry) -> None:
+        with self._lock:
+            self._query_logs.append(entry)
+            self._save()
+
+    def get_query_logs(self, org_id: str, limit: int = 200) -> list[QueryLogEntry]:
+        logs = [q for q in self._query_logs if q.org_id == org_id]
+        logs.sort(key=lambda q: q.timestamp, reverse=True)
+        return logs[:limit]
+
+    # ──────────────────────────── Copilot Retrieval Helpers ───────────────
+
+    def search_chunks_fulltext(
+        self, org_id: str, query_terms: list[str], limit: int = 20
+    ) -> list[tuple[DocumentChunk, float]]:
+        """
+        Full-text search over chunks: score by term overlap count.
+        Returns (chunk, score) tuples sorted by score descending.
+        """
+        results: list[tuple[DocumentChunk, float]] = []
+        query_lower = [t.lower() for t in query_terms if len(t) > 2]
+        if not query_lower:
+            return results
+
+        for chunk in self._chunks.values():
+            if chunk.org_id != org_id:
+                continue
+            text_lower = chunk.text.lower()
+            hits = sum(1 for term in query_lower if term in text_lower)
+            if hits > 0:
+                score = hits / len(query_lower)
+                results.append((chunk, score))
+
+        results.sort(key=lambda x: x[1], reverse=True)
+        return results[:limit]
+
+    def get_chunks_by_entity_documents(
+        self, org_id: str, entity_ids: list[str], limit: int = 15
+    ) -> list[DocumentChunk]:
+        """
+        Graph-proximity retrieval (FR-3.2.2): find chunks from documents
+        that are linked to the given entity IDs.
+        """
+        # Find all documents linked to the entity ids
+        linked_doc_ids: set[str] = set()
+        for entity in self._entities.values():
+            if entity.org_id != org_id:
+                continue
+            eid = entity.canonical_id or entity.id
+            if eid in entity_ids or entity.id in entity_ids:
+                linked_doc_ids.add(entity.document_id)
+
+        # Collect chunks from those documents
+        chunks: list[DocumentChunk] = []
+        for chunk in self._chunks.values():
+            if chunk.org_id == org_id and chunk.document_id in linked_doc_ids:
+                chunks.append(chunk)
+
+        chunks.sort(key=lambda c: c.chunk_index)
+        return chunks[:limit]
+
+    def get_all_chunks_for_org(self, org_id: str) -> list[DocumentChunk]:
+        """Return all chunks for an org (used for embedding-based search)."""
+        return [c for c in self._chunks.values() if c.org_id == org_id]
 
 
 # Singleton instance
