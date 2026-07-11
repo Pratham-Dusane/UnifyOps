@@ -5,8 +5,6 @@ Verifies deterministic entity resolution, relationship inference, document super
 neighborhood query structure, graph search, completeness trends, and review queue resolutions.
 """
 
-import uuid
-from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 
 from app.core.store import store
@@ -18,7 +16,6 @@ from app.models.ingestion import (
     PipelineStage,
     PIDConnection,
     CandidateMerge,
-    ReviewAction
 )
 
 
@@ -35,7 +32,6 @@ def _register_user(client: TestClient, uid: str = "graph-user-001") -> str:
 def test_entity_resolution_deterministic_and_fuzzy(client: TestClient) -> None:
     """FR-2.2: Test deterministic tag normalisation and auto-merges."""
     org_id = _register_user(client, "guser-001")
-    headers = {"X-User-UID": "guser-001", "X-User-Org": org_id}
 
     # Clean prior test states
     store._entities = {}
@@ -104,7 +100,6 @@ def test_entity_resolution_deterministic_and_fuzzy(client: TestClient) -> None:
 def test_document_supersession_logic(client: TestClient) -> None:
     """FR-2.6: Verify document supersession sets status and links active nodes."""
     org_id = _register_user(client, "guser-002")
-    headers = {"X-User-UID": "guser-002", "X-User-Org": org_id}
 
     store._documents = {}
     store._connections = {}
@@ -143,10 +138,7 @@ def test_document_supersession_logic(client: TestClient) -> None:
     )
     store.create_document(new_doc)
 
-    # Run fake completion stage to trigger supersession check
-    from app.routers.ingestion import simulate_pipeline_task
-    # Mock pipeline text, layout, and chunks variables to complete new-doc ingestion
-    import asyncio
+
     # Directly trigger pipeline's supersession check logic
     all_docs, _ = store.list_documents(org_id=org_id, page_size=100)
     for other_doc in all_docs:

@@ -8,18 +8,15 @@ Provides endpoints for:
 - Entity resolution review queue resolution (FR-2.2.3, FR-2.5.3)
 """
 
-from fastapi import APIRouter, Header, HTTPException, Body
-from datetime import datetime, timezone
-import uuid
+from fastapi import APIRouter, Header, HTTPException
 
 from app.core.config import settings
 from app.core.store import store
-from app.models.common import HealthResponse, MessageResponse
+from app.models.common import HealthResponse
 from app.models.ingestion import (
     ReviewDecision,
     ReviewAction,
     CandidateMerge,
-    ExtractedEntity
 )
 
 router = APIRouter(prefix="/api/v1/graph", tags=["Graph Service"])

@@ -361,7 +361,6 @@ class DataStore:
         """
         Traverse the graph starting from node_id and return connected nodes and edges (FR-2.4).
         """
-        from app.models.ingestion import EntityType
         with self._lock:
             # Gather all documents and entities for the organization
             org_docs = {d.id: d for d in self._documents.values() if d.org_id == org_id}

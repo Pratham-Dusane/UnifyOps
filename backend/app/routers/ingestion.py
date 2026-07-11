@@ -6,7 +6,6 @@ Implements FR-1.1.1 through FR-1.7.3.
 """
 
 import uuid
-import asyncio
 import random
 import zipfile
 import io

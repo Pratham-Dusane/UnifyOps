@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+from pydantic_settings import BaseSettings
+from pydantic import Field
 import dotenv
 
 # Load environment variables from .env file into os.environ
@@ -12,8 +14,6 @@ if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
     if not os.path.isabs(sa_path):
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str((backend_dir / sa_path).resolve())
 
-from pydantic_settings import BaseSettings
-from pydantic import Field
 
 
 class Settings(BaseSettings):
