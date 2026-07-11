@@ -45,9 +45,8 @@ interface GraphData {
 
 interface SearchResult {
   id: string;
-  value: string;
-  entity_type: string;
-  confidence: number;
+  label: string;
+  type: string;
 }
 
 const TYPE_COLORS: Record<string, string> = {
