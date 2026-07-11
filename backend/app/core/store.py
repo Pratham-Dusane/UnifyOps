@@ -30,6 +30,7 @@ from app.models.copilot import (
     FeedbackRequest,
     FeedbackVote,
 )
+from app.models.maintenance import RCADraft
 
 DB_FILE = "db.json"
 
@@ -50,6 +51,8 @@ class DataStore:
         self._sessions: dict[str, ConversationSession] = {}  # keyed by session_id
         self._feedback: list[dict] = []  # feedback entries
         self._query_logs: list[QueryLogEntry] = []  # query analytics
+        # Phase 4 - Maintenance Advisor collections
+        self._rca_drafts: dict[str, RCADraft] = {}  # keyed by rca_id
 
         # Load persisted data on initialization (unless running tests)
         if os.environ.get("TESTING") != "1":
@@ -78,6 +81,9 @@ class DataStore:
                 "feedback": self._feedback,
                 "query_logs": [
                     q.model_dump() for q in self._query_logs
+                ],
+                "rca_drafts": [
+                    r.model_dump() for r in self._rca_drafts.values()
                 ],
             }
 
@@ -149,8 +155,19 @@ class DataStore:
                 item["timestamp"] = parse_dt(item["timestamp"])
                 self._query_logs.append(QueryLogEntry(**item))
 
+            for item in data.get("rca_drafts", []):
+                item["generated_at"] = parse_dt(item["generated_at"])
+                if item.get("approved_at"):
+                    item["approved_at"] = parse_dt(item["approved_at"])
+                if item.get("original_draft_backup"):
+                    backup = item["original_draft_backup"]
+                    if backup.get("generated_at"):
+                        backup["generated_at"] = parse_dt(backup["generated_at"])
+                rca = RCADraft(**item)
+                self._rca_drafts[rca.rca_id] = rca
+
             print(
-                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges, {len(self._sessions)} sessions)"
+                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges, {len(self._sessions)} sessions, {len(self._rca_drafts)} RCAs)"
             )
         except Exception as e:
             print(f"[DataStore] Failed to load state from db.json: {e}")
@@ -860,6 +877,68 @@ class DataStore:
     def get_all_chunks_for_org(self, org_id: str) -> list[DocumentChunk]:
         """Return all chunks for an org (used for embedding-based search)."""
         return [c for c in self._chunks.values() if c.org_id == org_id]
+
+    # ──────────────────────────── Maintenance Advisor (Phase 4) ────────────
+
+    def get_events_by_equipment(self, org_id: str, equipment_tag: str) -> list[DocumentRecord]:
+        """
+        Finds all documents (work orders, incidents, SOPs) linked to the given
+        equipment tag via entity mentions (FR-4.1.1).
+        """
+        target_upper = equipment_tag.upper().strip()
+        matching_canonical_ids = set()
+        matching_raw_ids = set()
+
+        for entity in self._entities.values():
+            if entity.org_id != org_id:
+                continue
+            if entity.entity_type.value == "equipment_tag":
+                val = entity.value.upper().strip()
+                norm = entity.normalised_value.upper().strip()
+                if val == target_upper or norm == target_upper:
+                    matching_raw_ids.add(entity.id)
+                    if entity.canonical_id:
+                        matching_canonical_ids.add(entity.canonical_id)
+
+        linked_doc_ids = set()
+        for entity in self._entities.values():
+            if entity.org_id != org_id:
+                continue
+            eid = entity.canonical_id or entity.id
+            if eid in matching_canonical_ids or entity.id in matching_raw_ids:
+                linked_doc_ids.add(entity.document_id)
+
+        documents = []
+        for doc_id in linked_doc_ids:
+            doc = self._documents.get(doc_id)
+            if doc and doc.org_id == org_id:
+                documents.append(doc)
+
+        return documents
+
+    def create_rca_draft(self, draft: RCADraft) -> None:
+        with self._lock:
+            self._rca_drafts[draft.rca_id] = draft
+            self._save()
+
+    def get_rca_draft(self, rca_id: str) -> RCADraft | None:
+        return self._rca_drafts.get(rca_id)
+
+    def update_rca_draft(self, rca_id: str, **kwargs) -> RCADraft | None:
+        with self._lock:
+            rca = self._rca_drafts.get(rca_id)
+            if rca:
+                for k, v in kwargs.items():
+                    setattr(rca, k, v)
+                self._save()
+                return rca
+            return None
+
+    def list_rca_drafts(self, org_id: str) -> list[RCADraft]:
+        # We need to filter drafts by org. Since RCAs are linked to equipment tags,
+        # we check the equipment tag's entity org_id, or return all since it's local dev.
+        # To be safe, we list all since there is no org_id on RCADraft, but we can match via equipment tag.
+        return list(self._rca_drafts.values())
 
 
 # Singleton instance

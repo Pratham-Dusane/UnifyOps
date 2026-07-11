@@ -1,0 +1,563 @@
+/*
+ * MaintenanceAdvisor — Premium UI Styles
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--topbar-height) - 32px);
+  padding: 0 16px;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0 12px;
+  border-bottom: 1px solid var(--border-primary);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+.tabs {
+  display: flex;
+  background: var(--bg-secondary);
+  padding: 3px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-primary);
+}
+
+.tabBtn {
+  padding: 6px 16px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.activeTab {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Layout Grid ─── */
+.grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  flex: 1;
+  overflow: hidden;
+  padding: 16px 0;
+}
+
+/* ─── Left Column ─── */
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-primary);
+  padding-right: 20px;
+  overflow: hidden;
+}
+
+.panelTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+}
+
+.attentionList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 4px;
+}
+
+.attentionCard {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: 14px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.attentionCard:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.selectedCard {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-light);
+  box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.equipmentTag {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.scoreBadge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.scoreHigh {
+  background: var(--status-error-light);
+  color: var(--status-error);
+}
+
+.scoreMedium {
+  background: var(--status-warning-light);
+  color: var(--status-warning);
+}
+
+.scoreLow {
+  background: var(--status-success-light);
+  color: var(--status-success);
+}
+
+.cardMeta {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+}
+
+.evidenceText {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.emptySignal {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 32px 16px;
+  border: 1px dashed var(--border-primary);
+  border-radius: var(--border-radius-lg);
+}
+
+/* ─── Right Column ─── */
+.rightColumn {
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.emptyWorkspace {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80%;
+  color: var(--text-tertiary);
+  font-size: 0.9rem;
+  border: 1px dashed var(--border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: 32px;
+}
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.workspaceHeader {
+  border-bottom: 1px solid var(--border-primary);
+  padding-bottom: 12px;
+}
+
+.workspaceTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 2px;
+}
+
+.workspaceMeta {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+.sectionCard {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sectionTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  border-left: 3px solid var(--accent-primary);
+  padding-left: 8px;
+}
+
+/* ─── Timeline UI ─── */
+.timelineContainer {
+  position: relative;
+  padding-left: 20px;
+}
+
+.timelineContainer::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 5px;
+  width: 2px;
+  background: var(--border-secondary);
+}
+
+.timelineItem {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.timelineItem:last-child {
+  margin-bottom: 0;
+}
+
+.timelineIconWrap {
+  position: absolute;
+  left: -20px;
+  top: 4px;
+}
+
+.timelineBadge {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-elevated);
+}
+
+.badgeIncident {
+  background: var(--status-error);
+}
+
+.badgeWorkOrder {
+  background: var(--accent-primary);
+}
+
+.badgeSop {
+  background: var(--status-success);
+}
+
+.timelineContent {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-md);
+  padding: 12px;
+}
+
+.timelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.eventTitle {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.eventTime {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.eventDesc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0 0 10px;
+}
+
+.timelineEnrichment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.enrichTag {
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: var(--border-primary);
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.partsTag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--accent-secondary-light);
+  color: var(--accent-secondary);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.emptyTimeline {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* ─── RCA Workspace UI ─── */
+.rcaRequestBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rcaInput {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  resize: vertical;
+}
+
+.rcaInput:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.rcaSubmitBtn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: var(--border-radius-md);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.rcaSubmitBtn:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.rcaSubmitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rcaWorkspace {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.warningBanner {
+  background: var(--status-warning-light);
+  color: var(--status-warning);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: var(--border-radius-md);
+}
+
+.rcaForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.formInput {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+}
+
+.fiveWhysInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-secondary);
+  padding: 12px;
+  border-radius: var(--border-radius-md);
+}
+
+.whyRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.whyNumber {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  width: 50px;
+  flex-shrink: 0;
+}
+
+.whyInput {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.formTextarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  resize: vertical;
+}
+
+.approvalSection {
+  margin-top: 12px;
+  border-top: 1px solid var(--border-primary);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.approveBtn {
+  align-self: flex-start;
+  background: var(--status-success);
+  color: white;
+  padding: 10px 20px;
+  border-radius: var(--border-radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.approveBtn:hover {
+  background: #1e7e34;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.approvedSection {
+  margin-top: 12px;
+  border-top: 1px solid var(--border-primary);
+  padding-top: 16px;
+  background: #e6f4ea;
+  color: #137333;
+  padding: 16px;
+  border-radius: var(--border-radius-md);
+}
+
+.approvedTick {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.approvedMeta {
+  font-size: 0.78rem;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.approvedNotes {
+  font-size: 0.82rem;
+  font-style: italic;
+  margin: 0;
+  color: #202124;
+}
+
+/* ─── Loading Spinners ─── */
+.loaderWrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 0;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid var(--border-secondary);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.inlineSpinner {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid white;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

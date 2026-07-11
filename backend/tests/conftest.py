@@ -22,6 +22,7 @@ def _reset_store() -> None:
     store._sessions.clear()
     store._feedback.clear()
     store._query_logs.clear()
+    store._rca_drafts.clear()
 
 
 @pytest.fixture
