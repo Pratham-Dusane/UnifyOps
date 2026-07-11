@@ -1,0 +1,111 @@
+/*
+ * Settings — Styles
+ */
+
+.page {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.card {
+  width: 100%;
+  max-width: 640px;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-xl);
+  padding: 36px 32px;
+  transition: background-color var(--transition-base), border-color var(--transition-base);
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 28px;
+  letter-spacing: -0.02em;
+}
+
+.section {
+  margin-bottom: 28px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  gap: 16px;
+}
+
+.settingLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.settingDesc {
+  display: block;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* --- Toggle --- */
+.toggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggleTrack {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: var(--bg-tertiary);
+  border-radius: 12px;
+  transition: background-color var(--transition-fast);
+}
+
+.toggleTrack.toggleActive {
+  background-color: var(--accent-primary);
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.toggleActive .toggleThumb {
+  transform: translateX(20px);
+}
+
+.toggleLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  min-width: 36px;
+}

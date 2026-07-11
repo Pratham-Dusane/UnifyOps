@@ -1,0 +1,306 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.header {
+  background-color: var(--bg-elevated);
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--border-radius-lg);
+  border: 1px border-solid var(--border-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px border-solid var(--border-primary);
+  padding-bottom: 0.25rem;
+}
+
+.tabBtn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+  border-bottom: 2px border-solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.tabBtn:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.tabActive {
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
+  background-color: var(--bg-secondary);
+}
+
+/* Completeness Widget */
+.metricCard {
+  background-color: var(--bg-elevated);
+  border: 1px border-solid var(--border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.metricValueArea {
+  display: flex;
+  flex-direction: column;
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metricValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.metricSubtext {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.trendSparkline {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  height: 60px;
+}
+
+.trendBar {
+  width: 14px;
+  background-color: var(--accent-primary-light);
+  border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+  transition: height var(--transition-slow);
+}
+
+.trendBarActive {
+  background-color: var(--accent-primary);
+}
+
+/* Pipeline List */
+.pipelineTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-elevated);
+  border: 1px border-solid var(--border-primary);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.th {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px border-solid var(--border-primary);
+}
+
+.tr {
+  border-bottom: 1px border-solid var(--border-primary);
+  transition: background-color var(--transition-fast);
+}
+
+.tr:last-child {
+  border-bottom: none;
+}
+
+.tr:hover {
+  background-color: var(--bg-secondary);
+}
+
+.td {
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.stageBadge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--border-radius-sm);
+  text-transform: capitalize;
+}
+
+.stageQueued { background-color: var(--bg-tertiary); color: var(--text-secondary); }
+.stageProcessing { background-color: var(--status-info-light); color: var(--status-info); }
+.stageCompleted { background-color: var(--status-success-light); color: var(--status-success); }
+.stageFailed { background-color: var(--status-error-light); color: var(--status-error); }
+.stageReview { background-color: var(--status-warning-light); color: var(--status-warning); }
+
+.reprocessBtn {
+  padding: 0.375rem 0.75rem;
+  background-color: var(--bg-primary);
+  border: 1px border-solid var(--border-secondary);
+  border-radius: var(--border-radius-md);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.reprocessBtn:hover {
+  background-color: var(--accent-primary-light);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+/* Review Card Queue */
+.queueGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1rem;
+}
+
+.reviewCard {
+  background-color: var(--bg-elevated);
+  border: 1px border-solid var(--border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.cardTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cardMeta {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.comparisonBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-primary);
+  border: 1px border-solid var(--border-primary);
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem;
+}
+
+.entityTerm {
+  display: flex;
+  flex-direction: column;
+}
+
+.termLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.termValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+}
+
+.connector {
+  font-size: 1rem;
+  color: var(--text-tertiary);
+}
+
+.confidenceBadge {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+}
+
+.actionRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.btnApprove {
+  flex: 1;
+  padding: 0.5rem;
+  background-color: var(--status-success);
+  color: var(--text-inverse);
+  font-weight: 500;
+  border-radius: var(--border-radius-md);
+  font-size: 0.875rem;
+  text-align: center;
+  transition: opacity var(--transition-fast);
+}
+
+.btnApprove:hover {
+  opacity: 0.9;
+}
+
+.btnReject {
+  flex: 1;
+  padding: 0.5rem;
+  background-color: var(--status-error);
+  color: var(--text-inverse);
+  font-weight: 500;
+  border-radius: var(--border-radius-md);
+  font-size: 0.875rem;
+  text-align: center;
+  transition: opacity var(--transition-fast);
+}
+
+.btnReject:hover {
+  opacity: 0.9;
+}
+
+.emptyState {
+  background-color: var(--bg-elevated);
+  border: 1px border-solid var(--border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-sm);
+}

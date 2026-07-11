@@ -1,0 +1,15 @@
+# Gitleaks configuration for UnifyOps
+# Enforces FR-0.6.1: No credential, API key, or connection string in Git history
+
+title = "UnifyOps Gitleaks Config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist"
+paths = [
+    '''.gitleaks.toml''',
+    '''\.env\.example''',
+    '''PRD_V1\.md''',
+]
