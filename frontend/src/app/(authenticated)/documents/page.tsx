@@ -127,12 +127,16 @@ export default function DocumentsPage() {
   const [editingEntityId, setEditingEntityId] = useState<string | null>(null);
   const [editingEntityValue, setEditingEntityValue] = useState<string>("");
 
-  const headers: Record<string, string> = {
+  const getHeaders = (): Record<string, string> => ({
     "X-User-UID": user?.uid || "",
     "X-User-Org": profile?.org_id || "",
-  };
+  });
 
   const fetchDocuments = useCallback(async () => {
+    const hdrs: Record<string, string> = {
+      "X-User-UID": user?.uid || "",
+      "X-User-Org": profile?.org_id || "",
+    };
     try {
       const params = new URLSearchParams({ page: "1", page_size: "50" });
       if (filterStage) params.set("stage", filterStage);
@@ -140,7 +144,7 @@ export default function DocumentsPage() {
 
       const res = await fetch(
         `${API_URL}/api/v1/ingestion/documents?${params}`,
-        { headers }
+        { headers: hdrs }
       );
       if (res.ok) {
         const data = await res.json();
@@ -152,8 +156,12 @@ export default function DocumentsPage() {
   }, [filterStage, filterType, user?.uid, profile?.org_id]);
 
   const fetchStats = useCallback(async () => {
+    const hdrs: Record<string, string> = {
+      "X-User-UID": user?.uid || "",
+      "X-User-Org": profile?.org_id || "",
+    };
     try {
-      const res = await fetch(`${API_URL}/api/v1/ingestion/stats`, { headers });
+      const res = await fetch(`${API_URL}/api/v1/ingestion/stats`, { headers: hdrs });
       if (res.ok) {
         setStats(await res.json());
       }
@@ -163,16 +171,39 @@ export default function DocumentsPage() {
   }, [user?.uid, profile?.org_id]);
 
   useEffect(() => {
-    if (profile) {
-      fetchDocuments();
-      fetchStats();
-    }
-  }, [profile, fetchDocuments, fetchStats]);
+    if (!profile) return;
+    // Initial data load using inline async to avoid set-state-in-effect lint.
+    // fetchDocuments and fetchStats are still used for manual refreshes.
+    let cancelled = false;
+    (async () => {
+      try {
+        const hdrs = {
+          "X-User-UID": user?.uid || "",
+          "X-User-Org": profile?.org_id || "",
+        };
+        const [docsRes, statsRes] = await Promise.all([
+          fetch(`${API_URL}/api/v1/ingestion/documents?page=1&page_size=50&stage=${filterStage}&doc_type=${filterType}`, { headers: hdrs }),
+          fetch(`${API_URL}/api/v1/ingestion/stats`, { headers: hdrs }),
+        ]);
+        if (cancelled) return;
+        if (docsRes.ok) {
+          const data = await docsRes.json();
+          setDocuments(data.documents || []);
+        }
+        if (statsRes.ok) {
+          setStats(await statsRes.json());
+        }
+      } catch {
+        // Backend may be down
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [profile, filterStage, filterType, user?.uid]);
 
   const fetchDocDetail = async (id: string) => {
     setDetailLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/v1/ingestion/documents/${id}`, { headers });
+      const res = await fetch(`${API_URL}/api/v1/ingestion/documents/${id}`, { headers: getHeaders() });
       if (res.ok) {
         const data = await res.json();
         setDocDetail(data);
@@ -213,7 +244,7 @@ export default function DocumentsPage() {
     try {
       const res = await fetch(`${API_URL}/api/v1/ingestion/upload`, {
         method: "POST",
-        headers,
+        headers: getHeaders(),
         body: formData,
       });
 
@@ -268,7 +299,7 @@ export default function DocumentsPage() {
       const res = await fetch(`${API_URL}/api/v1/ingestion/documents/${selectedDocId}/review`, {
         method: "POST",
         headers: {
-          ...headers,
+          ...getHeaders(),
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -295,7 +326,7 @@ export default function DocumentsPage() {
       const res = await fetch(`${API_URL}/api/v1/ingestion/entities/${entityId}/review`, {
         method: "POST",
         headers: {
-          ...headers,
+          ...getHeaders(),
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -321,7 +352,7 @@ export default function DocumentsPage() {
       const res = await fetch(`${API_URL}/api/v1/ingestion/connections/${connectionId}/review`, {
         method: "POST",
         headers: {
-          ...headers,
+          ...getHeaders(),
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

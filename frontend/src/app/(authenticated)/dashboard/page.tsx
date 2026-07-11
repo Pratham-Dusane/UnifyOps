@@ -22,7 +22,7 @@ const services: ServiceHealth[] = [
 ];
 
 export default function DashboardPage() {
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [healthChecks, setHealthChecks] = useState(services);
 
   useEffect(() => {

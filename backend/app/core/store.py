@@ -430,7 +430,7 @@ class DataStore:
                     }
 
             # Gather all candidate edges dynamically
-            all_edges = []
+            all_edges: list[dict[str, object]] = []
 
             # (a) Document -> ExtractedEntity (has_entity) OR specific semantic edges
             for ent in org_entities.values():
@@ -545,24 +545,23 @@ class DataStore:
                         break
 
                 if source_id and target_id:
-                    all_edges.append(
-                        {
-                            "id": conn.id,
-                            "source": source_id,
-                            "target": target_id,
-                            "type": "CONNECTS_TO",
-                            "properties": {
-                                "status": conn.status,
-                                "confidence": conn.confidence,
-                            },
-                        }
-                    )
+                    edge_entry: dict[str, object] = {
+                        "id": conn.id,
+                        "source": source_id,
+                        "target": target_id,
+                        "type": "CONNECTS_TO",
+                        "properties": {
+                            "status": conn.status,
+                            "confidence": conn.confidence,
+                        },
+                    }
+                    all_edges.append(edge_entry)
 
             # Check if requested node_id exists (as canonical id or regular id)
             start_node_id = node_id
             # Resolve to canonical_id if it's an alias
             if node_id in org_entities and org_entities[node_id].canonical_id:
-                start_node_id = org_entities[node_id].canonical_id
+                start_node_id = org_entities[node_id].canonical_id or node_id
 
             visited_nodes = set()
             active_edges = []
@@ -582,21 +581,22 @@ class DataStore:
                     elif edge["target"] == current_id:
                         neighbor = edge["source"]
 
-                    if neighbor and neighbor not in visited_nodes:
-                        if (
-                            neighbor in org_docs
-                            or neighbor in org_entities
-                            or any(
-                                e.canonical_id == neighbor
-                                for e in org_entities.values()
-                            )
-                        ):
-                            visited_nodes.add(neighbor)
-                            queue.append((neighbor, current_hop + 1))
-                            active_edges.append(edge)
-                    elif neighbor and neighbor in visited_nodes:
-                        if edge not in active_edges:
-                            active_edges.append(edge)
+                    if neighbor and isinstance(neighbor, str):
+                        if neighbor not in visited_nodes:
+                            if (
+                                neighbor in org_docs
+                                or neighbor in org_entities
+                                or any(
+                                    e.canonical_id == neighbor
+                                    for e in org_entities.values()
+                                )
+                            ):
+                                visited_nodes.add(neighbor)
+                                queue.append((neighbor, current_hop + 1))
+                                active_edges.append(edge)
+                        else:
+                            if edge not in active_edges:
+                                active_edges.append(edge)
 
             # Assemble node details
             nodes_list = []

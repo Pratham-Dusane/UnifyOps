@@ -38,14 +38,12 @@ export default function RegisterPage() {
     }
   }, [user, profile, authLoading, router]);
 
-  // If user is signed in (Firebase) but has no backend profile, go to step 2
-  useEffect(() => {
-    if (!authLoading && user && !profile) {
-      setDisplayName(user.displayName || "");
-      setEmail(user.email || "");
-      setStep("profile");
-    }
-  }, [user, profile, authLoading]);
+  // If user is signed in (Firebase) but has no backend profile, show profile step
+  const shouldShowProfile = !authLoading && !!user && !profile;
+  const effectiveStep = shouldShowProfile ? "profile" : step;
+
+  // Sync display name and email from Firebase user when transitioning to profile step
+  const resolvedDisplayName = effectiveStep === "profile" && user?.displayName && !displayName ? user.displayName : displayName;
 
   // Fetch existing orgs for the "join" option
   useEffect(() => {
@@ -119,7 +117,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (!displayName.trim()) {
+    if (!resolvedDisplayName.trim()) {
       setError("Display name is required.");
       return;
     }
@@ -135,7 +133,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await registerProfile({
-        display_name: displayName.trim(),
+        display_name: resolvedDisplayName.trim(),
         org_name: orgMode === "create" ? orgName.trim() : "",
         org_id: orgMode === "join" ? selectedOrgId : undefined,
         department: department.trim(),
@@ -158,20 +156,20 @@ export default function RegisterPage() {
       <div className={styles.card}>
         <div className={styles.header}>
           <span className={styles.eyebrow}>
-            {step === "credentials" ? "New Account" : "Almost there"}
+            {effectiveStep === "credentials" ? "New Account" : "Almost there"}
           </span>
           <h1 className={styles.title}>
-            {step === "credentials" ? "Create your account" : "Complete profile"}
+            {effectiveStep === "credentials" ? "Create your account" : "Complete profile"}
           </h1>
           <p className={styles.subtitle}>
-            {step === "credentials"
+            {effectiveStep === "credentials"
               ? "Get started with UnifyOps."
               : "Set up your organisation and profile."}
           </p>
         </div>
 
         {/* ─── Step 1: Credentials ─── */}
-        {step === "credentials" && (
+        {effectiveStep === "credentials" && (
           <>
             {error && <div className={styles.error}>{error}</div>}
 
@@ -268,7 +266,7 @@ export default function RegisterPage() {
         )}
 
         {/* ─── Step 2: Profile & Organisation ─── */}
-        {step === "profile" && (
+        {effectiveStep === "profile" && (
           <form onSubmit={handleProfileSubmit} className={styles.form}>
             {error && <div className={styles.error}>{error}</div>}
 
@@ -279,7 +277,7 @@ export default function RegisterPage() {
               <input
                 id="display-name"
                 type="text"
-                value={displayName}
+                value={resolvedDisplayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className={styles.inputFlat}
                 placeholder="Your full name"

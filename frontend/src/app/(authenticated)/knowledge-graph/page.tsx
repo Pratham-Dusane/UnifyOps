@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./knowledge-graph.module.css";
 
@@ -41,6 +41,13 @@ interface Edge {
 interface GraphData {
   nodes: Node[];
   edges: Edge[];
+}
+
+interface SearchResult {
+  id: string;
+  value: string;
+  entity_type: string;
+  confidence: number;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -89,8 +96,7 @@ export default function KnowledgeGraphPage() {
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], edges: [] });
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [hops, setHops] = useState(2);
   const [isPanelOpen, setIsPanelOpen] = useState(true);
 
@@ -100,20 +106,18 @@ export default function KnowledgeGraphPage() {
   const activeDragNodeRef = useRef<Node | null>(null);
   const hoverNodeRef = useRef<Node | null>(null);
 
-  // Headers
-  const headers = {
-    "X-User-UID": user?.uid || "",
-    "X-User-Org": profile?.org_id || "",
-  };
-
   // Fetch Neighborhood
-  const fetchNeighborhood = async (nodeId: string, customHops = hops) => {
+  const fetchNeighborhood = (nodeId: string, customHops = hops) => {
     if (!profile) return;
-    setLoading(true);
+    const hdrs = {
+      "X-User-UID": user?.uid || "",
+      "X-User-Org": profile?.org_id || "",
+    };
+    (async () => {
     try {
       const res = await fetch(
         `${API_URL}/api/v1/graph/neighborhood?node_id=${encodeURIComponent(nodeId)}&hops=${customHops}`,
-        { headers }
+        { headers: hdrs }
       );
       if (res.ok) {
         const data: GraphData = await res.json();
@@ -147,40 +151,46 @@ export default function KnowledgeGraphPage() {
       }
     } catch (err) {
       console.error("Failed to load graph neighborhood:", err);
-    } finally {
-      setLoading(false);
     }
+    })();
   };
 
-  // Fetch Initial Graph
   useEffect(() => {
-    if (profile) {
-      const seed = async () => {
-        try {
-          const res = await fetch(`${API_URL}/api/v1/ingestion/documents?page=1&page_size=1`, { headers });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.documents && data.documents.length > 0) {
-              fetchNeighborhood(data.documents[0].id);
-            }
+    if (!profile) return;
+    const hdrs = {
+      "X-User-UID": user?.uid || "",
+      "X-User-Org": profile?.org_id || "",
+    };
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/ingestion/documents?page=1&page_size=1`, { headers: hdrs });
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          if (data.documents && data.documents.length > 0) {
+            fetchNeighborhood(data.documents[0].id);
           }
-        } catch {}
-      };
-      seed();
-    }
-  }, [profile]);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, user?.uid]);
 
-  // Graph Search
   useEffect(() => {
     if (searchQuery.trim().length < 2 || !profile) {
       setSearchResults([]);
       return;
     }
+    const hdrs = {
+      "X-User-UID": user?.uid || "",
+      "X-User-Org": profile?.org_id || "",
+    };
     const delayDebounce = setTimeout(async () => {
       try {
         const res = await fetch(
           `${API_URL}/api/v1/graph/search?q=${encodeURIComponent(searchQuery)}`,
-          { headers }
+          { headers: hdrs }
         );
         if (res.ok) {
           setSearchResults(await res.json());
@@ -189,7 +199,7 @@ export default function KnowledgeGraphPage() {
     }, 300);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery, profile]);
+  }, [searchQuery, profile, user?.uid]);
 
   // Force-directed Simulation Loop
   useEffect(() => {

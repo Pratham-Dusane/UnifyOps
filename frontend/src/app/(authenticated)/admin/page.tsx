@@ -70,69 +70,82 @@ export default function AdminPage() {
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [candidateMerges, setCandidateMerges] = useState<CandidateMerge[]>([]);
   const [completeness, setCompleteness] = useState<CompletenessStats | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const headers = {
-    "X-User-UID": user?.uid || "",
-    "X-User-Org": profile?.org_id || "",
-  };
 
   // 1. Fetch Ingestion Documents
   const fetchDocuments = useCallback(async () => {
     if (!profile) return;
+    const hdrs = { "X-User-UID": user?.uid || "", "X-User-Org": profile?.org_id || "" };
     try {
-      const res = await fetch(`${API_URL}/api/v1/ingestion/documents?page=1&page_size=50`, { headers });
+      const res = await fetch(`${API_URL}/api/v1/ingestion/documents?page=1&page_size=50`, { headers: hdrs });
       if (res.ok) {
         const data = await res.json();
         setDocuments(data.documents || []);
       }
     } catch {}
-  }, [profile]);
+  }, [profile, user?.uid]);
 
   // 2. Fetch Proposed Merges
   const fetchCandidateMerges = useCallback(async () => {
     if (!profile) return;
+    const hdrs = { "X-User-UID": user?.uid || "", "X-User-Org": profile?.org_id || "" };
     try {
-      const res = await fetch(`${API_URL}/api/v1/graph/merges`, { headers });
+      const res = await fetch(`${API_URL}/api/v1/graph/merges`, { headers: hdrs });
       if (res.ok) {
         setCandidateMerges(await res.json());
       }
     } catch {}
-  }, [profile]);
+  }, [profile, user?.uid]);
 
   // 3. Fetch Completeness Metrics
   const fetchCompleteness = useCallback(async () => {
     if (!profile) return;
+    const hdrs = { "X-User-UID": user?.uid || "", "X-User-Org": profile?.org_id || "" };
     try {
-      const res = await fetch(`${API_URL}/api/v1/graph/completeness`, { headers });
+      const res = await fetch(`${API_URL}/api/v1/graph/completeness`, { headers: hdrs });
       if (res.ok) {
         setCompleteness(await res.json());
       }
     } catch {}
-  }, [profile]);
-
-  // Combined Refresh
-  const refreshAll = useCallback(async () => {
-    setLoading(true);
-    await Promise.all([fetchDocuments(), fetchCandidateMerges(), fetchCompleteness()]);
-    setLoading(false);
-  }, [fetchDocuments, fetchCandidateMerges, fetchCompleteness]);
+  }, [profile, user?.uid]);
 
   useEffect(() => {
-    if (profile) {
-      refreshAll();
-      // Setup periodic polling for the pipeline monitor
-      const interval = setInterval(fetchDocuments, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [profile, refreshAll]);
+    if (!profile) return;
+    // Initial data load using inline async to avoid set-state-in-effect lint.
+    let cancelled = false;
+    const hdrs = {
+      "X-User-UID": user?.uid || "",
+      "X-User-Org": profile?.org_id || "",
+    };
+    (async () => {
+      try {
+        const [docsRes, mergesRes, compRes] = await Promise.all([
+          fetch(`${API_URL}/api/v1/ingestion/documents?page=1&page_size=50`, { headers: hdrs }),
+          fetch(`${API_URL}/api/v1/graph/merges`, { headers: hdrs }),
+          fetch(`${API_URL}/api/v1/graph/completeness`, { headers: hdrs }),
+        ]);
+        if (cancelled) return;
+        if (docsRes.ok) {
+          const data = await docsRes.json();
+          setDocuments(data.documents || []);
+        }
+        if (mergesRes.ok) setCandidateMerges(await mergesRes.json());
+        if (compRes.ok) setCompleteness(await compRes.json());
+      } catch {
+        // Backend may be down
+      }
+    })();
+    // Setup periodic polling for the pipeline monitor
+    const interval = setInterval(fetchDocuments, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [profile, user?.uid, fetchDocuments]);
 
   // 4. Document Reprocessing trigger
   const handleReprocess = async (docId: string) => {
+    const hdrs = { "X-User-UID": user?.uid || "", "X-User-Org": profile?.org_id || "" };
     try {
       const res = await fetch(`${API_URL}/api/v1/ingestion/documents/${docId}/reprocess`, {
         method: "POST",
-        headers,
+        headers: hdrs,
       });
       if (res.ok) {
         fetchDocuments();
@@ -142,11 +155,12 @@ export default function AdminPage() {
 
   // 5. Submit candidate merge resolution
   const handleResolveMerge = async (mergeId: string, action: "approve" | "reject") => {
+    const hdrs = { "X-User-UID": user?.uid || "", "X-User-Org": profile?.org_id || "" };
     try {
       const res = await fetch(`${API_URL}/api/v1/graph/merges/${mergeId}/resolve`, {
         method: "POST",
         headers: {
-          ...headers,
+          ...hdrs,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ action }),
