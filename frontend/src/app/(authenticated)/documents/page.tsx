@@ -170,6 +170,33 @@ export default function DocumentsPage() {
     }
   }, [user?.uid, profile?.org_id]);
 
+  const handleDeleteDoc = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this document and all its layout chunks, entities, and connections? This action cannot be undone.")) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/v1/ingestion/documents/${id}`, {
+        method: "DELETE",
+        headers: {
+          "X-User-UID": user?.uid || "",
+          "X-User-Org": profile?.org_id || "",
+        },
+      });
+      if (res.ok) {
+        setDocuments(prev => prev.filter(d => d.id !== id));
+        if (selectedDocId === id) {
+          setSelectedDocId(null);
+          setDocDetail(null);
+        }
+        await fetchStats();
+      } else {
+        alert("Failed to delete document.");
+      }
+    } catch {
+      alert("Error deleting document.");
+    }
+  };
+
   useEffect(() => {
     if (!profile) return;
     // Initial data load using inline async to avoid set-state-in-effect lint.
@@ -510,6 +537,7 @@ export default function DocumentsPage() {
               <th>Entities</th>
               <th>Chunks</th>
               <th>Uploaded</th>
+              <th className={styles.centerHeader}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -560,6 +588,15 @@ export default function DocumentsPage() {
                   <td className={styles.numericCell}>{doc.entity_count}</td>
                   <td className={styles.numericCell}>{doc.chunk_count}</td>
                   <td className={styles.dateCell}>{formatDate(doc.created_at)}</td>
+                  <td className={styles.actionCell} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className={styles.deleteBtn}
+                      onClick={(e) => handleDeleteDoc(doc.id, e)}
+                      title="Delete Document"
+                    >
+                      🗑️
+                    </button>
+                  </td>
                 </tr>
               ))
             )}

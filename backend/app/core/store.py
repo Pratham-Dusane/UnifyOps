@@ -31,6 +31,7 @@ from app.models.copilot import (
     FeedbackVote,
 )
 from app.models.maintenance import RCADraft
+from app.models.compliance import RegulatoryClause, ComplianceGap
 
 DB_FILE = "db.json"
 
@@ -53,6 +54,9 @@ class DataStore:
         self._query_logs: list[QueryLogEntry] = []  # query analytics
         # Phase 4 - Maintenance Advisor collections
         self._rca_drafts: dict[str, RCADraft] = {}  # keyed by rca_id
+        # Phase 5 - Compliance collections
+        self._regulatory_clauses: dict[str, RegulatoryClause] = {}  # keyed by clause_id
+        self._compliance_gaps: dict[str, ComplianceGap] = {}  # keyed by gap_id
 
         # Load persisted data on initialization (unless running tests)
         if os.environ.get("TESTING") != "1":
@@ -84,6 +88,12 @@ class DataStore:
                 ],
                 "rca_drafts": [
                     r.model_dump() for r in self._rca_drafts.values()
+                ],
+                "regulatory_clauses": [
+                    c.model_dump() for c in self._regulatory_clauses.values()
+                ],
+                "compliance_gaps": [
+                    g.model_dump() for g in self._compliance_gaps.values()
                 ],
             }
 
@@ -166,8 +176,19 @@ class DataStore:
                 rca = RCADraft(**item)
                 self._rca_drafts[rca.rca_id] = rca
 
+            for item in data.get("regulatory_clauses", []):
+                clause = RegulatoryClause(**item)
+                self._regulatory_clauses[clause.id] = clause
+
+            for item in data.get("compliance_gaps", []):
+                item["created_at"] = parse_dt(item["created_at"])
+                if item.get("resolved_at"):
+                    item["resolved_at"] = parse_dt(item["resolved_at"])
+                gap = ComplianceGap(**item)
+                self._compliance_gaps[gap.gap_id] = gap
+
             print(
-                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges, {len(self._sessions)} sessions, {len(self._rca_drafts)} RCAs)"
+                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges, {len(self._sessions)} sessions, {len(self._rca_drafts)} RCAs, {len(self._regulatory_clauses)} clauses, {len(self._compliance_gaps)} gaps)"
             )
         except Exception as e:
             print(f"[DataStore] Failed to load state from db.json: {e}")
@@ -939,6 +960,93 @@ class DataStore:
         # we check the equipment tag's entity org_id, or return all since it's local dev.
         # To be safe, we list all since there is no org_id on RCADraft, but we can match via equipment tag.
         return list(self._rca_drafts.values())
+
+    # ──────────────────────────── Compliance & Quality (Phase 5) ────────────
+
+    def delete_document(self, doc_id: str) -> None:
+        """
+        Deletes a document and performs a cascading cleanup of all related chunks,
+        extracted entities, candidate merges, P&ID connections, and associated
+        compliance/maintenance collections (FR-5.2.3).
+        """
+        with self._lock:
+            # 1. Remove the document record
+            if doc_id in self._documents:
+                del self._documents[doc_id]
+
+            # 2. Remove all layout chunks belonging to this document
+            chunks_to_remove = [cid for cid, chk in self._chunks.items() if chk.document_id == doc_id]
+            for cid in chunks_to_remove:
+                del self._chunks[cid]
+
+            # 3. Remove all extracted entities for this document
+            entities_to_remove = [eid for eid, ent in self._entities.items() if ent.document_id == doc_id]
+            for eid in entities_to_remove:
+                del self._entities[eid]
+
+            # 4. Clean up any P&ID connections referencing deleted entities/document
+            conns_to_remove = [
+                conn_id for conn_id, conn in self._connections.items()
+                if conn.document_id == doc_id or conn.from_entity_id in entities_to_remove or conn.to_entity_id in entities_to_remove
+            ]
+            for conn_id in conns_to_remove:
+                del self._connections[conn_id]
+
+            # 5. Clean up candidate merges referencing deleted entities
+            merges_to_remove = [
+                mid for mid, merge in self._candidate_merges.items()
+                if merge.source_entity_id in entities_to_remove or merge.target_entity_id in entities_to_remove
+            ]
+            for mid in merges_to_remove:
+                del self._candidate_merges[mid]
+
+            # 6. Clean up regulatory clauses referencing deleted document
+            clauses_to_remove = [
+                cid for cid, clause in self._regulatory_clauses.items() if clause.document_id == doc_id
+            ]
+            for cid in clauses_to_remove:
+                del self._regulatory_clauses[cid]
+
+            # 7. Clean up compliance gaps referencing deleted clauses
+            gaps_to_remove = [
+                gid for gid, gap in self._compliance_gaps.items() if gap.clause_id in clauses_to_remove
+            ]
+            for gid in gaps_to_remove:
+                del self._compliance_gaps[gid]
+
+            self._save()
+
+    def create_regulatory_clause(self, clause: RegulatoryClause) -> None:
+        with self._lock:
+            self._regulatory_clauses[clause.id] = clause
+            self._save()
+
+    def get_regulatory_clause(self, clause_id: str) -> RegulatoryClause | None:
+        return self._regulatory_clauses.get(clause_id)
+
+    def list_regulatory_clauses(self) -> list[RegulatoryClause]:
+        return list(self._regulatory_clauses.values())
+
+    def create_compliance_gap(self, gap: ComplianceGap) -> None:
+        with self._lock:
+            self._compliance_gaps[gap.gap_id] = gap
+            self._save()
+
+    def get_compliance_gap(self, gap_id: str) -> ComplianceGap | None:
+        return self._compliance_gaps.get(gap_id)
+
+    def update_compliance_gap(self, gap_id: str, **kwargs) -> ComplianceGap | None:
+        with self._lock:
+            gap = self._compliance_gaps.get(gap_id)
+            if gap:
+                for k, v in kwargs.items():
+                    setattr(gap, k, v)
+                self._save()
+                return gap
+            return None
+
+    def list_compliance_gaps(self) -> list[ComplianceGap]:
+        return list(self._compliance_gaps.values())
 
 
 # Singleton instance

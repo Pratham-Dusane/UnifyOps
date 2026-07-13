@@ -1,5 +1,5 @@
 """
-UnifyOps — Ingestion Service Router (Phase 1)
+UnifyOps - Ingestion Service Router (Phase 1)
 
 Multi-format document upload, pipeline tracking, and ingestion monitoring.
 Implements FR-1.1.1 through FR-1.7.3.
@@ -72,7 +72,7 @@ _ENTITY_TEMPLATES: dict[DocumentType, list[tuple[EntityType, str, float]]] = {
         (EntityType.EQUIPMENT_TAG, "P-204A", 0.96),
         (EntityType.EQUIPMENT_TAG, "HE-301", 0.94),
         (EntityType.EQUIPMENT_TAG, "V-102", 0.91),
-        (EntityType.LOCATION, "Unit 3 — Crude Distillation", 0.97),
+        (EntityType.LOCATION, "Unit 3 - Crude Distillation", 0.97),
         (EntityType.MATERIAL, "SS316L", 0.88),
         (EntityType.MEASUREMENT, "150 psig MAWP", 0.93),
         (EntityType.DOCUMENT_REFERENCE, "DWG-CDU-P&ID-003 Rev.4", 0.95),
@@ -81,7 +81,7 @@ _ENTITY_TEMPLATES: dict[DocumentType, list[tuple[EntityType, str, float]]] = {
         (EntityType.EQUIPMENT_TAG, "P-204A", 0.95),
         (EntityType.DATE, "2025-06-15", 0.99),
         (EntityType.PERSON, "Rajesh Kumar", 0.92),
-        (EntityType.FAILURE_MODE, "Seal leakage — mechanical seal degradation", 0.87),
+        (EntityType.FAILURE_MODE, "Seal leakage - mechanical seal degradation", 0.87),
         (EntityType.MATERIAL, "John Crane Type 2100 seal kit", 0.90),
         (EntityType.PROCEDURE_STEP, "Isolate pump via XV-204", 0.88),
     ],
@@ -106,7 +106,7 @@ _ENTITY_TEMPLATES: dict[DocumentType, list[tuple[EntityType, str, float]]] = {
         (EntityType.LOCATION, "Flare Header Section B", 0.90),
         (
             EntityType.FAILURE_MODE,
-            "Valve stuck open — actuator air supply failure",
+            "Valve stuck open - actuator air supply failure",
             0.85,
         ),
         (EntityType.PERSON, "Operator B-Shift", 0.88),
@@ -298,7 +298,7 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
         )
         return
 
-    # ──── 1. OCR & Layout Extraction (FR-1.3) — Run FIRST ────
+    # ──── 1. OCR & Layout Extraction (FR-1.3) - Run FIRST ────
     store.update_document_stage(doc_id, PipelineStage.EXTRACTING_TEXT)
 
     ocr_data = document_ai_service.extract_layout(file_content, doc.mime_type)
@@ -362,7 +362,7 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
         extracted_text_path=layout_path,
     )
 
-    # ──── 2. Classification (FR-1.2) — Now uses OCR text ────
+    # ──── 2. Classification (FR-1.2) - Now uses OCR text ────
     store.update_document_stage(doc_id, PipelineStage.CLASSIFYING)
 
     inferred_type = DocumentType.UNKNOWN
@@ -462,7 +462,7 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
 
     entities_created = 0
 
-    # 3.1 P&ID Custom Tag Bounding Box Extraction (FR-1.4) — only for drawings
+    # 3.1 P&ID Custom Tag Bounding Box Extraction (FR-1.4) - only for drawings
     if inferred_type == DocumentType.ENGINEERING_DRAWING:
         pid_tags = document_ai_service.extract_pid_tags(file_content, doc.mime_type)
         if pid_tags:
@@ -491,7 +491,7 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
     # 3.2 General Ontology entity extraction via Gemini/Groq (FR-1.5)
     extracted_entities = gemini_service.extract_entities(full_text, inferred_type.value)
 
-    # NO static template fallback — if AI extraction returns nothing, we log it
+    # NO static template fallback - if AI extraction returns nothing, we log it
     if not extracted_entities:
         print(
             f"[Pipeline] Warning: No entities extracted for document {doc_id} ({filename}). "
@@ -902,6 +902,20 @@ async def get_document(
     return DocumentDetailResponse(
         document=doc, entities=entities, chunks=chunks, connections=connections
     )
+
+
+@router.delete("/documents/{document_id}")
+async def delete_document(
+    document_id: str,
+    x_user_org: str = Header(..., description="User's organisation ID"),
+) -> dict:
+    """Delete a document and perform cascading cleanups (FR-5.2.3)."""
+    doc = store.get_document(document_id)
+    if not doc or doc.org_id != x_user_org:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    store.delete_document(document_id)
+    return {"message": f"Document {document_id} and all its cascading records deleted successfully."}
 
 
 @router.patch("/documents/{document_id}/stage", response_model=DocumentRecord)

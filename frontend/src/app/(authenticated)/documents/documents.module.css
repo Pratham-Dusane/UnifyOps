@@ -1,5 +1,5 @@
 /*
- * Document Management — Styles
+ * Document Management - Styles
  * Upload zone, stats grid, document table with pipeline status.
  */
 
@@ -345,8 +345,15 @@
 }
 
 @keyframes modalEnter {
-  from { opacity: 0; transform: scale(0.96) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modalHeader {
@@ -400,7 +407,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .modalGrid {
@@ -799,12 +808,15 @@
   .modalOverlay {
     padding: 10px;
   }
+
   .modalContent {
     max-height: 95vh;
   }
+
   .modalGrid {
     grid-template-columns: 1fr;
   }
+
   .metaColumn {
     border-right: none;
     border-bottom: 1px solid var(--border-primary);
@@ -812,3 +824,24 @@
   }
 }
 
+.centerHeader {
+  text-align: center !important;
+}
+
+.actionCell {
+  text-align: center;
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.deleteBtn:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+}
