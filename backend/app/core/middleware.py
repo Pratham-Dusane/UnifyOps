@@ -1,5 +1,5 @@
 """
-UnifyOps — Middleware (FR-0.4.3, FR-0.5.1)
+UnifyOps - Middleware (FR-0.4.3, FR-0.5.1)
 
 - RequestIDMiddleware: Generates/propagates X-Request-ID on every request.
 - LoggingMiddleware: Logs method, path, status_code, latency_ms per request.

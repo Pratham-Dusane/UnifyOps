@@ -1,5 +1,5 @@
 """
-UnifyOps — FastAPI Application Entry Point
+UnifyOps - FastAPI Application Entry Point
 
 Mounts all 8 service routers behind a unified API gateway.
 Applies middleware for request-ID propagation, CORS, and structured logging.

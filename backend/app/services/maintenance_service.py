@@ -1,5 +1,5 @@
 """
-UnifyOps — Maintenance Intelligence Service (Phase 4)
+UnifyOps -  Maintenance Intelligence Service (Phase 4)
 
 Implements:
 - Work Order Timeline and Metadata Extraction (FR-4.1)

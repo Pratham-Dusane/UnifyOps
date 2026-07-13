@@ -594,7 +594,7 @@ export default function DocumentsPage() {
                       onClick={(e) => handleDeleteDoc(doc.id, e)}
                       title="Delete Document"
                     >
-                      🗑️
+                      Delete
                     </button>
                   </td>
                 </tr>
@@ -843,7 +843,7 @@ export default function DocumentsPage() {
                                 )}
                                 {ent.needs_review && (
                                   <div className={styles.warningNote}>
-                                    ⚠️ Flagged for review
+                                    Flagged for review
                                   </div>
                                 )}
                               </div>

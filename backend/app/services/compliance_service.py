@@ -42,11 +42,22 @@ class ComplianceService:
         if not chunks:
             return []
 
+        # Clear existing clauses for this document to avoid duplicates or stale data
+        for c_id in list(store._regulatory_clauses.keys()):
+            if store._regulatory_clauses[c_id].document_id == document_id:
+                del store._regulatory_clauses[c_id]
+
         clauses: list[RegulatoryClause] = []
 
-        # For the hackathon/local prototype, we split by paragraphs or headers
-        raw_text = "\n".join([c.text for c in chunks])
-        paragraphs = [p.strip() for p in raw_text.split("\n\n") if len(p.strip()) > 30]
+        import re
+        paragraphs: list[str] = []
+        for chunk in chunks:
+            cleaned_text = re.sub(r"^\[[^\]]+\]\s*", "", chunk.text)
+            # Split into separate rules if multiple newlines exist within the chunk text
+            for block in cleaned_text.split("\n\n"):
+                for sub in block.split("\n"):
+                    if len(sub.strip()) > 30:
+                        paragraphs.append(sub.strip())
 
         # Extract equipment tags associated with this document to link clauses automatically
         doc_entities = [e for e in store._entities.values() if e.document_id == document_id]

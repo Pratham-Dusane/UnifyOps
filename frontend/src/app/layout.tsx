@@ -3,7 +3,7 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "UnifyOps — AI Industrial Knowledge Intelligence",
+  title: "UnifyOps - AI Industrial Knowledge Intelligence",
   description:
     "Unified Asset & Operations Brain for industrial plants. Ingest, connect, and query your plant's entire documented history with AI-powered intelligence.",
   keywords: [

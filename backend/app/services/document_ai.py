@@ -1,5 +1,5 @@
 """
-UnifyOps — Document AI Service
+UnifyOps - Document AI Service
 
 Integrates with Google Cloud Document AI (FR-1.2, FR-1.3, FR-1.4).
 Features:

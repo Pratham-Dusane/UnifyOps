@@ -1,5 +1,5 @@
 """
-UnifyOps — Auth Router
+UnifyOps - Auth Router
 
 User registration, profile management, and organisation management.
 Firebase handles authentication; this router manages the extended profile
@@ -76,7 +76,7 @@ async def register_user(
     else:
         org = store.find_org_by_name(body.org_name)
         if not org:
-            # Create new org — first user becomes admin
+            # Create new org - first user becomes admin
             org = store.create_org(name=body.org_name, created_by=x_user_uid)
             role = UserRole.PLATFORM_ADMIN
 

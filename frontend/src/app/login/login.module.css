@@ -1,5 +1,5 @@
 /*
- * Login Page — Styles
+ * Login Page - Styles
  * Structure inspired by modern auth pages:
  * Google button on top, email/password with icons, show/hide toggle.
  */
@@ -41,7 +41,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .card {

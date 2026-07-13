@@ -1,5 +1,5 @@
 """
-UnifyOps — Auth Models
+UnifyOps - Auth Models
 
 User profile, organisation, and role management models.
 Implements PRD Section 3.5 role-based access scoping and multi-org tenancy.
@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 
 class UserRole(str, Enum):
-    """PRD Section 4 — Persona-mapped roles."""
+    """PRD Section 4 - Persona-mapped roles."""
 
     FIELD_TECHNICIAN = "field_technician"  # Rajesh
     MAINTENANCE_ENGINEER = "maintenance_engineer"  # Priya
@@ -58,7 +58,7 @@ class UserRegister(BaseModel):
     org_name: str = Field(
         min_length=2,
         max_length=100,
-        description="Organisation name — creates new if not found",
+        description="Organisation name - creates new if not found",
     )
     org_id: str | None = Field(
         default=None,

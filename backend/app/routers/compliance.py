@@ -43,7 +43,27 @@ async def list_clauses(
     x_user_org: str = Header(..., description="User's organisation ID"),
 ) -> list[RegulatoryClause]:
     """List segmented regulatory clauses (FR-5.1)."""
-    return store.list_regulatory_clauses()
+    clauses = store.list_regulatory_clauses()
+    has_unclean = any("[" in c.verbatim_text for c in clauses)
+    if not clauses or has_unclean:
+        if has_unclean:
+            store._regulatory_clauses.clear()
+            store._compliance_gaps.clear()
+        from app.models.ingestion import DocumentType, PipelineStage
+        all_docs, _ = store.list_documents(org_id=x_user_org, page_size=1000)
+        reg_docs = [
+            d
+            for d in all_docs
+            if d.doc_type == DocumentType.REGULATORY and d.pipeline_stage == PipelineStage.COMPLETED
+        ]
+        for doc in reg_docs:
+            try:
+                compliance_service.segment_regulatory_document(x_user_org, doc.id)
+                print(f"[Fallback] Segmented regulatory clauses for document: {doc.id}")
+            except Exception as e:
+                print(f"[Fallback] Clause segmentation failed: {e}")
+        clauses = store.list_regulatory_clauses()
+    return clauses
 
 
 @router.get("/gaps", response_model=list[ComplianceGap])
@@ -51,6 +71,24 @@ async def list_gaps(
     x_user_org: str = Header(..., description="User's organisation ID"),
 ) -> list[ComplianceGap]:
     """List all open/resolved compliance gaps (FR-5.2)."""
+    clauses = store.list_regulatory_clauses()
+    has_unclean = any("[" in c.verbatim_text for c in clauses)
+    if not clauses or has_unclean:
+        if has_unclean:
+            store._regulatory_clauses.clear()
+            store._compliance_gaps.clear()
+        from app.models.ingestion import DocumentType, PipelineStage
+        all_docs, _ = store.list_documents(org_id=x_user_org, page_size=1000)
+        reg_docs = [
+            d
+            for d in all_docs
+            if d.doc_type == DocumentType.REGULATORY and d.pipeline_stage == PipelineStage.COMPLETED
+        ]
+        for doc in reg_docs:
+            try:
+                compliance_service.segment_regulatory_document(x_user_org, doc.id)
+            except Exception as e:
+                print(f"[Fallback] Gaps sweep segmentation failed: {e}")
     # Trigger a quick sweep to keep them fresh in local dev
     compliance_service.run_compliance_gap_agent(x_user_org)
     return store.list_compliance_gaps()

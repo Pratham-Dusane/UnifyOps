@@ -229,7 +229,7 @@ export default function CopilotChat() {
    */
   const parseInlineMarkdown = (lineText: string, keyPrefix: string, citations: Citation[]) => {
     // 1. Handle [GENERAL]
-    const cleanText = lineText.replace(/\[GENERAL\]/g, "⚠️");
+    const cleanText = lineText.replace(/\[GENERAL\]/g, "[Uncited]");
 
     // 2. Parse bold markers: **bold**
     const boldParts = cleanText.split("**");

@@ -173,7 +173,7 @@ export default function RegisterPage() {
           <>
             {error && <div className={styles.error}>{error}</div>}
 
-            {/* Google — primary CTA */}
+            {/* Google - primary CTA */}
             <button
               className={styles.googleBtn}
               onClick={handleGoogleSignUp}

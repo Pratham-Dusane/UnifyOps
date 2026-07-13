@@ -1,34 +1,34 @@
-# Product Requirements Document: UnifyOps — AI Industrial Knowledge Intelligence Platform
+# Product Requirements Document: UnifyOps - AI Industrial Knowledge Intelligence Platform
 
-**ET AI Hackathon 2026 — Problem Statement 8: AI for Industrial Knowledge Intelligence: Unified Asset & Operations Brain**
+**ET AI Hackathon 2026 - Problem Statement 8: AI for Industrial Knowledge Intelligence: Unified Asset & Operations Brain**
 
 | | |
 |---|---|
 | **Document Type** | Engineering & Product PRD (build-ready) |
-| **Product Codename** | UnifyOps (Hindi: "bridge" — the platform bridges fragmented plant knowledge into one substrate) |
+| **Product Codename** | UnifyOps (Hindi: "bridge" - the platform bridges fragmented plant knowledge into one substrate) |
 | **Version** | 1.0 |
 | **Status** | Approved for build |
 | **Audience** | AI coding agents, software engineers, technical leads implementing this project |
-| **Cloud Platform** | Google Cloud Platform (GCP) — exclusively |
+| **Cloud Platform** | Google Cloud Platform (GCP) - exclusively |
 | **Deliverable Format** | Working Prototype, Architecture Diagram, Presentation Deck, Demo Video |
 
 ---
 
 ## 1. Executive Summary
 
-UnifyOps is an AI-powered Industrial Knowledge Intelligence platform built entirely on Google Cloud that ingests every category of document a heavy-industrial plant produces — engineering drawings and P&IDs, maintenance work orders, safety procedures, inspection reports, operating instructions, incident reports, and regulatory filings — and turns them into a single, continuously-updating knowledge graph. On top of that one substrate, UnifyOps runs four distinct intelligence layers: a cited, conversational **Expert Knowledge Copilot**; a **Maintenance Intelligence & RCA Agent**; a **Quality & Regulatory Compliance Intelligence** layer; and a **Lessons Learned & Failure Intelligence Engine**. Each layer is a different lens over the same graph, not a separate system — which is the core architectural bet of this PRD.
+UnifyOps is an AI-powered Industrial Knowledge Intelligence platform built entirely on Google Cloud that ingests every category of document a heavy-industrial plant produces - engineering drawings and P&IDs, maintenance work orders, safety procedures, inspection reports, operating instructions, incident reports, and regulatory filings - and turns them into a single, continuously-updating knowledge graph. On top of that one substrate, UnifyOps runs four distinct intelligence layers: a cited, conversational **Expert Knowledge Copilot**; a **Maintenance Intelligence & RCA Agent**; a **Quality & Regulatory Compliance Intelligence** layer; and a **Lessons Learned & Failure Intelligence Engine**. Each layer is a different lens over the same graph, not a separate system - which is the core architectural bet of this PRD.
 
-The platform directly answers the problem statement's central claim: Indian industrial plants don't have a technology-absence problem, they have a fragmentation problem — 7 to 12 disconnected document systems per large plant, 35% of working hours spent searching for information that already exists somewhere, an approaching retirement cliff that will take undocumented judgment out the door with it. UnifyOps is designed to be demoable as a working, end-to-end prototype within a hackathon timeline while remaining structurally honest about what is hackathon-scope versus what is a credible post-hackathon roadmap — every feature in this document is tagged **[MVP]**, **[Demo Extension]**, or **[Post-Hackathon Roadmap]** so the engineering team always knows what "done for the deadline" actually means.
+The platform directly answers the problem statement's central claim: Indian industrial plants don't have a technology-absence problem, they have a fragmentation problem - 7 to 12 disconnected document systems per large plant, 35% of working hours spent searching for information that already exists somewhere, an approaching retirement cliff that will take undocumented judgment out the door with it. UnifyOps is designed to be demoable as a working, end-to-end prototype within a hackathon timeline while remaining structurally honest about what is hackathon-scope versus what is a credible post-hackathon roadmap - every feature in this document is tagged **[MVP]**, **[Demo Extension]**, or **[Post-Hackathon Roadmap]** so the engineering team always knows what "done for the deadline" actually means.
 
-This PRD is intentionally exhaustive. It is written to be handed directly to an AI coding agent (e.g. Claude Code) and a human engineering team working in parallel, with every feature specified to the level of testable functional requirements, explicit GCP service bindings, and concrete acceptance criteria — so that "is this feature done" never depends on a conversation, only on the document.
+This PRD is intentionally exhaustive. It is written to be handed directly to an AI coding agent (e.g. Claude Code) and a human engineering team working in parallel, with every feature specified to the level of testable functional requirements, explicit GCP service bindings, and concrete acceptance criteria - so that "is this feature done" never depends on a conversation, only on the document.
 
 ## 2. Problem Statement Recap
 
 **Theme:** Industrial Intelligence / Document Management / Knowledge Engineering / Quality
 
-**The core problem, in one paragraph:** Asset-intensive Indian industrial organisations run on 7–12 disconnected document systems per plant — drawings in one place, work orders in another, procedures in a third, inspections in a fourth, regulatory filings scattered across email. Professionals lose roughly a third of their working hours searching for or recreating information that already exists somewhere in the organisation. This fragmentation is not a filing inconvenience — it is a documented contributor to unplanned downtime, and it compounds every year as a quarter of India's experienced industrial engineers approach retirement, taking undocumented operational judgment with them permanently.
+**The core problem, in one paragraph:** Asset-intensive Indian industrial organisations run on 7–12 disconnected document systems per plant - drawings in one place, work orders in another, procedures in a third, inspections in a fourth, regulatory filings scattered across email. Professionals lose roughly a third of their working hours searching for or recreating information that already exists somewhere in the organisation. This fragmentation is not a filing inconvenience - it is a documented contributor to unplanned downtime, and it compounds every year as a quarter of India's experienced industrial engineers approach retirement, taking undocumented operational judgment with them permanently.
 
-**The challenge statement, restated as a build target:** ingest heterogeneous industrial documents across structured and unstructured formats, extract their entities into a unified knowledge graph that keeps itself current as new records arrive, and make the collective intelligence of that graph queryable, actionable, and continuously updated — across any device, for any function in the plant, from a field technician's phone to a plant head's leadership dashboard.
+**The challenge statement, restated as a build target:** ingest heterogeneous industrial documents across structured and unstructured formats, extract their entities into a unified knowledge graph that keeps itself current as new records arrive, and make the collective intelligence of that graph queryable, actionable, and continuously updated - across any device, for any function in the plant, from a field technician's phone to a plant head's leadership dashboard.
 
 **The five capability pillars named in the problem statement**, each of which this PRD maps to a dedicated phase group:
 1. **Universal Document Ingestion & Knowledge Graph Agent** → Phases 1–2
@@ -37,13 +37,13 @@ This PRD is intentionally exhaustive. It is written to be handed directly to an 
 4. **Quality & Regulatory Compliance Intelligence** → Phase 5
 5. **Lessons Learned & Failure Intelligence Engine** → Phase 6
 
-**Official evaluation focus** (from the problem statement — this PRD's success metrics in Section 14 map directly onto these): entity extraction accuracy across document types; query answer quality on domain-expert benchmark questions; knowledge graph linkage completeness; time-to-answer versus traditional search; compliance gap detection accuracy; demonstrated improvement in cross-functional knowledge discovery.
+**Official evaluation focus** (from the problem statement - this PRD's success metrics in Section 14 map directly onto these): entity extraction accuracy across document types; query answer quality on domain-expert benchmark questions; knowledge graph linkage completeness; time-to-answer versus traditional search; compliance gap detection accuracy; demonstrated improvement in cross-functional knowledge discovery.
 
 **Official judging criteria:** Innovation (25%), Business Impact (25%), Technical Excellence (20%), Scalability (15%), User Experience (15%).
 
 ## 3. Vision & Measurable Objectives
 
-**Vision statement:** Every person on the plant floor — from a field technician troubleshooting a pump at 2am to a plant head reviewing quarterly risk exposure — should be able to ask a plain-language question and get a trustworthy, cited, role-appropriate answer drawn from the plant's entire documented history, in seconds, on whatever device they have in hand.
+**Vision statement:** Every person on the plant floor - from a field technician troubleshooting a pump at 2am to a plant head reviewing quarterly risk exposure - should be able to ask a plain-language question and get a trustworthy, cited, role-appropriate answer drawn from the plant's entire documented history, in seconds, on whatever device they have in hand.
 
 UnifyOps's objectives are written as measurable targets so that "did we succeed" is never a matter of opinion. Each objective is deliberately mapped to one of the problem statement's own evaluation-focus criteria.
 
@@ -54,7 +54,7 @@ UnifyOps's objectives are written as measurable targets so that "did we succeed"
 | **O3** | Produce correct, well-cited answers to real domain-expert questions | ≥ 85% of benchmark questions rated correct and properly cited by a domain reviewer | "query answer quality on domain-expert benchmark questions" |
 | **O4** | Build a knowledge graph where entities are correctly linked, not just extracted | ≥ 90% entity-resolution precision and recall on a labelled duplicate-equipment benchmark | "knowledge graph linkage completeness" |
 | **O5** | Detect real compliance gaps between regulation and documented plant practice | ≥ 85% precision and recall on a labelled clause/procedure compliance benchmark | "compliance gap detection accuracy" |
-| **O6** | Demonstrate the platform is used, and useful, across roles — not just by one function | Query activity logged and attributable across at least 4 distinct personas/roles during the demo period, with role-specific value evidenced per persona | "demonstrated improvement in cross-functional knowledge discovery" |
+| **O6** | Demonstrate the platform is used, and useful, across roles - not just by one function | Query activity logged and attributable across at least 4 distinct personas/roles during the demo period, with role-specific value evidenced per persona | "demonstrated improvement in cross-functional knowledge discovery" |
 
 ## 4. Personas
 
@@ -67,7 +67,7 @@ Every feature in this PRD is written with a specific persona's need in mind, and
 | **Anita** | Quality & Regulatory Compliance Officer | Confidence that current procedures actually satisfy current regulation, and audit-ready evidence when they're asked to prove it | Desktop, periodic audit-prep crunches |
 | **Vikram** | Senior/Veteran Engineer (approaching retirement) | A way to externalise 25+ years of undocumented judgment before it leaves with him | Desktop, low tolerance for high-friction documentation tools |
 | **Deepak** | Knowledge/Platform Administrator | Visibility into what's flowing through the ingestion pipeline, and a way to fix what the AI gets wrong before it becomes "ground truth" | Desktop, admin console |
-| **Mr. Iyer** | Plant Head / Leadership | A synthesized, cross-functional view of operational risk, compliance exposure, and knowledge health — not a query interface | Desktop/tablet, dashboard-first |
+| **Mr. Iyer** | Plant Head / Leadership | A synthesized, cross-functional view of operational risk, compliance exposure, and knowledge health - not a query interface | Desktop/tablet, dashboard-first |
 
 ## 5. Scope & Out-of-Scope
 
@@ -75,32 +75,32 @@ Every feature in this PRD is written with a specific persona's need in mind, and
 
 - Ingestion and knowledge-graph construction for the seven core document types named in the problem statement: engineering drawings/P&IDs, maintenance work orders, safety procedures/SOPs, inspection reports, operating instructions, incident/near-miss reports, and regulatory documents.
 - A fully functional Expert Knowledge Copilot (Phase 3) with citations, confidence scoring, and role-based access.
-- At least one working, demoable feature from each of the three agentic intelligence pillars — Maintenance/RCA (Phase 4), Compliance (Phase 5), Lessons Learned (Phase 6) — sufficient to prove the "one substrate, many lenses" architecture, not necessarily every feature listed in those phases.
+- At least one working, demoable feature from each of the three agentic intelligence pillars - Maintenance/RCA (Phase 4), Compliance (Phase 5), Lessons Learned (Phase 6) - sufficient to prove the "one substrate, many lenses" architecture, not necessarily every feature listed in those phases.
 - Full evaluation and benchmarking harness (Phase 10) producing real numbers against Objectives O1–O6.
-- A responsive web application usable on both desktop and mobile viewports (a installed native app and full offline mode are Post-Hackathon Roadmap — see Phase 8).
+- A responsive web application usable on both desktop and mobile viewports (a installed native app and full offline mode are Post-Hackathon Roadmap - see Phase 8).
 
 ### 5.2 Explicitly Out of Scope for the Hackathon Build
 
-- **Live IoT/SCADA/sensor integration.** Phase 4's predictive maintenance signals are derived from *documented* maintenance history (work orders, inspections), not live telemetry. This is a deliberate scope boundary, not an oversight — it keeps the build honest about what it can prove versus claim.
-- **Comprehensive national/state regulatory corpus.** Phase 5 ingests a curated, representative regulatory sample (a real subset of Factory Act / OISD / PESO / environmental clauses) sufficient to demonstrate the compliance-mapping mechanism convincingly — not an exhaustive national regulatory database, which is a multi-year data-licensing and legal-review effort beyond hackathon scope.
+- **Live IoT/SCADA/sensor integration.** Phase 4's predictive maintenance signals are derived from *documented* maintenance history (work orders, inspections), not live telemetry. This is a deliberate scope boundary, not an oversight - it keeps the build honest about what it can prove versus claim.
+- **Comprehensive national/state regulatory corpus.** Phase 5 ingests a curated, representative regulatory sample (a real subset of Factory Act / OISD / PESO / environmental clauses) sufficient to demonstrate the compliance-mapping mechanism convincingly - not an exhaustive national regulatory database, which is a multi-year data-licensing and legal-review effort beyond hackathon scope.
 - **Native mobile apps (iOS/Android).** The mobile experience is a responsive Progressive Web App (Phase 0.3, Phase 3.1). True native apps with offline-first sync (Phase 8) are Post-Hackathon Roadmap.
 - **Multi-region disaster recovery.** The hackathon build runs single-region (Section 7.5); DR posture (Phase 9.5) is Post-Hackathon Roadmap.
 - **CMMS/ERP system integration.** UnifyOps ingests documents *exported from* such systems (e.g. a work-order PDF/CSV export) rather than building live bidirectional integrations with specific vendor CMMS/ERP platforms during the hackathon.
 
 ### 5.3 Priority Tiers Used Throughout This Document
 
-- **[MVP]** — required for the hackathon submission; the mandatory spine plus at least one feature per demo-breadth phase.
-- **[Demo Extension]** — strengthens Phases 4–6 if time allows; not required, but each is feasible within a hackathon timeline if the MVP spine is done early.
-- **[Post-Hackathon Roadmap]** — written to full engineering depth for continuity and to demonstrate scalability thinking to judges, but explicitly not required for the submission.
+- **[MVP]** - required for the hackathon submission; the mandatory spine plus at least one feature per demo-breadth phase.
+- **[Demo Extension]** - strengthens Phases 4–6 if time allows; not required, but each is feasible within a hackathon timeline if the MVP spine is done early.
+- **[Post-Hackathon Roadmap]** - written to full engineering depth for continuity and to demonstrate scalability thinking to judges, but explicitly not required for the submission.
 
 ## 6. Guiding Principles
 
 These six principles are referenced by name throughout the rest of this PRD, and any engineer or AI agent implementing a feature should resolve ambiguity by checking it against these principles first.
 
-1. **One substrate, many lenses.** There is exactly one knowledge graph. The Copilot, the RCA agent, the Compliance agent, and the Lessons Learned agent are four different queries and four different presentations over the *same* underlying data — never four separate pipelines that happen to share a name. If a feature seems to need its own private data store, that is a signal to reconsider the design, not a green light.
+1. **One substrate, many lenses.** There is exactly one knowledge graph. The Copilot, the RCA agent, the Compliance agent, and the Lessons Learned agent are four different queries and four different presentations over the *same* underlying data - never four separate pipelines that happen to share a name. If a feature seems to need its own private data store, that is a signal to reconsider the design, not a green light.
 2. **Never silently guess.** Any AI-generated classification, extraction, merge, or conclusion below a defined confidence threshold goes to a human review queue. It is never auto-committed to the graph as ground truth. This applies to entity resolution (Phase 2.2), compliance gap conclusions (Phase 5.2), and RCA drafts (Phase 4.3) alike.
 3. **Every answer is traceable.** No answer, score, or flag is presented to a user without a citation back to the specific source document and location it came from. An uncited claim is a defect, not a stylistic choice.
-4. **Field-first, not desktop-first-then-adapted.** Every user-facing feature is designed to work on a mobile viewport from the start (Phase 0.3), because Rajesh's context — gloves, poor signal, one hand occupied — is the hardest constraint, and a desktop-first design that is "made responsive" later routinely fails that constraint.
+4. **Field-first, not desktop-first-then-adapted.** Every user-facing feature is designed to work on a mobile viewport from the start (Phase 0.3), because Rajesh's context - gloves, poor signal, one hand occupied - is the hardest constraint, and a desktop-first design that is "made responsive" later routinely fails that constraint.
 5. **Walking skeleton before features.** Phase 0 exists to get a real, deployed, end-to-end system (empty of business logic) live before any feature work starts, so that the first real feature is built on a foundation that already works, not one that's theorized.
 6. **GCP-native, not cloud-agnostic.** Every architectural decision in this PRD assumes Google Cloud as the exclusive platform, per explicit product direction. Where a well-known cloud-agnostic pattern (e.g. a generic message queue) has a more tightly-integrated GCP-native equivalent (e.g. Pub/Sub + Eventarc), this PRD chooses the GCP-native option, because tighter integration reduces the engineering surface area a hackathon team has to build and debug.
 
@@ -125,7 +125,7 @@ flowchart TB
         GATEWAY["API Gateway"]
     end
 
-    subgraph SERVICES["Application Layer — Cloud Run Microservices"]
+    subgraph SERVICES["Application Layer - Cloud Run Microservices"]
         ING["Ingestion Service"]
         GRAPHSVC["Graph Service"]
         RAGSVC["RAG / Copilot Service"]
@@ -137,8 +137,8 @@ flowchart TB
     end
 
     subgraph AILAYER["Vertex AI (Gemini Enterprise Agent Platform)"]
-        DOCAI["Document AI — OCR / Layout Parser / Custom Extractor"]
-        MODELS["Gemini models — Pro / Flash / Flash-Lite"]
+        DOCAI["Document AI - OCR / Layout Parser / Custom Extractor"]
+        MODELS["Gemini models - Pro / Flash / Flash-Lite"]
         ADK["Agent Development Kit + managed Agent runtime"]
         RAGENGINE["RAG orchestration (Spanner-backed retrieval)"]
         VSEARCH["Vector Search (optional standalone index)"]
@@ -146,10 +146,10 @@ flowchart TB
     end
 
     subgraph DATALAYER["Data Layer"]
-        GCS["Cloud Storage — Raw Document Lake"]
-        SPANNER["Spanner Graph — Knowledge Graph + Vector + Full-Text Search"]
-        FIRESTORE["Firestore — App State / Session / Offline Sync"]
-        BQ["BigQuery — Analytics Warehouse"]
+        GCS["Cloud Storage - Raw Document Lake"]
+        SPANNER["Spanner Graph - Knowledge Graph + Vector + Full-Text Search"]
+        FIRESTORE["Firestore - App State / Session / Offline Sync"]
+        BQ["BigQuery - Analytics Warehouse"]
     end
 
     subgraph CROSSCUT["Cross-Cutting"]
@@ -198,7 +198,7 @@ flowchart TB
     LESSON -.-> MONITOR
 ```
 
-**Reading the diagram:** solid arrows are synchronous/primary data-flow calls; dotted arrows are secondary flows (analytics export, observability). Every Cloud Run service in the Application Layer ultimately reads from or writes to Spanner Graph — this is Guiding Principle 1 ("one substrate, many lenses") made literal in the architecture, not just asserted in prose.
+**Reading the diagram:** solid arrows are synchronous/primary data-flow calls; dotted arrows are secondary flows (analytics export, observability). Every Cloud Run service in the Application Layer ultimately reads from or writes to Spanner Graph - this is Guiding Principle 1 ("one substrate, many lenses") made literal in the architecture, not just asserted in prose.
 
 ### 7.2 RAG Query Sequence (Expert Knowledge Copilot)
 
@@ -229,7 +229,7 @@ sequenceDiagram
     App-->>User: Rendered answer with tappable source links
 ```
 
-Two Model Armor checkpoints matter here for different reasons. The **input** check exists because ingested documents (Phase 1) include third-party regulatory PDFs and vendor manuals UnifyOps does not control — a maliciously-crafted document could otherwise attempt an indirect prompt injection against the Copilot. The **output** check exists because generated responses may inadvertently surface personnel names or other sensitive fields pulled from work orders; Model Armor and Sensitive Data Protection catch this before it reaches the user (Section 12).
+Two Model Armor checkpoints matter here for different reasons. The **input** check exists because ingested documents (Phase 1) include third-party regulatory PDFs and vendor manuals UnifyOps does not control - a maliciously-crafted document could otherwise attempt an indirect prompt injection against the Copilot. The **output** check exists because generated responses may inadvertently surface personnel names or other sensitive fields pulled from work orders; Model Armor and Sensitive Data Protection catch this before it reaches the user (Section 12).
 
 ### 7.3 Phase Dependency Map
 
@@ -265,7 +265,7 @@ Blue = the mandatory hackathon spine. Green = the demo-breadth phases, each of w
 ### 7.4 Deployment Topology
 
 - **Primary region:** `asia-south1` (Mumbai), for data-residency alignment with Indian regulatory expectations and lowest latency to Indian plant sites.
-- **DR region:** `asia-south2` (Delhi) — a multi-region Spanner configuration and cross-region Cloud Storage replication are the Post-Hackathon Roadmap DR posture (Phase 9.5); the hackathon build runs single-region for cost and simplicity.
+- **DR region:** `asia-south2` (Delhi) - a multi-region Spanner configuration and cross-region Cloud Storage replication are the Post-Hackathon Roadmap DR posture (Phase 9.5); the hackathon build runs single-region for cost and simplicity.
 - **Environments:** `dev`, `staging`, `prod` as three separate GCP projects under one GCP Folder, promoted via Cloud Deploy delivery pipelines (Phase 0.2).
 - **Networking:** all Cloud Run services sit behind a Serverless VPC Access connector into a shared VPC; Spanner, Firestore, and Cloud Storage are reached over Private Google Access; VPC Service Controls define a security perimeter around the data layer (Phase 9.3).
 
@@ -294,16 +294,16 @@ Every layer of UnifyOps maps to a specific GCP service. Where two viable GCP opt
 | Multi-step pipeline orchestration | Cloud Workflows | Sequences the ingestion pipeline (classify → OCR → extract → embed → graph-populate) with retry/branching logic |
 | Background/batch jobs | Cloud Run jobs + Cloud Scheduler | Nightly re-indexing, compliance re-scans, digest emails, benchmark harness runs |
 
-### 8.3 AI / ML Layer — Vertex AI (Gemini Enterprise Agent Platform)
+### 8.3 AI / ML Layer - Vertex AI (Gemini Enterprise Agent Platform)
 
 | Component | GCP Service | Notes |
 |---|---|---|
 | Foundation models | Gemini Pro (complex reasoning: RCA synthesis, compliance mapping), Gemini Flash (high-volume: chat, classification), Gemini Flash-Lite (cheap/fast: routing, simple extraction) | Tiered model selection by task complexity is a deliberate cost control (Section 11.6) |
-| Document understanding | Document AI — Enterprise Document OCR, Form Parser, Layout Parser, Custom Extractor, Custom Classifier/Splitter | Layout Parser combines OCR with layout understanding for structure-aware, RAG-ready chunking (headings, tables, reading order preserved) |
+| Document understanding | Document AI - Enterprise Document OCR, Form Parser, Layout Parser, Custom Extractor, Custom Classifier/Splitter | Layout Parser combines OCR with layout understanding for structure-aware, RAG-ready chunking (headings, tables, reading order preserved) |
 | Embeddings | Vertex AI text embedding model, consistent 768-dim vectors | Used consistently across Spanner Graph's native vector index |
-| Vector search | Spanner Graph's native vector index (primary) — Vertex AI Vector Search as an optional standalone store if a second index is ever needed | Spanner Graph's built-in vector + full-text search covers the MVP without standing up a second vector store |
+| Vector search | Spanner Graph's native vector index (primary) - Vertex AI Vector Search as an optional standalone store if a second index is ever needed | Spanner Graph's built-in vector + full-text search covers the MVP without standing up a second vector store |
 | Managed RAG orchestration | Retrieval orchestrated directly against Spanner Graph from the RAG/Copilot Service, using Vertex AI's grounding and embedding APIs | Keeps retrieval tied directly to the graph corpus rather than a separate managed RAG product, for the tightest possible integration with Guiding Principle 1 |
-| Agent framework | Agent Development Kit (ADK) — open-source, code-first, deployed to a managed agent runtime | Used for the multi-agent logic in Phases 4–6 (RCA, Compliance, Lessons Learned agents) |
+| Agent framework | Agent Development Kit (ADK) - open-source, code-first, deployed to a managed agent runtime | Used for the multi-agent logic in Phases 4–6 (RCA, Compliance, Lessons Learned agents) |
 | Inter-agent communication | Agent-to-agent tool calling via ADK | Lets the Compliance agent call the Copilot's retrieval tool, the RCA agent call the Lessons Learned agent, etc., without tight coupling |
 | LLM firewall | Model Armor | Screens every prompt/response for injection attacks, jailbreaks, and sensitive-data leakage; sits in front of every LLM call (Sections 7.2, 12) |
 | Regional language support | Cloud Translation API | Hindi, Marathi, Tamil, Kannada, and other regional languages for field-facing surfaces (Phase 7.4) |
@@ -314,9 +314,9 @@ Every layer of UnifyOps maps to a specific GCP service. Where two viable GCP opt
 | Component | GCP Service | Notes |
 |---|---|---|
 | Raw document lake | Cloud Storage (regional, lifecycle rules to Nearline/Coldline for aged raw files) | Source of truth for original files; never mutated post-upload |
-| Knowledge graph + vector + full-text search | **Spanner Graph** (ISO GQL interface, unified with SQL, native vector and full-text search) | **Primary recommendation.** One database serves graph traversal, semantic search, and keyword search — directly eliminates the "separate feature store" problem that plagues most RAG stacks |
+| Knowledge graph + vector + full-text search | **Spanner Graph** (ISO GQL interface, unified with SQL, native vector and full-text search) | **Primary recommendation.** One database serves graph traversal, semantic search, and keyword search - directly eliminates the "separate feature store" problem that plagues most RAG stacks |
 | *Alternative to Spanner Graph* | AlloyDB for PostgreSQL with pgvector + a junction-table graph model | Lower cost of entry and SQL-familiar for teams less comfortable with GQL; models relationships as foreign keys instead of native graph traversal. Recommended fallback if Spanner Graph's pricing tier is a constraint during the hackathon |
-| Application/session state, offline sync | Firestore | Native offline persistence SDK is why Firestore — not Cloud SQL — backs the mobile PWA's sync layer (Phase 8.1) and session state (Phase 3.6) |
+| Application/session state, offline sync | Firestore | Native offline persistence SDK is why Firestore - not Cloud SQL - backs the mobile PWA's sync layer (Phase 8.1) and session state (Phase 3.6) |
 | Analytics warehouse | BigQuery | Usage analytics, KPI/judging-metric computation (Phase 10), cost/ops reporting |
 
 ### 8.5 Identity, Security & Governance
@@ -327,7 +327,7 @@ Every layer of UnifyOps maps to a specific GCP service. Where two viable GCP opt
 | Service-to-service identity | Cloud IAM with per-service service accounts, least-privilege roles | No shared "god" service account across microservices |
 | Network perimeter | VPC Service Controls around the data layer | Prevents data exfiltration even from a compromised service account (Phase 9.3) |
 | Encryption | Cloud KMS with customer-managed encryption keys (CMEK) on Cloud Storage, Spanner, Firestore | Section 12.3 |
-| Sensitive data discovery/redaction | Sensitive Data Protection (DLP) — built-in infoType detectors, redaction/masking/tokenisation | Scans ingested documents for PII before they are indexed (Phase 9.1) |
+| Sensitive data discovery/redaction | Sensitive Data Protection (DLP) - built-in infoType detectors, redaction/masking/tokenisation | Scans ingested documents for PII before they are indexed (Phase 9.1) |
 | AI-specific firewall | Model Armor | See Section 8.3 |
 | Secrets | Secret Manager | API keys, DB credentials, webhook secrets |
 | Audit trail | Cloud Audit Logs | Every read of a compliance-sensitive record and every AI-generated recommendation is logged with actor, timestamp, and reason (Section 12.4) |
@@ -348,12 +348,12 @@ Cross-checking against the problem statement's own "Suggested Technologies" list
 
 | Suggested technology | Covered by |
 |---|---|
-| RAG over heterogeneous industrial document corpora | Phase 3 — retrieval against Spanner Graph |
+| RAG over heterogeneous industrial document corpora | Phase 3 - retrieval against Spanner Graph |
 | Knowledge Graphs & industrial ontology engineering | Phase 2, Spanner Graph + Section 9 ontology |
 | Computer Vision (P&ID parsing, drawing digitisation) | Phase 1.4, Document AI Custom Extractor + Gemini multimodal understanding |
 | OCR & Document Intelligence | Phase 1.3, Document AI Enterprise OCR + Layout Parser |
 | QMS Integration | Phase 5 (compliance/quality mapping), Phase 4 (maintenance QMS signals) |
-| Agentic AI for maintenance and compliance workflows | Phases 4, 5, 6 — ADK-based agents |
+| Agentic AI for maintenance and compliance workflows | Phases 4, 5, 6 - ADK-based agents |
 
 ---
 
@@ -361,7 +361,7 @@ Cross-checking against the problem statement's own "Suggested Technologies" list
 
 ### 9.1 Design Approach
 
-UnifyOps's ontology is deliberately small and extensible rather than exhaustively modelled up front — entity resolution against a messy ontology is a bigger risk to hackathon timelines than an incomplete one. Phase 2 ships with the core entity types below; Phase 7 (Post-Hackathon Roadmap) revisits ontology extension as a self-service admin capability.
+UnifyOps's ontology is deliberately small and extensible rather than exhaustively modelled up front - entity resolution against a messy ontology is a bigger risk to hackathon timelines than an incomplete one. Phase 2 ships with the core entity types below; Phase 7 (Post-Hackathon Roadmap) revisits ontology extension as a self-service admin capability.
 
 ### 9.2 Core Entity Types
 
@@ -402,7 +402,7 @@ erDiagram
 
 ### 9.4 Representative GQL Query
 
-Illustrates why Spanner Graph's native GQL is well suited to this ontology — a single query answers "what work has been done on equipment governed by a specific SOP, and were any of those work orders linked to an incident?":
+Illustrates why Spanner Graph's native GQL is well suited to this ontology - a single query answers "what work has been done on equipment governed by a specific SOP, and were any of those work orders linked to an incident?":
 
 ```
 GRAPH IndustrialGraph
@@ -414,7 +414,7 @@ RETURN e.tag, w.wo_id, w.status, i.incident_id, i.severity
 
 ### 9.5 Entity Resolution Strategy
 
-The same physical pump is routinely tagged inconsistently across systems ("P-204", "Pump-204", "P204-A"). Phase 2.2 handles this with a three-tier approach: (1) deterministic normalisation (case, punctuation, known abbreviation expansion), (2) fuzzy/embedding-similarity matching with a confidence threshold, and (3) a human review queue for anything below that threshold — never a silent auto-merge on a low-confidence match, per Guiding Principle 2.
+The same physical pump is routinely tagged inconsistently across systems ("P-204", "Pump-204", "P204-A"). Phase 2.2 handles this with a three-tier approach: (1) deterministic normalisation (case, punctuation, known abbreviation expansion), (2) fuzzy/embedding-similarity matching with a confidence threshold, and (3) a human review queue for anything below that threshold - never a silent auto-merge on a low-confidence match, per Guiding Principle 2.
 
 ---
 
@@ -424,7 +424,7 @@ The same physical pump is routinely tagged inconsistently across systems ("P-204
 
 | Phase | Name | Priority Tier | Primary Persona(s) | Key Question It Answers |
 |---|---|---|---|---|
-| 0 | Foundation, GCP Landing Zone & Platform Bootstrap | **MVP — build first** | Deepak | "Is there a live, secure, deployable system to build on?" |
+| 0 | Foundation, GCP Landing Zone & Platform Bootstrap | **MVP - build first** | Deepak | "Is there a live, secure, deployable system to build on?" |
 | 1 | Universal Document Ingestion & Processing Pipeline | **MVP** | Deepak, all personas indirectly | "Can every document type get in, cleanly?" |
 | 2 | Industrial Knowledge Graph & Ontology Engine | **MVP** | Deepak, Priya | "Are the documents connected to the equipment, people, and rules they relate to?" |
 | 3 | Semantic Search & Expert Knowledge Copilot (RAG) | **MVP** | Rajesh, Priya | "Can anyone ask a question in plain language and get a trustworthy, cited answer?" |
@@ -434,30 +434,30 @@ The same physical pump is routinely tagged inconsistently across systems ("P-204
 | 7 | Knowledge Retention, Notifications & Analytics | Post-Hackathon Roadmap | Vikram, Mr. Iyer | "Are we capturing what's about to walk out the door, and does leadership see the whole picture?" |
 | 8 | Mobile, Offline & Multi-Modal Field Experience | Post-Hackathon Roadmap | Rajesh | "Does it still work when the technician has no signal and gloves on?" |
 | 9 | Security, Governance & Platform Hardening | Post-Hackathon Roadmap (three items pulled forward to MVP) | Deepak | "Is this safe to put real plant data into?" |
-| 10 | Evaluation, Benchmarking & Hackathon Deliverables | **MVP — final block** | All (for judging) | "Can we prove, with numbers, that this works?" |
+| 10 | Evaluation, Benchmarking & Hackathon Deliverables | **MVP - final block** | All (for judging) | "Can we prove, with numbers, that this works?" |
 
 ### 10.2 How to Read Each Phase
 
 Every feature below follows the same template:
 
-- **Description** — what it is and why it exists.
-- **Key Capabilities** — the concrete things a user or downstream system can do because this feature exists.
-- **Functional Requirements** — numbered, testable statements (`FR-<phase>.<feature>.<n>`).
-- **GCP Implementation** — the exact services and how they're wired together.
-- **Acceptance Criteria** — the bar for "done," phrased as Given/When/Then.
-- **Dependencies** — what must exist first.
+- **Description** - what it is and why it exists.
+- **Key Capabilities** - the concrete things a user or downstream system can do because this feature exists.
+- **Functional Requirements** - numbered, testable statements (`FR-<phase>.<feature>.<n>`).
+- **GCP Implementation** - the exact services and how they're wired together.
+- **Acceptance Criteria** - the bar for "done," phrased as Given/When/Then.
+- **Dependencies** - what must exist first.
 
 Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Post-Hackathon Roadmap]**, as defined in Section 5.3.
 
 ---
 
-## Phase 0 — Foundation, GCP Landing Zone & Platform Bootstrap
+## Phase 0 - Foundation, GCP Landing Zone & Platform Bootstrap
 
-**Goal of this phase:** by the end of Phase 0 there is a live URL, a working login, a backend health-check round trip, and a CI/CD pipeline that deploys on every push — with no business logic built yet. This is the "walking skeleton" from Guiding Principle 5.
+**Goal of this phase:** by the end of Phase 0 there is a live URL, a working login, a backend health-check round trip, and a CI/CD pipeline that deploys on every push - with no business logic built yet. This is the "walking skeleton" from Guiding Principle 5.
 
 ### 0.1 GCP Landing Zone, Project Structure & IAM Foundation **[MVP]**
 
-**Description:** Establishes the GCP organisational structure — projects, folders, billing, and baseline IAM — that every later phase builds inside.
+**Description:** Establishes the GCP organisational structure - projects, folders, billing, and baseline IAM - that every later phase builds inside.
 
 **Key Capabilities:** separate `UnifyOps-dev` / `UnifyOps-staging` / `UnifyOps-prod` projects under a shared folder; baseline IAM groups mapped to predefined roles rather than per-person grants; a billing budget configured before any AI API is called.
 
@@ -473,11 +473,11 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 - ✅ Given a fresh GCP Organisation, when `terraform apply` runs against the landing-zone module, then all three projects, their IAM bindings, and enabled APIs exist with no manual console steps.
 - ✅ Given the billing budget is configured, when spend crosses 50%, then the designated alert channel receives notice within 15 minutes.
 
-**Dependencies:** None — first thing built.
+**Dependencies:** None - first thing built.
 
 ### 0.2 Infrastructure as Code & CI/CD Pipeline **[MVP]**
 
-**Description:** Every GCP resource is defined in Terraform and deployed through Cloud Build — no console-clicked infrastructure once this phase is complete.
+**Description:** Every GCP resource is defined in Terraform and deployed through Cloud Build - no console-clicked infrastructure once this phase is complete.
 
 **Key Capabilities:** a monorepo (`/services/*`, `/infra/terraform/*`, `/web`) with per-service Dockerfiles; push-to-deploy to `staging`; manual-approval promotion to `prod`; PR builds run tests/build without deploying.
 
@@ -485,7 +485,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 1. FR-0.2.1: A Cloud Build trigger exists per service, path-filtered to that service's directory.
 2. FR-0.2.2: Every container image is tagged with the Git commit SHA and pushed to Artifact Registry before deployment.
 3. FR-0.2.3: Cloud Deploy defines a `dev → staging → prod` pipeline with a manual approval gate before `prod`.
-4. FR-0.2.4: Terraform state is stored remotely (GCS backend, versioned) — never local.
+4. FR-0.2.4: Terraform state is stored remotely (GCS backend, versioned) - never local.
 
 **GCP Implementation:** Cloud Build, Artifact Registry, Cloud Deploy, GCS (Terraform state backend), Git host of choice.
 
@@ -497,7 +497,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 0.3 Base Frontend Application Shell **[MVP]**
 
-**Description:** The first deployed, visible artifact of UnifyOps — a responsive app shell with routing, a design-system baseline, and a login screen, live at a real URL before any feature logic exists.
+**Description:** The first deployed, visible artifact of UnifyOps - a responsive app shell with routing, a design-system baseline, and a login screen, live at a real URL before any feature logic exists.
 
 **Key Capabilities:** responsive shell (mobile + desktop breakpoints from day one, per Guiding Principle 4); authenticated/unauthenticated route groups; a persistent nav scaffold with placeholders for every future module.
 
@@ -509,7 +509,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 **GCP Implementation:** Cloud Run/Firebase Hosting, Cloud CDN, Identity Platform (wired fully in 0.4/0.6).
 
 **Acceptance Criteria:**
-- ✅ Given the deployed URL, when any person visits it, then they see a real, branded, responsive shell — not a framework starter page.
+- ✅ Given the deployed URL, when any person visits it, then they see a real, branded, responsive shell - not a framework starter page.
 
 **Dependencies:** 0.2.
 
@@ -568,13 +568,13 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ---
 
-## Phase 1 — Universal Document Ingestion & Processing Pipeline
+## Phase 1 - Universal Document Ingestion & Processing Pipeline
 
 **Goal of this phase:** every document type named in the problem statement can be dropped into UnifyOps and comes out the other side classified, text-extracted, entity-tagged, and chunk-ready. This delivers the ingestion half of Pillar 1.
 
 ### 1.1 Multi-Format Document Upload Interface **[MVP]**
 
-**Description:** The entry point for all content — drag-and-drop web upload, bulk folder/zip upload for initial migration, and an API endpoint for future system-to-system integration.
+**Description:** The entry point for all content - drag-and-drop web upload, bulk folder/zip upload for initial migration, and an API endpoint for future system-to-system integration.
 
 **Key Capabilities:** drag-and-drop single/multi-file upload with progress indicators; bulk zip/folder upload; optional upload-time metadata hints (plant, unit, doc-type).
 
@@ -582,7 +582,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 1. FR-1.1.1: The upload UI accepts PDF, DOCX, XLSX, CSV, PNG, JPEG, TIFF, and common CAD-exchange formats (e.g. DWG/DXF-exported PDF) up to 200MB per file.
 2. FR-1.1.2: A bulk zip upload is unpacked server-side and each contained file is queued individually.
 3. FR-1.1.3: Every upload is written to Cloud Storage before any processing begins, so the original file is never lost even if downstream processing fails.
-4. FR-1.1.4: Upload triggers an Eventarc event that starts the Cloud Workflows ingestion pipeline asynchronously — the uploader is never blocked waiting for OCR/extraction to complete.
+4. FR-1.1.4: Upload triggers an Eventarc event that starts the Cloud Workflows ingestion pipeline asynchronously - the uploader is never blocked waiting for OCR/extraction to complete.
 
 **GCP Implementation:** Frontend upload component → signed Cloud Storage URL → direct browser-to-GCS upload → Eventarc trigger on object finalisation.
 
@@ -612,7 +612,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 1.3 OCR & Text Extraction Pipeline **[MVP]**
 
-**Description:** Converts every page — typed, scanned, or handwritten — into machine-readable, structure-aware text, using Document AI's Layout Parser rather than flat OCR, because flat OCR destroys the heading/table/list structure both RAG quality and human readability depend on.
+**Description:** Converts every page - typed, scanned, or handwritten - into machine-readable, structure-aware text, using Document AI's Layout Parser rather than flat OCR, because flat OCR destroys the heading/table/list structure both RAG quality and human readability depend on.
 
 **Key Capabilities:** full-text extraction preserving structure; table detection/extraction; multi-language support for mixed English/regional-language documents; image-quality scoring for degraded scans.
 
@@ -631,7 +631,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 1.4 Engineering Drawing & P&ID Digitisation **[MVP: basic tag extraction · Demo Extension: topology graph]**
 
-**Description:** P&IDs are the hardest, most valuable document type to digitise — dense with equipment tags and instrument symbols standard OCR can't interpret, but exactly what the knowledge graph needs to link a drawing to the physical equipment it describes.
+**Description:** P&IDs are the hardest, most valuable document type to digitise - dense with equipment tags and instrument symbols standard OCR can't interpret, but exactly what the knowledge graph needs to link a drawing to the physical equipment it describes.
 
 **Key Capabilities:** equipment tag extraction from title blocks and inline callouts; symbol recognition via a fine-tuned Custom Extractor; **[Demo Extension]** line/connectivity tracing into a simplified topology graph.
 
@@ -649,7 +649,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 1.5 Metadata & Entity Extraction Engine **[MVP]**
 
-**Description:** Runs across every document type to pull the structured entities that populate the knowledge graph — this is the feature Objective O2's F1 target is measured against.
+**Description:** Runs across every document type to pull the structured entities that populate the knowledge graph - this is the feature Objective O2's F1 target is measured against.
 
 **Key Capabilities:** ontology-tuned named-entity extraction; cross-reference detection between documents; confidence-scored output feeding the human review queue.
 
@@ -668,7 +668,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 1.6 Document Chunking & RAG Preprocessing **[MVP]**
 
-**Description:** Splits processed documents into retrieval-ready chunks that preserve structural context, and generates embeddings — the direct input to Phase 3's retrieval layer.
+**Description:** Splits processed documents into retrieval-ready chunks that preserve structural context, and generates embeddings - the direct input to Phase 3's retrieval layer.
 
 **Key Capabilities:** structure-aware chunking rather than naive fixed-length splitting; per-chunk embeddings written to Spanner Graph; chunk-to-document-to-entity linkage preserved for citations.
 
@@ -699,15 +699,15 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 **Acceptance Criteria:**
 - ✅ Given 100 documents mid-pipeline, when the dashboard is viewed, then every document's current stage is visible without inspecting logs.
-- ✅ Given a flagged low-confidence equipment tag, when a reviewer corrects it, then the corrected value — not the original guess — is what the graph and Copilot use.
+- ✅ Given a flagged low-confidence equipment tag, when a reviewer corrects it, then the corrected value - not the original guess - is what the graph and Copilot use.
 
 **Dependencies:** 1.2, 1.3, 1.5.
 
 ---
 
-## Phase 2 — Industrial Knowledge Graph & Ontology Engine
+## Phase 2 - Industrial Knowledge Graph & Ontology Engine
 
-**Goal of this phase:** entities extracted in Phase 1 stop being isolated per-document facts and become one connected, continuously-updating graph — Guiding Principle 1 made real. By the end of this phase, "show me everything connected to Pump P-204" returns a real, multi-hop answer.
+**Goal of this phase:** entities extracted in Phase 1 stop being isolated per-document facts and become one connected, continuously-updating graph - Guiding Principle 1 made real. By the end of this phase, "show me everything connected to Pump P-204" returns a real, multi-hop answer.
 
 ### 2.1 Knowledge Graph Schema & Property Graph Provisioning **[MVP]**
 
@@ -718,7 +718,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 **Functional Requirements:**
 1. FR-2.1.1: A `CREATE OR REPLACE PROPERTY GRAPH IndustrialGraph` statement defines all core node types and relationships from Section 9.3, applied via a versioned migration script.
 2. FR-2.1.2: A vector index (on chunk embeddings) and a full-text search index (on chunk text and key entity fields) are created in the same migration.
-3. FR-2.1.3: Schema changes go through the same PR-review/CI process as application code — no direct schema edits against staging/prod.
+3. FR-2.1.3: Schema changes go through the same PR-review/CI process as application code - no direct schema edits against staging/prod.
 
 **GCP Implementation:** Spanner Graph, GQL/DDL migration scripts run via a Cloud Build step, Terraform for the underlying Spanner instance.
 
@@ -729,7 +729,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 2.2 Entity Resolution & Deduplication Engine **[MVP]**
 
-**Description:** The same physical pump gets tagged inconsistently across source systems. This engine stops UnifyOps's graph from becoming three disconnected nodes for one real piece of equipment — the single highest-leverage feature in the ontology layer, since every downstream agent depends on equipment history being attached to one node, not three.
+**Description:** The same physical pump gets tagged inconsistently across source systems. This engine stops UnifyOps's graph from becoming three disconnected nodes for one real piece of equipment - the single highest-leverage feature in the ontology layer, since every downstream agent depends on equipment history being attached to one node, not three.
 
 **Key Capabilities:** deterministic normalisation; embedding-similarity fuzzy matching scoped within the same plant to avoid false cross-plant merges; confidence-scored merge decisions, never a silent auto-merge on an uncertain match.
 
@@ -754,9 +754,9 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 **Key Capabilities:** direct relationship creation from explicit extraction output; inferred relationship creation from shared context; idempotent population.
 
 **Functional Requirements:**
-1. FR-2.3.1: For every entity extracted in 1.5, the corresponding graph edge is created or confirmed within the same ingestion pipeline run — graph population is a pipeline stage, not a manual step.
+1. FR-2.3.1: For every entity extracted in 1.5, the corresponding graph edge is created or confirmed within the same ingestion pipeline run - graph population is a pipeline stage, not a manual step.
 2. FR-2.3.2: Inferred `SIMILAR_TO` edges between incidents are proposed based on shared equipment + overlapping failure-mode keywords, with a confidence score, subject to the same review discipline as 2.2.
-3. FR-2.3.3: Edge creation is idempotent — reprocessing a document updates existing edges rather than creating duplicates, keyed on `(source_node, edge_type, target_node)`.
+3. FR-2.3.3: Edge creation is idempotent - reprocessing a document updates existing edges rather than creating duplicates, keyed on `(source_node, edge_type, target_node)`.
 4. FR-2.3.4: When a newer document version supersedes an older one (2.6), edges sourced from the superseded version are marked `superseded`, not deleted.
 
 **GCP Implementation:** Graph Service, invoked as the final Cloud Workflows stage after Phase 1.6, writing directly to Spanner Graph.
@@ -769,7 +769,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 2.4 Knowledge Graph Explorer & Visual Browser **[MVP]**
 
-**Description:** Lets Deepak and Priya see the graph directly — sanity-checking ingestion output and manually exploring equipment history, often faster than a natural-language query when you already know the node you want.
+**Description:** Lets Deepak and Priya see the graph directly - sanity-checking ingestion output and manually exploring equipment history, often faster than a natural-language query when you already know the node you want.
 
 **Key Capabilities:** search-and-focus by equipment tag/document name; expand-on-click multi-hop traversal; a side panel with the full property set and source-document links.
 
@@ -807,7 +807,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 2.6 Incremental Graph Update, Versioning & Document Supersession **[MVP]**
 
-**Description:** Directly implements the problem statement's requirement that the graph "maintains relationships across document types and updates automatically as new records arrive" — including the common case where a revised SOP or drawing must replace an older version without breaking every link pointing at it.
+**Description:** Directly implements the problem statement's requirement that the graph "maintains relationships across document types and updates automatically as new records arrive" - including the common case where a revised SOP or drawing must replace an older version without breaking every link pointing at it.
 
 **Key Capabilities:** live automatic graph updates on new documents; explicit supersession handling via a `SUPERSEDES` edge; full version history retained, nothing hard-deleted.
 
@@ -826,13 +826,13 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ---
 
-## Phase 3 — Semantic Search & Expert Knowledge Copilot (RAG)
+## Phase 3 - Semantic Search & Expert Knowledge Copilot (RAG)
 
 **Goal of this phase:** the knowledge graph becomes directly queryable in plain language by every persona, with every answer cited. This phase delivers the "Expert Knowledge Copilot" pillar in full and is measured most directly by Objectives O1 and O3.
 
 ### 3.1 Conversational Copilot Interface (Web + Mobile) **[MVP]**
 
-**Description:** The primary user-facing surface — a chat-style interface, available on desktop and mobile, where any persona types or speaks a question and gets an answer with clickable source links.
+**Description:** The primary user-facing surface - a chat-style interface, available on desktop and mobile, where any persona types or speaks a question and gets an answer with clickable source links.
 
 **Key Capabilities:** streaming token-by-token response rendering; tappable citation chips opening the exact source page/section; role-aware starter prompts.
 
@@ -851,7 +851,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 3.2 Hybrid Retrieval Engine (GraphRAG) **[MVP]**
 
-**Description:** The retrieval core — combines vector search, full-text search, and graph traversal in one retrieval pass, since pure vector similarity misses relationship context and pure graph traversal misses semantic phrasing.
+**Description:** The retrieval core - combines vector search, full-text search, and graph traversal in one retrieval pass, since pure vector similarity misses relationship context and pure graph traversal misses semantic phrasing.
 
 **Key Capabilities:** query understanding that parses entity mentions before retrieval, so "Why did P-204 trip?" retrieves from P-204's neighbourhood, not just semantically similar text anywhere; hybrid ranking; configurable retrieval depth.
 
@@ -871,13 +871,13 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 3.3 Citation & Source Attribution Engine **[MVP]**
 
-**Description:** Structurally enforces Guiding Principle 3 — citations are a byproduct of which chunks were actually used, not requested as an afterthought in the generation prompt, which is a meaningfully weaker guarantee.
+**Description:** Structurally enforces Guiding Principle 3 - citations are a byproduct of which chunks were actually used, not requested as an afterthought in the generation prompt, which is a meaningfully weaker guarantee.
 
 **Key Capabilities:** every answer is post-processed to map each claim to its supporting chunk(s); citations resolve to document, page/section, and a deep link; claims with no supporting chunk are flagged, not presented with equal confidence.
 
 **Functional Requirements:**
 1. FR-3.3.1: Generation receives retrieved chunks with explicit source IDs, and the model is constrained via structured output to tag each claim with the source chunk ID(s) it drew from.
-2. FR-3.3.2: A post-generation validation step confirms every citation tag corresponds to an actually-retrieved chunk ID — a hallucinated citation is rejected and the response regenerated or the unsupported sentence removed.
+2. FR-3.3.2: A post-generation validation step confirms every citation tag corresponds to an actually-retrieved chunk ID - a hallucinated citation is rejected and the response regenerated or the unsupported sentence removed.
 3. FR-3.3.3: Every displayed citation resolves to `document name + page/section + deep link`, never a generic corpus-level reference.
 4. FR-3.3.4: Any answer portion that cannot be tied to a retrieved source with sufficient confidence is visually distinguished ("based on general knowledge, not found in your documents").
 
@@ -896,7 +896,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 **Functional Requirements:**
 1. FR-3.4.1: A confidence score (0–100) is computed per answer from retrieval-similarity strength and citation coverage ratio, displayed alongside the answer.
-2. FR-3.4.2: Answers below a defined threshold are visually flagged (e.g. an amber banner: "Limited supporting documentation found — verify with a supervisor").
+2. FR-3.4.2: Answers below a defined threshold are visually flagged (e.g. an amber banner: "Limited supporting documentation found - verify with a supervisor").
 3. FR-3.4.3: A thumbs up/down control is attached to every answer; feedback is persisted with the query, answer, and citations.
 
 **GCP Implementation:** Confidence computation in the RAG/Copilot Service; feedback persisted to Firestore, mirrored nightly to BigQuery for Phase 10/Phase 7.3.
@@ -913,7 +913,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 **Key Capabilities:** document-level and plant-level access scoping enforced at the retrieval layer, never after the fact; role-aware answer framing.
 
 **Functional Requirements:**
-1. FR-3.5.1: Every retrieval query is scoped server-side by the requesting user's `role`, `plant_id`, and `department` claims before candidate chunks are ranked — access control is in the retrieval query itself, not filtered from results afterward.
+1. FR-3.5.1: Every retrieval query is scoped server-side by the requesting user's `role`, `plant_id`, and `department` claims before candidate chunks are ranked - access control is in the retrieval query itself, not filtered from results afterward.
 2. FR-3.5.2: A user querying about a document outside their access scope receives a clear "not accessible" response rather than a silent omission, unless omission is itself a security requirement for that document's classification.
 3. FR-3.5.3: Access-scope enforcement is covered by an automated test suite exercising each role against a fixture graph with documents at every classification level.
 
@@ -962,9 +962,9 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ---
 
-## Phase 4 — Maintenance Intelligence & RCA Agent
+## Phase 4 - Maintenance Intelligence & RCA Agent
 
-**Goal of this phase:** prove the same knowledge graph and retrieval substrate can power a structurally different use case — an agent that reasons across failure history rather than answering a single lookup — without rebuilding ingestion or retrieval from scratch.
+**Goal of this phase:** prove the same knowledge graph and retrieval substrate can power a structurally different use case - an agent that reasons across failure history rather than answering a single lookup - without rebuilding ingestion or retrieval from scratch.
 
 ### 4.1 Work Order & Maintenance History Enrichment **[MVP]**
 
@@ -986,15 +986,15 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 4.2 Predictive Maintenance Signal Engine **[MVP]**
 
-**Description:** Surfaces equipment statistically due for attention based on documented history — recurrence intervals, time-since-last-service, failure-mode clustering — without live sensor/SCADA integration, which is explicitly out of scope (Section 5.2).
+**Description:** Surfaces equipment statistically due for attention based on documented history - recurrence intervals, time-since-last-service, failure-mode clustering - without live sensor/SCADA integration, which is explicitly out of scope (Section 5.2).
 
 **Key Capabilities:** a per-equipment "attention score" from documented history; a ranked "needs attention" list with the specific evidence behind each ranking.
 
 **Functional Requirements:**
 1. FR-4.2.1: For every `Equipment` node with at least 2 historical maintenance events, an attention score is computed from documented recurrence interval, time-since-last-service, and incident severity history.
-2. FR-4.2.2: The score is always returned with the specific evidence behind it (e.g. "3 bearing failures in 14 months, average interval 4.6 months, 5.2 months since last service") — a bare number with no explanation is treated as a defect, per Guiding Principle 3.
+2. FR-4.2.2: The score is always returned with the specific evidence behind it (e.g. "3 bearing failures in 14 months, average interval 4.6 months, 5.2 months since last service") - a bare number with no explanation is treated as a defect, per Guiding Principle 3.
 3. FR-4.2.3: A ranked "equipment needing attention" view is available to Priya, filterable by plant/unit.
-4. FR-4.2.4: The scoring model is clearly documented as based on documented historical patterns, not live telemetry, in both the UI and this PRD — avoiding overclaiming.
+4. FR-4.2.4: The scoring model is clearly documented as based on documented historical patterns, not live telemetry, in both the UI and this PRD - avoiding overclaiming.
 
 **GCP Implementation:** Maintenance and RCA Service, scoring run as a scheduled Cloud Run job (Cloud Scheduler) over Spanner Graph data, Gemini Pro for synthesising the evidence explanation.
 
@@ -1005,14 +1005,14 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 4.3 Root Cause Analysis (RCA) Agent **[MVP]**
 
-**Description:** The signature agentic feature of this phase — given a failure event, the agent pulls together work-order history, OEM manual guidance, similar prior incidents (via 2.3's `SIMILAR_TO` edges), and inspection findings, and produces a structured, cited RCA draft, rather than a blank page.
+**Description:** The signature agentic feature of this phase - given a failure event, the agent pulls together work-order history, OEM manual guidance, similar prior incidents (via 2.3's `SIMILAR_TO` edges), and inspection findings, and produces a structured, cited RCA draft, rather than a blank page.
 
 **Key Capabilities:** an ADK agent retrieving and synthesising equipment history, OEM guidance, and similar historical incidents; structured 5-Whys-style output, every factor cited; explicitly framed as a draft for human review, never presented as final.
 
 **Functional Requirements:**
 1. FR-4.3.1: Given an equipment tag and short failure description, the agent retrieves that equipment's timeline (4.1), any `SIMILAR_TO`-linked prior incidents (2.3), and relevant OEM manual sections (via Phase 3's retrieval engine).
 2. FR-4.3.2: The agent produces a structured draft RCA with distinct sections for immediate cause, contributing factors, and recommended corrective actions, each factor citing its source per the 3.3 citation discipline.
-3. FR-4.3.3: The draft is explicitly labelled "AI-assisted draft — requires engineer review and sign-off" and cannot be exported/filed as final without a human-recorded approval step.
+3. FR-4.3.3: The draft is explicitly labelled "AI-assisted draft - requires engineer review and sign-off" and cannot be exported/filed as final without a human-recorded approval step.
 4. FR-4.3.4: Priya can edit any section before approval; the final approved version and the original AI draft are both retained for audit.
 
 **GCP Implementation:** ADK agent deployed to a managed agent runtime, using Phase 3.2 retrieval as a tool and the Maintenance and RCA Service for equipment-timeline tool calls; Gemini Pro for multi-source synthesis.
@@ -1043,7 +1043,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 4.5 Failure Pattern Library & Cross-Equipment Learning **[Demo Extension]**
 
-**Description:** Generalises individual RCA findings into a reusable pattern library, so a recurring failure mode across different equipment is recognised as a known pattern rather than re-derived from scratch — and hands off directly into Phase 6's Lessons Learned engine.
+**Description:** Generalises individual RCA findings into a reusable pattern library, so a recurring failure mode across different equipment is recognised as a known pattern rather than re-derived from scratch - and hands off directly into Phase 6's Lessons Learned engine.
 
 **Key Capabilities:** approved RCA conclusions distilled into a reusable `FailurePattern` record; new RCA drafts check the library first and surface a matching pattern as a starting hypothesis.
 
@@ -1061,13 +1061,13 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ---
 
-## Phase 5 — Quality & Regulatory Compliance Intelligence
+## Phase 5 - Quality & Regulatory Compliance Intelligence
 
-**Goal of this phase:** the second demo-breadth pillar — mapping regulatory obligations against what the plant's own documents say it actually does, surfacing the gap before an external auditor does. Like Phase 4, this adds no new ingestion or retrieval infrastructure; it is a new lens over the existing graph (Guiding Principle 1).
+**Goal of this phase:** the second demo-breadth pillar - mapping regulatory obligations against what the plant's own documents say it actually does, surfacing the gap before an external auditor does. Like Phase 4, this adds no new ingestion or retrieval infrastructure; it is a new lens over the existing graph (Guiding Principle 1).
 
 ### 5.1 Regulatory Corpus Ingestion & Clause-Level Mapping **[MVP]**
 
-**Description:** Regulatory text needs to be broken down to individually addressable clauses — not ingested as an undifferentiated PDF — so each clause can be individually mapped against the plant's procedures and equipment state.
+**Description:** Regulatory text needs to be broken down to individually addressable clauses - not ingested as an undifferentiated PDF - so each clause can be individually mapped against the plant's procedures and equipment state.
 
 **Key Capabilities:** a curated, representative regulatory corpus (Section 5.2) ingested through the Phase 1 pipeline plus a clause-segmentation step; each `RegulatoryClause` node carries source, clause number, and plain-language summary alongside legal text; clauses linked to `Procedure`/`Equipment` nodes by explicit reference or Gemini-assisted topical matching, confidence-scored per Guiding Principle 2.
 
@@ -1086,7 +1086,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 5.2 Compliance Gap Detection Agent **[MVP]**
 
-**Description:** The core agentic capability of this phase — for each mapped clause, checks whether current procedures and equipment records actually satisfy it, flagging a gap with specific, cited evidence when they don't. Targets Objective O5 directly.
+**Description:** The core agentic capability of this phase - for each mapped clause, checks whether current procedures and equipment records actually satisfy it, flagging a gap with specific, cited evidence when they don't. Targets Objective O5 directly.
 
 **Key Capabilities:** automated clause-by-clause checking (does a governing procedure exist? is it current? do recent inspections show conformance?); every flagged gap includes clause text, specific evidence, and a severity rating; re-runs automatically on any linked procedure/clause change.
 
@@ -1094,7 +1094,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 1. FR-5.2.1: For every `RegulatoryClause` linked to at least one `Equipment`/`Procedure`, the agent evaluates three checks: (a) a governing procedure exists, (b) it is not stale (no update within a configurable review window), (c) linked inspection records within the same window show no unresolved non-conformance.
 2. FR-5.2.2: A failed check produces a `ComplianceGap` record with the specific clause, failed check, supporting/absent evidence, and a severity rating derived from the clause's own risk classification where extractable.
 3. FR-5.2.3: The agent runs both on a nightly schedule and immediately on any relevant procedure/inspection update (via 2.6), so gaps surface as soon as they're introduced.
-4. FR-5.2.4: Every `ComplianceGap` is reviewable by Anita, who can mark it resolved (with a note) or escalate it — the agent flags gaps, it does not unilaterally close them.
+4. FR-5.2.4: Every `ComplianceGap` is reviewable by Anita, who can mark it resolved (with a note) or escalate it - the agent flags gaps, it does not unilaterally close them.
 
 **GCP Implementation:** ADK agent using Phase 3.2 retrieval and Spanner Graph as tools; Gemini Pro for the compliance-check reasoning given the need for conservative judgment; triggered via Cloud Scheduler (nightly) and Eventarc (on-change).
 
@@ -1106,7 +1106,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 5.3 Audit Evidence Package Generator **[MVP]**
 
-**Description:** Converts the graph's own documented evidence into the format an external auditor actually wants — a structured, citation-backed package per clause or audit scope — turning what would otherwise be days of manual document-gathering into a generated starting draft.
+**Description:** Converts the graph's own documented evidence into the format an external auditor actually wants - a structured, citation-backed package per clause or audit scope - turning what would otherwise be days of manual document-gathering into a generated starting draft.
 
 **Key Capabilities:** given a clause or clause group, assembles clause text, governing procedure, supporting inspection records, and open gap status, each with full citations; exportable to a shareable document.
 
@@ -1125,7 +1125,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 5.4 Compliance Dashboard & Deviation Tracking **[Demo Extension]**
 
-**Description:** Gives Anita and Mr. Iyer a standing view of compliance posture — not just a list of gaps, but a trend answering "are we getting better or worse."
+**Description:** Gives Anita and Mr. Iyer a standing view of compliance posture - not just a list of gaps, but a trend answering "are we getting better or worse."
 
 **Key Capabilities:** a compliance-by-category heatmap (by regulatory source, plant unit) showing open gap count/severity; a 90-day trend chart.
 
@@ -1143,9 +1143,9 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ---
 
-## Phase 6 — Lessons Learned & Failure Intelligence Engine
+## Phase 6 - Lessons Learned & Failure Intelligence Engine
 
-**Goal of this phase:** the third demo-breadth pillar — finding the systemic pattern across many individual incident reports that no single review would catch, and pushing it to the people who need to know before the condition recurs. This is the phase most directly aimed at the failure mode described in the problem statement's own context (a warning signal that existed but was never connected to a decision).
+**Goal of this phase:** the third demo-breadth pillar - finding the systemic pattern across many individual incident reports that no single review would catch, and pushing it to the people who need to know before the condition recurs. This is the phase most directly aimed at the failure mode described in the problem statement's own context (a warning signal that existed but was never connected to a decision).
 
 ### 6.1 Incident & Near-Miss Ingestion Enrichment **[MVP]**
 
@@ -1167,7 +1167,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 6.2 Cross-Incident Pattern Detection Agent **[MVP]**
 
-**Description:** The core intelligence of this phase — analyses the enriched incident corpus plus audit findings and non-conformances to surface recurring patterns invisible to any single incident review, directly implementing the problem statement's "systemic patterns invisible to any individual review" requirement.
+**Description:** The core intelligence of this phase - analyses the enriched incident corpus plus audit findings and non-conformances to surface recurring patterns invisible to any single incident review, directly implementing the problem statement's "systemic patterns invisible to any individual review" requirement.
 
 **Key Capabilities:** clustering by shared contributing conditions, equipment type, or location; each pattern presented with its full supporting incident set and cited evidence, never an unexplained alert; cross-checked against the Phase 4.5 failure pattern library.
 
@@ -1175,7 +1175,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 1. FR-6.2.1: On a scheduled and on-demand basis, the agent clusters `Incident` nodes by shared `contributing_conditions[]`, equipment type, and location using embedding similarity plus explicit shared-property matching.
 2. FR-6.2.2: A cluster of 3+ incidents sharing a meaningful common factor is surfaced as a candidate `LessonPattern`, with every contributing incident cited and the shared factor explicitly stated.
 3. FR-6.2.3: Candidate patterns are cross-referenced against existing `FailurePattern` records and linked where they share root evidence, connecting the safety and maintenance intelligence lenses over the same underlying data.
-4. FR-6.2.4: A domain reviewer (Anita or Priya) confirms or dismisses each candidate before it is promoted to an active, notification-triggering `LessonPattern` — per Guiding Principle 2, the agent surfaces candidates, a human confirms systemic conclusions.
+4. FR-6.2.4: A domain reviewer (Anita or Priya) confirms or dismisses each candidate before it is promoted to an active, notification-triggering `LessonPattern` - per Guiding Principle 2, the agent surfaces candidates, a human confirms systemic conclusions.
 
 **GCP Implementation:** ADK agent deployed to the managed agent runtime, embedding similarity via Spanner Graph's native vector index, Gemini Pro for synthesising the shared-factor explanation across a multi-incident cluster.
 
@@ -1186,7 +1186,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 6.3 Proactive Warning & Notification Push **[MVP]**
 
-**Description:** Directly implements the problem statement's requirement to "proactively push relevant warnings to operational teams before similar conditions recur" — a confirmed pattern is only valuable if it reaches the person about to walk into the same conditions.
+**Description:** Directly implements the problem statement's requirement to "proactively push relevant warnings to operational teams before similar conditions recur" - a confirmed pattern is only valuable if it reaches the person about to walk into the same conditions.
 
 **Key Capabilities:** automatic warnings when a confirmed `LessonPattern`'s trigger conditions are newly detected elsewhere in the graph; warnings are specific and cited, never generic; rate-limited/de-duplicated to avoid alert fatigue.
 
@@ -1194,7 +1194,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 1. FR-6.3.1: Each confirmed `LessonPattern` has a machine-checkable trigger condition (e.g. matching equipment type + contributing-condition category) evaluated against new work orders, permits, and inspection records as they enter the graph.
 2. FR-6.3.2: A trigger match generates a Notification Service push (in-app, plus email/SMS where configured) to the role/team associated with the newly-matching activity, including the pattern's evidence and a direct link to the full lesson.
 3. FR-6.3.3: Every pushed warning is logged, and its outcome (acknowledged, dismissed, acted upon) is tracked for Phase 10 evaluation and future pattern-quality tuning.
-4. FR-6.3.4: Warning volume is rate-limited and de-duplicated per user per pattern per time window, to avoid alert fatigue that would cause real warnings to be ignored — a direct design response to the problem statement's own account of unacted-upon signals.
+4. FR-6.3.4: Warning volume is rate-limited and de-duplicated per user per pattern per time window, to avoid alert fatigue that would cause real warnings to be ignored - a direct design response to the problem statement's own account of unacted-upon signals.
 
 **GCP Implementation:** Lessons Learned Service triggers via Eventarc on relevant graph writes; Notification Service fanning out through Firebase Cloud Messaging and an email/SMS channel; outcomes logged to Firestore, mirrored to BigQuery.
 
@@ -1205,7 +1205,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 6.4 Lessons Learned Repository & Search **[Demo Extension]**
 
-**Description:** A browsable, searchable repository of confirmed lesson patterns, independent of the push mechanism — for proactively checking "has this happened before," and for onboarding new staff to the plant's accumulated safety history.
+**Description:** A browsable, searchable repository of confirmed lesson patterns, independent of the push mechanism - for proactively checking "has this happened before," and for onboarding new staff to the plant's accumulated safety history.
 
 **Key Capabilities:** full-text and semantic search across confirmed patterns, filterable by equipment type/location/contributing-condition category; each pattern page shows its full supporting incident set and past trigger-warning history.
 
@@ -1223,14 +1223,14 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ---
 
-## Phase 7 — Knowledge Retention, Notifications & Analytics
-*(Post-Hackathon Roadmap — written to full depth for continuity; not required for the hackathon submission per Section 5.3)*
+## Phase 7 - Knowledge Retention, Notifications & Analytics
+*(Post-Hackathon Roadmap - written to full depth for continuity; not required for the hackathon submission per Section 5.3)*
 
-**Goal of this phase:** move UnifyOps from "answers questions about documents that already exist" to "actively captures the knowledge that doesn't exist as a document yet" — directly addressing the retirement-cliff framing — and gives leadership a synthesised view across everything Phases 1–6 surface.
+**Goal of this phase:** move UnifyOps from "answers questions about documents that already exist" to "actively captures the knowledge that doesn't exist as a document yet" - directly addressing the retirement-cliff framing - and gives leadership a synthesised view across everything Phases 1–6 surface.
 
 ### 7.1 Expert Knowledge Capture Interview Tool **[Post-Hackathon Roadmap]**
 
-**Description:** A structured, low-friction way for Vikram to externalise undocumented judgment before it's lost — an AI-guided interview starting from gaps the system has already identified, not a blank-page "write down what you know" request, which historically fails.
+**Description:** A structured, low-friction way for Vikram to externalise undocumented judgment before it's lost - an AI-guided interview starting from gaps the system has already identified, not a blank-page "write down what you know" request, which historically fails.
 
 **Key Capabilities:** interview topics proposed from Feature 3.7's gap detection plus a "criticality vs. documented depth" scoring; a conversational interview flow (voice or text) where the agent asks targeted follow-ups; the resulting transcript is processed through the Phase 1 pipeline to become graph-linked, citable content.
 
@@ -1255,7 +1255,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 **Functional Requirements:**
 1. FR-7.2.1: A user configures per-category channel and urgency preferences from one settings screen.
-2. FR-7.2.2: Low-urgency categories default to digest mode; high-urgency safety-pattern triggers cannot be fully disabled, only channel-redirected — Guiding Principle 2's "never silently guess" extends to "never silently suppress a safety warning."
+2. FR-7.2.2: Low-urgency categories default to digest mode; high-urgency safety-pattern triggers cannot be fully disabled, only channel-redirected - Guiding Principle 2's "never silently guess" extends to "never silently suppress a safety warning."
 3. FR-7.2.3: A digest aggregates pending low-urgency items since the last digest into one scannable summary.
 
 **GCP Implementation:** Notification Service, preferences in Firestore, digest compilation as a scheduled Cloud Run job.
@@ -1267,13 +1267,13 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 7.3 Leadership Analytics & Cross-Functional Dashboard **[Post-Hackathon Roadmap]**
 
-**Description:** A synthesised view for Mr. Iyer — where knowledge is thinnest, where compliance exposure is concentrated, which equipment trends toward attention, and how UnifyOps is being used across the organisation.
+**Description:** A synthesised view for Mr. Iyer - where knowledge is thinnest, where compliance exposure is concentrated, which equipment trends toward attention, and how UnifyOps is being used across the organisation.
 
 **Key Capabilities:** a cross-functional dashboard combining Phase 2 (completeness), 3 (query analytics), 4 (attention scores), 5 (compliance gaps), 6 (active patterns) into one leadership view with drill-down.
 
 **Functional Requirements:**
 1. FR-7.3.1: The dashboard presents graph completeness trend, top knowledge gaps, top-attention equipment, open compliance gap summary, and active lesson pattern count.
-2. FR-7.3.2: Every summary tile links to its full detail view in the owning module — a lens over existing data, not a separate reporting system.
+2. FR-7.3.2: Every summary tile links to its full detail view in the owning module - a lens over existing data, not a separate reporting system.
 3. FR-7.3.3: The dashboard is scoped to the viewer's organisational level, building on the role-scoping in 3.5.
 
 **GCP Implementation:** Admin Service aggregating from BigQuery (mirrored across all phases), a dashboard component embedded in the app shell.
@@ -1303,10 +1303,10 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ---
 
-## Phase 8 — Mobile, Offline & Multi-Modal Field Experience
-*(Post-Hackathon Roadmap — written to full depth for continuity; not required for the hackathon submission per Section 5.3)*
+## Phase 8 - Mobile, Offline & Multi-Modal Field Experience
+*(Post-Hackathon Roadmap - written to full depth for continuity; not required for the hackathon submission per Section 5.3)*
 
-**Goal of this phase:** make Rajesh's context — poor or no signal, gloves on, one hand occupied, bright outdoor light — a fully solved experience, not just a responsive layout.
+**Goal of this phase:** make Rajesh's context - poor or no signal, gloves on, one hand occupied, bright outdoor light - a fully solved experience, not just a responsive layout.
 
 ### 8.1 Offline-First Sync Engine **[Post-Hackathon Roadmap]**
 
@@ -1316,7 +1316,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 **Functional Requirements:**
 1. FR-8.1.1: On login (while online), the app pre-caches documentation for equipment linked to the technician's assigned work orders, using Firestore's native offline persistence.
-2. FR-8.1.2: While offline, Copilot queries run against the cached subset only, clearly labelled "offline mode — limited to cached documents."
+2. FR-8.1.2: While offline, Copilot queries run against the cached subset only, clearly labelled "offline mode - limited to cached documents."
 3. FR-8.1.3: Any offline user action (feedback, flags) is queued locally and synced automatically once connectivity returns, with conflict resolution favouring server state.
 4. FR-8.1.4: A visible sync-status indicator shows online/offline/syncing.
 
@@ -1347,7 +1347,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 8.3 Camera-Based Equipment Lookup **[Post-Hackathon Roadmap]**
 
-**Description:** The fastest way for Rajesh to identify "what is this thing" — point the phone at the equipment tag plate and jump straight to its knowledge graph node.
+**Description:** The fastest way for Rajesh to identify "what is this thing" - point the phone at the equipment tag plate and jump straight to its knowledge graph node.
 
 **Key Capabilities:** camera capture of a tag plate, OCR'd and matched against the `Equipment` registry (reusing 2.2's entity resolution); direct navigation to that equipment's detail view and timeline.
 
@@ -1382,8 +1382,8 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ---
 
-## Phase 9 — Security, Governance & Platform Hardening
-*(Mostly Post-Hackathon Roadmap — but three foundational features here are [MVP] and must exist for the submission, since a system ingesting third-party regulatory and vendor documents cannot safely be demoed without them)*
+## Phase 9 - Security, Governance & Platform Hardening
+*(Mostly Post-Hackathon Roadmap - but three foundational features here are [MVP] and must exist for the submission, since a system ingesting third-party regulatory and vendor documents cannot safely be demoed without them)*
 
 **Goal of this phase:** move from "security features exist" (true from Phase 0 onward) to "security is comprehensively and verifiably applied everywhere it needs to be," including every agent added in Phases 4–6.
 
@@ -1495,9 +1495,9 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ---
 
-## Phase 10 — Evaluation, Benchmarking & Hackathon Deliverables
+## Phase 10 - Evaluation, Benchmarking & Hackathon Deliverables
 
-**Goal of this phase:** convert everything built in Phases 0–9 into the specific deliverables the hackathon requires, and into hard evidence — not claims — against the problem statement's own evaluation focus and the official judging criteria. Nothing here is optional; a working prototype that cannot demonstrate its own numbers loses to one that can.
+**Goal of this phase:** convert everything built in Phases 0–9 into the specific deliverables the hackathon requires, and into hard evidence - not claims - against the problem statement's own evaluation focus and the official judging criteria. Nothing here is optional; a working prototype that cannot demonstrate its own numbers loses to one that can.
 
 ### 10.1 Benchmark Harness & Golden Dataset **[MVP]**
 
@@ -1520,7 +1520,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 10.2 Domain-Expert Answer Quality Evaluation **[MVP]**
 
-**Description:** Directly targets the problem statement's "query answer quality on domain-expert benchmark questions" evaluation focus and Objective O3 — automated retrieval accuracy (3.2's top-5 metric) is necessary but not sufficient; this adds the human-judgment layer a judge will expect to see.
+**Description:** Directly targets the problem statement's "query answer quality on domain-expert benchmark questions" evaluation focus and Objective O3 - automated retrieval accuracy (3.2's top-5 metric) is necessary but not sufficient; this adds the human-judgment layer a judge will expect to see.
 
 **Key Capabilities:** a curated set of domain-expert benchmark questions (lookup, multi-hop, RCA-style reasoning) with reference answers; a structured rubric (correctness, citation accuracy, completeness) producing the O3 metric; a time-to-answer comparison against manual/traditional search, producing the O1 metric.
 
@@ -1548,7 +1548,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 2. FR-10.3.2: The presentation deck includes a dedicated slide mapping UnifyOps's features directly against each of the five official judging criteria (Section 14), so judges don't have to infer the mapping themselves.
 3. FR-10.3.3: The deck includes the 10.1/10.2 benchmark scorecard as primary evidence, not just qualitative claims.
 
-**GCP Implementation:** No new infrastructure — a documentation/deliverable production task drawing on Sections 2, 6, 7, and 14 plus the 10.1/10.2 results.
+**GCP Implementation:** No new infrastructure - a documentation/deliverable production task drawing on Sections 2, 6, 7, and 14 plus the 10.1/10.2 results.
 
 **Acceptance Criteria:**
 - ✅ Given the final deck, when reviewed against the official judging rubric (Section 14), then every weighted criterion has at least one directly corresponding slide or evidence point.
@@ -1559,14 +1559,14 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 **Description:** Produces the "Demo Video" deliverable and a rehearsed live-demo script covering all four intelligence lenses in a tight, judge-appropriate runtime, since an unrehearsed live demo of a multi-agent system is a common and avoidable way to lose points on User Experience.
 
-**Key Capabilities:** a scripted demo narrative following one realistic scenario end-to-end — a document gets ingested (Phase 1), appears in the graph (Phase 2), gets asked about via the Copilot (Phase 3), triggers an RCA (Phase 4), surfaces a compliance angle (Phase 5), and connects to a lesson pattern (Phase 6) — demonstrating "one substrate, many lenses" concretely; a recorded fallback video in case of live connectivity issues during judging.
+**Key Capabilities:** a scripted demo narrative following one realistic scenario end-to-end - a document gets ingested (Phase 1), appears in the graph (Phase 2), gets asked about via the Copilot (Phase 3), triggers an RCA (Phase 4), surfaces a compliance angle (Phase 5), and connects to a lesson pattern (Phase 6) - demonstrating "one substrate, many lenses" concretely; a recorded fallback video in case of live connectivity issues during judging.
 
 **Functional Requirements:**
 1. FR-10.4.1: A single coherent scenario is scripted touching all four intelligence lenses using the same underlying equipment/document thread, demonstrating substrate reuse rather than four disconnected feature demos.
 2. FR-10.4.2: The demo video is recorded end-to-end against the actual deployed `staging`/`prod` system (not a mockup), within the deliverable's expected runtime.
 3. FR-10.4.3: A rehearsed live-demo script exists as a fallback-ready companion to the video, with clear timing checkpoints and a designated presenter per section.
 
-**GCP Implementation:** No new infrastructure — screen recording against the deployed system.
+**GCP Implementation:** No new infrastructure - screen recording against the deployed system.
 
 **Acceptance Criteria:**
 - ✅ Given the final video, when watched start to finish, then a viewer with no prior context can follow the single scenario across all four lenses and understand they share one underlying knowledge graph.
@@ -1575,7 +1575,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 10.5 Judging Criteria Self-Assessment **[MVP]**
 
-**Description:** A final internal gate before submission — an honest, evidence-backed self-scoring against the official rubric, to catch gaps while there is still time to address them.
+**Description:** A final internal gate before submission - an honest, evidence-backed self-scoring against the official rubric, to catch gaps while there is still time to address them.
 
 **Key Capabilities:** a structured self-assessment against each of the five weighted judging criteria (Section 14), each claim backed by a specific artifact (a feature, a benchmark number, or a deck slide) rather than an unsupported assertion.
 
@@ -1583,7 +1583,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 1. FR-10.5.1: For each judging criterion (Innovation, Business Impact, Technical Excellence, Scalability, User Experience), the team records the specific evidence UnifyOps offers and honestly flags any criterion where evidence is thin.
 2. FR-10.5.2: Any criterion flagged as thin triggers a prioritised action before submission, if time allows, rather than being silently left as a gap.
 
-**GCP Implementation:** No new infrastructure — a documentation/process task, run against Section 14.
+**GCP Implementation:** No new infrastructure - a documentation/process task, run against Section 14.
 
 **Acceptance Criteria:**
 - ✅ Given the completed self-assessment, when reviewed, then every judging criterion has at least one piece of concrete, artifact-backed evidence attached to it.
@@ -1607,15 +1607,15 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 ### 11.2 Scalability
 
 - Every Cloud Run service scales horizontally and independently (0 → N instances) based on request volume; no service holds in-memory state that would break horizontal scaling (session/queue state lives in Firestore).
-- Spanner Graph scales compute (processing units/nodes) independently of storage, allowing the knowledge graph to grow from a single-plant pilot to a multi-plant, multi-thousand-document corpus without an architecture change — only a capacity change.
+- Spanner Graph scales compute (processing units/nodes) independently of storage, allowing the knowledge graph to grow from a single-plant pilot to a multi-plant, multi-thousand-document corpus without an architecture change - only a capacity change.
 - The ingestion pipeline (Cloud Workflows + Eventarc) is inherently parallel: uploading 500 documents at once queues 500 independent pipeline runs rather than a single serial batch job.
-- Multi-tenancy (multiple plants, potentially multiple organisations) is supported at the data-model level from Phase 2.1 onward via the `Location`/`plant_id` scoping already threaded through every node type and every access-control check (3.5) — a second plant is a new `Location` node and a new set of scoped documents, not a schema change.
+- Multi-tenancy (multiple plants, potentially multiple organisations) is supported at the data-model level from Phase 2.1 onward via the `Location`/`plant_id` scoping already threaded through every node type and every access-control check (3.5) - a second plant is a new `Location` node and a new set of scoped documents, not a schema change.
 
 ### 11.3 Reliability & Availability
 
 - Target availability for `prod`: 99.5% during the hackathon build (single-region); the Post-Hackathon Roadmap DR posture (Phase 9.5) targets 99.9% with multi-region failover.
 - Every Cloud Run service defines a minimum instance count of 1 in `prod` to avoid cold-start latency on the Copilot's first query of the day.
-- The ingestion pipeline is designed to fail a single document without affecting any other document in flight — a malformed file never blocks the queue behind it.
+- The ingestion pipeline is designed to fail a single document without affecting any other document in flight - a malformed file never blocks the queue behind it.
 
 ### 11.4 Accessibility & Usability
 
@@ -1630,7 +1630,7 @@ Every feature carries a priority tag: **[MVP]**, **[Demo Extension]**, or **[Pos
 
 ### 11.6 Cost Governance
 
-- Every Gemini call is made through the tiered model-selection pattern in Section 8.3 (Flash-Lite for routing/simple extraction, Flash for high-volume chat/classification, Pro reserved for complex multi-source reasoning) — this is a deliberate cost control, not an incidental choice, since routing every call to the most capable model would be both slower and materially more expensive at no accuracy benefit for the simpler tasks.
+- Every Gemini call is made through the tiered model-selection pattern in Section 8.3 (Flash-Lite for routing/simple extraction, Flash for high-volume chat/classification, Pro reserved for complex multi-source reasoning) - this is a deliberate cost control, not an incidental choice, since routing every call to the most capable model would be both slower and materially more expensive at no accuracy benefit for the simpler tasks.
 - Cloud Run services scale to zero in `dev`/`staging` outside active development hours.
 - Cloud Billing budget alerts (Phase 0.1) are configured before any AI API is called, so cost overruns are caught within the same day, not discovered at the end of the hackathon.
 
@@ -1647,7 +1647,7 @@ UnifyOps's primary attack surface is its own ingestion pipeline: it is designed 
 - Ingested documents may contain personal data (names, contact details on work orders and permits). Phase 9.1's Sensitive Data Protection scanning pipeline is a mandatory ingestion stage, not opt-in, and runs before any content is indexed for retrieval.
 - Personnel are modelled at the `role`/`department`/`plant_id` level (Section 9.2) rather than retaining unnecessary personally-identifying detail, in line with data-minimisation principles.
 - Where personal data must be retained for legitimate operational reasons (e.g. a work order's assigned technician), access is scoped by role (Feature 3.5) and every access to a sensitive field is auditable (Section 12.4).
-- This data-handling design is built to be compatible with the principles of India's Digital Personal Data Protection Act (DPDP), 2023 — purpose limitation, data minimisation, and the ability to demonstrate lawful, scoped access — as a matter of good design practice; it is not a substitute for formal legal review, which is a Post-Hackathon Roadmap action item before any real personnel data is processed in production (Section 13).
+- This data-handling design is built to be compatible with the principles of India's Digital Personal Data Protection Act (DPDP), 2023 - purpose limitation, data minimisation, and the ability to demonstrate lawful, scoped access - as a matter of good design practice; it is not a substitute for formal legal review, which is a Post-Hackathon Roadmap action item before any real personnel data is processed in production (Section 13).
 
 ### 12.3 Encryption & Key Management
 
@@ -1663,14 +1663,14 @@ UnifyOps's primary attack surface is its own ingestion pipeline: it is designed 
 
 ### 12.5 AI-Specific Safeguards
 
-- **Model Armor** screens every prompt and every response for injection attempts, jailbreaks, and sensitive-data leakage, applied consistently across the Copilot and every Phase 4–6 agent (Phase 9.2) — no agent is allowed to bypass this screening, by design, via a shared middleware library rather than a per-service reimplementation.
-- **Citation validation** (Feature 3.3) structurally prevents hallucinated citations from reaching a user — a citation is only ever rendered if it resolves to an actually-retrieved chunk.
+- **Model Armor** screens every prompt and every response for injection attempts, jailbreaks, and sensitive-data leakage, applied consistently across the Copilot and every Phase 4–6 agent (Phase 9.2) - no agent is allowed to bypass this screening, by design, via a shared middleware library rather than a per-service reimplementation.
+- **Citation validation** (Feature 3.3) structurally prevents hallucinated citations from reaching a user - a citation is only ever rendered if it resolves to an actually-retrieved chunk.
 - **Human-in-the-loop gates** (Guiding Principle 2) are enforced at every point where an AI conclusion could become "ground truth" without review: entity merges (2.2), RCA drafts (4.3), compliance gap resolutions (5.2), and confirmed lesson patterns (6.2) all require an explicit human approval step before they affect what other users see as authoritative.
 
 ### 12.6 Regulatory & Compliance Posture
 
-- The demo regulatory corpus (Feature 5.1) is explicitly scoped and documented as a representative sample, not a claim of comprehensive national regulatory coverage (Section 5.2) — this PRD is deliberately honest about that boundary rather than overstating the compliance module's real-world readiness.
-- Full production readiness for real personnel and safety-critical data — including formal DPDP compliance review, a completed data protection impact assessment, and sign-off from the customer's own legal/compliance function — is explicitly a Post-Hackathon Roadmap gate before any real plant is onboarded, and is called out here so it is never mistaken for something the hackathon build already satisfies.
+- The demo regulatory corpus (Feature 5.1) is explicitly scoped and documented as a representative sample, not a claim of comprehensive national regulatory coverage (Section 5.2) - this PRD is deliberately honest about that boundary rather than overstating the compliance module's real-world readiness.
+- Full production readiness for real personnel and safety-critical data - including formal DPDP compliance review, a completed data protection impact assessment, and sign-off from the customer's own legal/compliance function - is explicitly a Post-Hackathon Roadmap gate before any real plant is onboarded, and is called out here so it is never mistaken for something the hackathon build already satisfies.
 
 ---
 
@@ -1695,21 +1695,21 @@ UnifyOps's primary attack surface is its own ingestion pipeline: it is designed 
 
 | Objective | Target | Measured By |
 |---|---|---|
-| O1 — Time-to-answer reduction | ≥ 70% reduction vs. traditional search | Feature 10.2 |
-| O2 — Classification & extraction accuracy | ≥ 90% classification accuracy, ≥ 90% entity extraction F1 | Feature 10.1 |
-| O3 — Domain-expert answer quality | ≥ 85% rated correct and well-cited | Feature 10.2 |
-| O4 — Knowledge graph linkage completeness | ≥ 90% entity-resolution precision & recall | Feature 10.1 |
-| O5 — Compliance gap detection accuracy | ≥ 85% precision & recall | Feature 10.1 |
-| O6 — Cross-functional usage | Evidenced usage across ≥ 4 personas | Feature 10.2, Feature 3.7 |
+| O1 - Time-to-answer reduction | ≥ 70% reduction vs. traditional search | Feature 10.2 |
+| O2 - Classification & extraction accuracy | ≥ 90% classification accuracy, ≥ 90% entity extraction F1 | Feature 10.1 |
+| O3 - Domain-expert answer quality | ≥ 85% rated correct and well-cited | Feature 10.2 |
+| O4 - Knowledge graph linkage completeness | ≥ 90% entity-resolution precision & recall | Feature 10.1 |
+| O5 - Compliance gap detection accuracy | ≥ 85% precision & recall | Feature 10.1 |
+| O6 - Cross-functional usage | Evidenced usage across ≥ 4 personas | Feature 10.2, Feature 3.7 |
 
 ### 14.2 Judging Criteria Mapping
 
 | Judging Criterion | Weight | UnifyOps's Primary Evidence |
 |---|---|---|
-| **Innovation** | 25% | The "one substrate, many lenses" architecture (Guiding Principle 1) — four structurally different intelligence agents (Copilot, RCA, Compliance, Lessons Learned) built on one knowledge graph rather than four siloed products; GraphRAG hybrid retrieval (3.2) combining vector, full-text, and graph traversal in a single pass |
+| **Innovation** | 25% | The "one substrate, many lenses" architecture (Guiding Principle 1) - four structurally different intelligence agents (Copilot, RCA, Compliance, Lessons Learned) built on one knowledge graph rather than four siloed products; GraphRAG hybrid retrieval (3.2) combining vector, full-text, and graph traversal in a single pass |
 | **Business Impact** | 25% | Directly quantified time-to-answer reduction (O1); documented linkage to the retirement-cliff and fragmentation costs cited in the problem statement's own context; the Expert Knowledge Capture tool (7.1, roadmap) as a direct answer to the knowledge-cliff risk |
 | **Technical Excellence** | 20% | Benchmark harness (10.1) producing real precision/recall/F1 numbers, not qualitative claims; structural (not prompted) citation validation (3.3); human-in-the-loop discipline enforced architecturally (Guiding Principle 2) rather than as a policy statement |
-| **Scalability** | 15% | Section 11.2 — independently-scaling Cloud Run services, Spanner Graph's compute/storage separation, multi-tenant data model from Phase 2.1 onward, and an explicit Post-Hackathon Roadmap (Phases 7–9) that shows the team has thought past the demo |
+| **Scalability** | 15% | Section 11.2 - independently-scaling Cloud Run services, Spanner Graph's compute/storage separation, multi-tenant data model from Phase 2.1 onward, and an explicit Post-Hackathon Roadmap (Phases 7–9) that shows the team has thought past the demo |
 | **User Experience** | 15% | Mobile-first design from Phase 0.3 (Guiding Principle 4); streaming, cited, confidence-scored Copilot answers (3.1–3.4); a rehearsed, scripted, single-scenario demo (10.4) rather than four disconnected feature walkthroughs |
 
 ---
@@ -1723,7 +1723,7 @@ UnifyOps's primary attack surface is its own ingestion pipeline: it is designed 
 | Knowledge Graph & Spanner Graph | Backend Engineer with data-modelling/GQL experience | 2 |
 | RAG / Copilot & Agentic Layer (ADK) | AI/ML Engineer | 3, 4, 5, 6 |
 | Frontend (Web + Mobile PWA) | Frontend Engineer | 0.3, 3.1, 2.4, all UI surfaces |
-| Evaluation, Benchmarking & Deliverables | Whoever owns the submission — typically team lead | 10 |
+| Evaluation, Benchmarking & Deliverables | Whoever owns the submission - typically team lead | 10 |
 
 **RACI shorthand for cross-cutting concerns:**
 
@@ -1739,18 +1739,18 @@ UnifyOps's primary attack surface is its own ingestion pipeline: it is designed 
 
 | Term | Meaning |
 |---|---|
-| **ADK** | Agent Development Kit — Google's code-first framework for building agents deployed to a managed runtime on Vertex AI |
+| **ADK** | Agent Development Kit - Google's code-first framework for building agents deployed to a managed runtime on Vertex AI |
 | **DLP / Sensitive Data Protection** | Google Cloud's service for discovering and redacting sensitive data (PII and similar) in text and files |
 | **GQL** | ISO Graph Query Language, the query language used by Spanner Graph |
-| **Model Armor** | Google Cloud's LLM-specific firewall — screens prompts/responses for injection attacks and sensitive-data leakage |
-| **P&ID** | Piping and Instrumentation Diagram — a core engineering drawing type in the ontology (Section 9.2) |
-| **RAG** | Retrieval-Augmented Generation — grounding an LLM's answer in retrieved source content rather than its parametric knowledge alone |
+| **Model Armor** | Google Cloud's LLM-specific firewall - screens prompts/responses for injection attacks and sensitive-data leakage |
+| **P&ID** | Piping and Instrumentation Diagram - a core engineering drawing type in the ontology (Section 9.2) |
+| **RAG** | Retrieval-Augmented Generation - grounding an LLM's answer in retrieved source content rather than its parametric knowledge alone |
 | **RCA** | Root Cause Analysis |
 | **SOP** | Standard Operating Procedure |
-| **VPC-SC** | VPC Service Controls — Google Cloud's network perimeter security control |
+| **VPC-SC** | VPC Service Controls - Google Cloud's network perimeter security control |
 
-**Primary reference:** ET AI Hackathon 2026, Problem Statement 8 — "AI for Industrial Knowledge Intelligence: Unified Asset & Operations Brain."
+**Primary reference:** ET AI Hackathon 2026, Problem Statement 8 - "AI for Industrial Knowledge Intelligence: Unified Asset & Operations Brain."
 
 ---
 
-*End of PRD. This document is the authoritative build reference for UnifyOps. Any feature ambiguity should be resolved first against Section 6 (Guiding Principles), then against the specific feature's Functional Requirements and Acceptance Criteria above — not by improvisation.*
+*End of PRD. This document is the authoritative build reference for UnifyOps. Any feature ambiguity should be resolved first against Section 6 (Guiding Principles), then against the specific feature's Functional Requirements and Acceptance Criteria above - not by improvisation.*

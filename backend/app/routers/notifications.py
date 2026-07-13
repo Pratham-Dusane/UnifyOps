@@ -1,5 +1,5 @@
 """
-UnifyOps — Notification Service Router (Phase 6.3 / Phase 7.2)
+UnifyOps - Notification Service Router (Phase 6.3 / Phase 7.2)
 
 Skeleton endpoints for the Notification Service.
 Business logic will be implemented in Phase 6.

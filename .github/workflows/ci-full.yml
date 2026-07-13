@@ -1,4 +1,4 @@
-name: CI — Full Integration
+name: CI - Full Integration
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   backend:
-    name: Backend — Lint & Test
+    name: Backend - Lint & Test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -43,7 +43,7 @@ jobs:
         run: pytest tests/ -v --tb=short
 
   frontend:
-    name: Frontend — Lint & Build
+    name: Frontend - Lint & Build
     runs-on: ubuntu-latest
     defaults:
       run:

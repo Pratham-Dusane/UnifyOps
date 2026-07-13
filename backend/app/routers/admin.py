@@ -1,5 +1,5 @@
 """
-UnifyOps — Admin Service Router
+UnifyOps - Admin Service Router
 
 Skeleton endpoints for the Admin Console backend.
 Supports Deepak's platform administration workflows.

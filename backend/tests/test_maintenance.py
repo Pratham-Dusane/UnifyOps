@@ -1,5 +1,5 @@
 """
-UnifyOps — Maintenance & RCA Agent Tests (Phase 4)
+UnifyOps -  Maintenance & RCA Agent Tests (Phase 4)
 
 Tests for:
 - Equipment Timelines (FR-4.1)
@@ -341,3 +341,13 @@ class TestRCAAgentWorkflow:
         assert approved["five_whys"][0] == "Modified Why 1"
         # Original backup remains unchanged
         assert approved["original_draft_backup"]["five_whys"][0] == "Pump shaft vibrated."
+
+        # 3. List RCAs for equipment (assert it includes the approved one)
+        list_res = client.get(
+            "/api/v1/maintenance/equipment/P-204/rcas",
+            headers=HEADERS,
+        )
+        assert list_res.status_code == 200
+        rca_list = list_res.json()
+        assert len(rca_list) >= 1
+        assert any(r["rca_id"] == rca_id for r in rca_list)

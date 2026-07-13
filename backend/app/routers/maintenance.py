@@ -1,12 +1,12 @@
 """
-UnifyOps — Maintenance Service Router (Phase 4)
+UnifyOps -  Maintenance Service Router (Phase 4)
 
 Endpoints:
-- GET  /equipment/{tag}/timeline — Chronological asset history timeline (FR-4.1)
-- GET  /attention — Ranked equipment attention signal list (FR-4.2)
-- POST /rca/generate — Generate AI-assisted RCA draft (FR-4.3.1)
-- GET  /rca/{rca_id} — Get single RCA draft detail
-- POST /rca/{rca_id}/approve — Submit reviewer edits and sign off RCA (FR-4.3.4)
+- GET  /equipment/{tag}/timeline -  Chronological asset history timeline (FR-4.1)
+- GET  /attention -  Ranked equipment attention signal list (FR-4.2)
+- POST /rca/generate -  Generate AI-assisted RCA draft (FR-4.3.1)
+- GET  /rca/{rca_id} -  Get single RCA draft detail
+- POST /rca/{rca_id}/approve -  Submit reviewer edits and sign off RCA (FR-4.3.4)
 """
 
 from datetime import datetime, timezone
@@ -153,3 +153,13 @@ async def approve_rca_draft(
     if not updated:
          raise HTTPException(status_code=500, detail="Failed to sign off RCA")
     return updated
+
+
+@router.get("/equipment/{tag}/rcas", response_model=list[RCADraft])
+async def list_equipment_rcas(
+    tag: str,
+    x_user_org: str = Header(..., description="User's organisation ID"),
+) -> list[RCADraft]:
+    """Retrieve all RCAs generated for a specific equipment tag."""
+    rcas = [r for r in store.list_rca_drafts(x_user_org) if r.equipment_tag.upper() == tag.upper()]
+    return rcas

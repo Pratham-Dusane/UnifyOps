@@ -682,6 +682,14 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
     except Exception as e:
         print(f"[Pipeline] Supersession check failed: {e}")
 
+    if inferred_type == DocumentType.REGULATORY:
+        try:
+            from app.services.compliance_service import compliance_service
+            compliance_service.segment_regulatory_document(org_id, doc_id)
+            print(f"[Pipeline] Segmented regulatory clauses for document: {doc_id}")
+        except Exception as e:
+            print(f"[Pipeline] Regulatory clause segmentation failed: {e}")
+
     store.update_document_stage(
         doc_id,
         PipelineStage.COMPLETED,

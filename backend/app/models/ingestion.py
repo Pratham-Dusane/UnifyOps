@@ -1,5 +1,5 @@
 """
-UnifyOps — Ingestion Models
+UnifyOps - Ingestion Models
 
 Document and ingestion pipeline models for Phase 1.
 Maps to PRD Section 9.2 Document entity type and Phase 1 pipeline stages.
@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 
 class DocumentType(str, Enum):
-    """PRD Section 9.2 — Seven core document types plus catch-all."""
+    """PRD Section 9.2 - Seven core document types plus catch-all."""
 
     ENGINEERING_DRAWING = "engineering_drawing"  # P&IDs, engineering drawings
     WORK_ORDER = "work_order"  # Maintenance work orders
@@ -44,7 +44,7 @@ class PipelineStage(str, Enum):
 
 
 class EntityType(str, Enum):
-    """PRD Section 9.2 — Entity types extracted from documents (FR-1.5.2)."""
+    """PRD Section 9.2 - Entity types extracted from documents (FR-1.5.2)."""
 
     EQUIPMENT_TAG = "equipment_tag"
     LOCATION = "location"
@@ -235,7 +235,7 @@ class UploadMetadata(BaseModel):
     unit: str = Field(default="")
     doc_type_hint: DocumentType | None = Field(
         default=None,
-        description="Optional hint from uploader — overrides classifier if provided",
+        description="Optional hint from uploader - overrides classifier if provided",
     )
 
 

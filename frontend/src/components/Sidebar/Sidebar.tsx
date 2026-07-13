@@ -113,7 +113,7 @@ export default function Sidebar() {
 
         <div className={styles.footer}>
           {!collapsed && (
-            <span className={styles.version}>v0.1.0 — Phase 0</span>
+            <span className={styles.version}>v0.1.0 - Phase 0</span>
           )}
         </div>
       </aside>

@@ -1,5 +1,5 @@
 """
-UnifyOps — Gemini Studio Service
+UnifyOps - Gemini Studio Service
 
 Integrates with Google AI Studio (using GEMINI_API_KEY) (FR-1.5, FR-1.6).
 Features:
@@ -143,7 +143,7 @@ CRITICAL RULES:
 2. Do NOT invent, infer, or hallucinate entities that are not explicitly written in the text.
 3. Do NOT use example values from these instructions as entity values.
 4. If the text contains very few extractable entities, return a short list. An empty list is acceptable.
-5. For equipment_tag: only extract actual tag IDs like "P-201", "HE-301", "V-102", "M-08" — alphanumeric codes that appear in the text.
+5. For equipment_tag: only extract actual tag IDs like "P-201", "HE-301", "V-102", "M-08" - alphanumeric codes that appear in the text.
 6. For procedure_step: only extract if the text explicitly describes a step-by-step procedure.
 7. Confidence should reflect how clearly the entity appears in the text (0.95 for exact clear matches, lower for ambiguous ones).
 

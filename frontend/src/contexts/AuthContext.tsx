@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setProfile(fresh);
           setCachedProfile(fresh);
         } else {
-          // No profile on backend (e.g., server restarted) — invalidate cache
+          // No profile on backend (e.g., server restarted) - invalidate cache
           setProfile(null);
           setCachedProfile(null);
         }

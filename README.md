@@ -1,4 +1,4 @@
-# UnifyOps — AI Industrial Knowledge Intelligence Platform
+# UnifyOps - AI Industrial Knowledge Intelligence Platform
 
 > Unified Asset & Operations Brain for industrial plants.
 
@@ -112,7 +112,7 @@ GitHub Actions workflows run automatically on push/PR:
 
 See [PRD_V1.md](PRD_V1.md) for the full architecture, data model, and implementation roadmap.
 
-**Current phase: Phase 0 — Foundation & Platform Bootstrap**
+**Current phase: Phase 0 - Foundation & Platform Bootstrap**
 
 ---
 

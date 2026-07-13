@@ -1,5 +1,5 @@
 """
-UnifyOps — Maintenance Intelligence & RCA Models (Phase 4)
+UnifyOps -  Maintenance Intelligence & RCA Models (Phase 4)
 
 Pydantic models for:
 - Equipment Timelines & Enriched Work Orders (FR-4.1)

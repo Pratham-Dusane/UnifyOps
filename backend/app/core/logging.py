@@ -1,5 +1,5 @@
 """
-UnifyOps — Structured Logging (FR-0.5.1)
+UnifyOps - Structured Logging (FR-0.5.1)
 
 Every log entry includes: severity, request_id, service_name, latency_ms.
 Uses structlog for JSON-structured output compatible with Cloud Logging.

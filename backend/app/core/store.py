@@ -32,6 +32,7 @@ from app.models.copilot import (
 )
 from app.models.maintenance import RCADraft
 from app.models.compliance import RegulatoryClause, ComplianceGap
+from app.models.lessons import IncidentEnrichment, LessonPattern, PatternWarning
 
 DB_FILE = "db.json"
 
@@ -57,6 +58,10 @@ class DataStore:
         # Phase 5 - Compliance collections
         self._regulatory_clauses: dict[str, RegulatoryClause] = {}  # keyed by clause_id
         self._compliance_gaps: dict[str, ComplianceGap] = {}  # keyed by gap_id
+        # Phase 6 - Lessons Learned collections
+        self._incident_enrichments: dict[str, IncidentEnrichment] = {}  # keyed by enrichment id
+        self._lesson_patterns: dict[str, LessonPattern] = {}  # keyed by pattern_id
+        self._pattern_warnings: dict[str, PatternWarning] = {}  # keyed by warning_id
 
         # Load persisted data on initialization (unless running tests)
         if os.environ.get("TESTING") != "1":
@@ -94,6 +99,15 @@ class DataStore:
                 ],
                 "compliance_gaps": [
                     g.model_dump() for g in self._compliance_gaps.values()
+                ],
+                "incident_enrichments": [
+                    e.model_dump() for e in self._incident_enrichments.values()
+                ],
+                "lesson_patterns": [
+                    p.model_dump() for p in self._lesson_patterns.values()
+                ],
+                "pattern_warnings": [
+                    w.model_dump() for w in self._pattern_warnings.values()
                 ],
             }
 
@@ -187,8 +201,27 @@ class DataStore:
                 gap = ComplianceGap(**item)
                 self._compliance_gaps[gap.gap_id] = gap
 
+            for item in data.get("incident_enrichments", []):
+                item["created_at"] = parse_dt(item["created_at"])
+                enrich = IncidentEnrichment(**item)
+                self._incident_enrichments[enrich.id] = enrich
+
+            for item in data.get("lesson_patterns", []):
+                item["created_at"] = parse_dt(item["created_at"])
+                if item.get("confirmed_at"):
+                    item["confirmed_at"] = parse_dt(item["confirmed_at"])
+                pattern = LessonPattern(**item)
+                self._lesson_patterns[pattern.pattern_id] = pattern
+
+            for item in data.get("pattern_warnings", []):
+                item["created_at"] = parse_dt(item["created_at"])
+                if item.get("acknowledged_at"):
+                    item["acknowledged_at"] = parse_dt(item["acknowledged_at"])
+                warn = PatternWarning(**item)
+                self._pattern_warnings[warn.warning_id] = warn
+
             print(
-                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges, {len(self._sessions)} sessions, {len(self._rca_drafts)} RCAs, {len(self._regulatory_clauses)} clauses, {len(self._compliance_gaps)} gaps)"
+                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges, {len(self._sessions)} sessions, {len(self._rca_drafts)} RCAs, {len(self._regulatory_clauses)} clauses, {len(self._compliance_gaps)} gaps, {len(self._lesson_patterns)} patterns)"
             )
         except Exception as e:
             print(f"[DataStore] Failed to load state from db.json: {e}")
@@ -1047,6 +1080,67 @@ class DataStore:
 
     def list_compliance_gaps(self) -> list[ComplianceGap]:
         return list(self._compliance_gaps.values())
+
+    # ──────────────────────────── Lessons Learned (Phase 6) ────────────────
+
+    def create_incident_enrichment(self, enrichment: IncidentEnrichment) -> None:
+        with self._lock:
+            self._incident_enrichments[enrichment.id] = enrichment
+            self._save()
+
+    def get_incident_enrichment(self, enrichment_id: str) -> IncidentEnrichment | None:
+        return self._incident_enrichments.get(enrichment_id)
+
+    def get_enrichment_by_document(self, doc_id: str) -> IncidentEnrichment | None:
+        for e in self._incident_enrichments.values():
+            if e.document_id == doc_id:
+                return e
+        return None
+
+    def list_incident_enrichments(self, org_id: str) -> list[IncidentEnrichment]:
+        return [e for e in self._incident_enrichments.values() if e.org_id == org_id]
+
+    def create_lesson_pattern(self, pattern: LessonPattern) -> None:
+        with self._lock:
+            self._lesson_patterns[pattern.pattern_id] = pattern
+            self._save()
+
+    def get_lesson_pattern(self, pattern_id: str) -> LessonPattern | None:
+        return self._lesson_patterns.get(pattern_id)
+
+    def update_lesson_pattern(self, pattern_id: str, **kwargs) -> LessonPattern | None:
+        with self._lock:
+            pattern = self._lesson_patterns.get(pattern_id)
+            if pattern:
+                for k, v in kwargs.items():
+                    setattr(pattern, k, v)
+                self._save()
+                return pattern
+            return None
+
+    def list_lesson_patterns(self, org_id: str) -> list[LessonPattern]:
+        return [p for p in self._lesson_patterns.values() if p.org_id == org_id]
+
+    def create_pattern_warning(self, warning: PatternWarning) -> None:
+        with self._lock:
+            self._pattern_warnings[warning.warning_id] = warning
+            self._save()
+
+    def get_pattern_warning(self, warning_id: str) -> PatternWarning | None:
+        return self._pattern_warnings.get(warning_id)
+
+    def update_pattern_warning(self, warning_id: str, **kwargs) -> PatternWarning | None:
+        with self._lock:
+            warn = self._pattern_warnings.get(warning_id)
+            if warn:
+                for k, v in kwargs.items():
+                    setattr(warn, k, v)
+                self._save()
+                return warn
+            return None
+
+    def list_pattern_warnings(self, org_id: str) -> list[PatternWarning]:
+        return [w for w in self._pattern_warnings.values() if w.org_id == org_id]
 
 
 # Singleton instance

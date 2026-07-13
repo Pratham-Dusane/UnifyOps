@@ -104,7 +104,7 @@ export default function LoginPage() {
 
         {error && <div className={styles.error}>{error}</div>}
 
-        {/* Google — primary CTA */}
+        {/* Google - primary CTA */}
         <button
           className={styles.googleBtn}
           onClick={handleGoogleSignIn}

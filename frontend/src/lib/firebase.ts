@@ -1,4 +1,4 @@
-// UnifyOps — Firebase Client Configuration
+// UnifyOps - Firebase Client Configuration
 // Replace placeholder values with your actual Firebase config from the Firebase Console.
 
 import { initializeApp, getApps } from "firebase/app";

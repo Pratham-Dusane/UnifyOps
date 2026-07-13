@@ -147,11 +147,26 @@ export default function ComplianceDashboard() {
   };
 
   // Filter Gaps List dynamically based on click in Heatmap Grid
-  const filteredGaps = gaps.filter((gap) => {
-    // Heatmap filters
-    if (selectedTypeFilter && gap.check_type !== selectedTypeFilter) return false;
-    return true;
-  });
+  const filteredGaps = (() => {
+    let result = gaps;
+
+    // Filter by check_type when a heatmap column is selected
+    if (selectedTypeFilter) {
+      result = result.filter((gap) => gap.check_type === selectedTypeFilter);
+    }
+
+    // When a unit row is selected, limit the count to what the heatmap shows for that cell
+    if (selectedUnitFilter && selectedTypeFilter && stats?.heatmap) {
+      const heatRow = stats.heatmap.find((r) => r.unit === selectedUnitFilter);
+      if (heatRow) {
+        const cellCount =
+          (heatRow as Record<string, number | string>)[selectedTypeFilter] as number ?? 0;
+        result = result.slice(0, cellCount);
+      }
+    }
+
+    return result;
+  })();
 
   const conformancePct = stats
     ? Math.max(100 - Math.round((stats.total_gaps / (clauses.length || 10)) * 100), 0)
@@ -310,19 +325,19 @@ export default function ComplianceDashboard() {
         <div className={styles.bottomSection}>
           
           {/* Main Gaps control console */}
-          <div className={styles.gapsCard}>
+          <div className={`${styles.gapsCard} ${filteredGaps.length === 0 ? styles.gapsCardCollapsed : ""}`}>
             <div className={styles.gapsHeader}>
               <h3 className={styles.cardTitle}>Open Deviations & Gaps Control</h3>
-              <span className={styles.countBadge}>{filteredGaps.length} gaps</span>
+              <span className={styles.countBadge}>
+                {filteredGaps.length === 0
+                  ? "All governing procedures match regulatory conditions. No deviations found."
+                  : `${filteredGaps.length} gaps`}
+              </span>
             </div>
             
-            <div className={styles.gapsList}>
-              {filteredGaps.length === 0 ? (
-                <div className={styles.emptyGaps}>
-                  🎉 All governing procedures match regulatory conditions. No deviations found.
-                </div>
-              ) : (
-                filteredGaps.map((gap) => (
+            {filteredGaps.length > 0 && (
+              <div className={styles.gapsList}>
+                {filteredGaps.map((gap) => (
                   <div
                     key={gap.gap_id}
                     className={`${styles.gapCard} ${
@@ -396,15 +411,15 @@ export default function ComplianceDashboard() {
                           </div>
                         ) : (
                           <div className={styles.resolvedBanner}>
-                            ✓ Resolved: {gap.resolution_notes}
+                            Resolved: {gap.resolution_notes}
                           </div>
                         )}
                       </div>
                     )}
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Audit Package Report Output split */}

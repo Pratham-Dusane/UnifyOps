@@ -1,5 +1,5 @@
 """
-UnifyOps — Storage Service
+UnifyOps - Storage Service
 
 Manages file persistence to Google Cloud Storage (GCS) (FR-1.1.3).
 Provides local file storage fallback for development when GCP credentials are not active.

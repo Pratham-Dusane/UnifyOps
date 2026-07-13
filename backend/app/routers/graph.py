@@ -1,5 +1,5 @@
 """
-UnifyOps — Graph Service Router (Phase 2)
+UnifyOps - Graph Service Router (Phase 2)
 
 Provides endpoints for:
 - Neighborhood traversal (FR-2.4)

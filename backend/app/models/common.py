@@ -1,5 +1,5 @@
 """
-UnifyOps — Shared Pydantic Models
+UnifyOps - Shared Pydantic Models
 
 Common response/request models used across all service routers.
 """

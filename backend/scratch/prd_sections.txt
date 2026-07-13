@@ -1,0 +1,136 @@
+Line 17: ## 1. Executive Summary
+Line 25: ## 2. Problem Statement Recap
+Line 36: 3. **Maintenance Intelligence & RCA Agent** → Phase 4
+Line 44: ## 3. Vision & Measurable Objectives
+Line 59: ## 4. Personas
+Line 72: ## 5. Scope & Out-of-Scope
+Line 74: ### 5.1 In Scope (Hackathon Build)
+Line 78: - At least one working, demoable feature from each of the three agentic intelligence pillars - Maintenance/RCA (Phase 4), Compliance (Phase 5), Lessons Learned (Phase 6) - sufficient to prove the "one substrate, many lenses" architecture, not necessarily every feature listed in those phases.
+Line 82: ### 5.2 Explicitly Out of Scope for the Hackathon Build
+Line 84: - **Live IoT/SCADA/sensor integration.** Phase 4's predictive maintenance signals are derived from *documented* maintenance history (work orders, inspections), not live telemetry. This is a deliberate scope boundary, not an oversight - it keeps the build honest about what it can prove versus claim.
+Line 90: ### 5.3 Priority Tiers Used Throughout This Document
+Line 96: ## 6. Guiding Principles
+Line 101: 2. **Never silently guess.** Any AI-generated classification, extraction, merge, or conclusion below a defined confidence threshold goes to a human review queue. It is never auto-committed to the graph as ground truth. This applies to entity resolution (Phase 2.2), compliance gap conclusions (Phase 5.2), and RCA drafts (Phase 4.3) alike.
+Line 109: ## 7. System Architecture
+Line 111: ### 7.1 High-Level Architecture
+Line 203: ### 7.2 RAG Query Sequence (Expert Knowledge Copilot)
+Line 234: ### 7.3 Phase Dependency Map
+Line 241: P3 --> P4["Phase 4<br/>Maintenance & RCA"]
+Line 265: ### 7.4 Deployment Topology
+Line 274: ## 8. Technology Stack
+Line 278: ### 8.1 Client & Presentation Layer
+Line 287: ### 8.2 Application & Orchestration Layer
+Line 297: ### 8.3 AI / ML Layer - Vertex AI (Gemini Enterprise Agent Platform)
+Line 312: ### 8.4 Data Layer
+Line 322: ### 8.5 Identity, Security & Governance
+Line 335: ### 8.6 DevOps & Observability
+Line 345: ### 8.7 Suggested-Technology Coverage Check
+Line 355: | QMS Integration | Phase 5 (compliance/quality mapping), Phase 4 (maintenance QMS signals) |
+Line 360: ## 9. Data Model & Knowledge Graph Ontology
+Line 362: ### 9.1 Design Approach
+Line 366: ### 9.2 Core Entity Types
+Line 376: | **WorkOrder** | `wo_id`, `type`, `status`, `equipment_id`, `assigned_role`, `failure_mode`, `downtime_hours` | Phase 1 ingestion, Phase 4 enrichment |
+Line 380: | **FailurePattern** | `pattern_id`, `failure_mode`, `typical_contributing_factors[]`, `typical_corrective_actions[]` | Phase 4.5 |
+Line 383: ### 9.3 Core Relationships
+Line 403: ### 9.4 Representative GQL Query
+Line 415: ### 9.5 Entity Resolution Strategy
+Line 421: ## 10. Implementation Roadmap Overview
+Line 423: ### 10.1 Phase Summary
+Line 439: ### 10.2 How to Read Each Phase
+Line 454: ## Phase 0 - Foundation, GCP Landing Zone & Platform Bootstrap
+Line 458: ### 0.1 GCP Landing Zone, Project Structure & IAM Foundation **[MVP]**
+Line 478: ### 0.2 Infrastructure as Code & CI/CD Pipeline **[MVP]**
+Line 498: ### 0.3 Base Frontend Application Shell **[MVP]**
+Line 516: ### 0.4 Base Backend API Gateway & Microservice Skeleton **[MVP]**
+Line 534: ### 0.5 Observability Foundation **[MVP]**
+Line 552: ### 0.6 Secrets & Configuration Management **[MVP]**
+Line 571: ## Phase 1 - Universal Document Ingestion & Processing Pipeline
+Line 575: ### 1.1 Multi-Format Document Upload Interface **[MVP]**
+Line 595: ### 1.2 Document Classification & Routing Engine **[MVP]**
+Line 613: ### 1.3 OCR & Text Extraction Pipeline **[MVP]**
+Line 632: ### 1.4 Engineering Drawing & P&ID Digitisation **[MVP: basic tag extraction · Demo Extension: topology graph]**
+Line 650: ### 1.5 Metadata & Entity Extraction Engine **[MVP]**
+Line 669: ### 1.6 Document Chunking & RAG Preprocessing **[MVP]**
+Line 687: ### 1.7 Ingestion Monitoring Dashboard & Human-in-the-Loop Correction **[MVP: monitoring · Demo Extension: full correction UI]**
+Line 708: ## Phase 2 - Industrial Knowledge Graph & Ontology Engine
+Line 712: ### 2.1 Knowledge Graph Schema & Property Graph Provisioning **[MVP]**
+Line 730: ### 2.2 Entity Resolution & Deduplication Engine **[MVP]**
+Line 750: ### 2.3 Automated Relationship Inference & Graph Population Service **[MVP]**
+Line 770: ### 2.4 Knowledge Graph Explorer & Visual Browser **[MVP]**
+Line 789: ### 2.5 Graph Review Queue & Data Quality / Completeness Scoring **[MVP]**
+Line 808: ### 2.6 Incremental Graph Update, Versioning & Document Supersession **[MVP]**
+Line 829: ## Phase 3 - Semantic Search & Expert Knowledge Copilot (RAG)
+Line 833: ### 3.1 Conversational Copilot Interface (Web + Mobile) **[MVP]**
+Line 852: ### 3.2 Hybrid Retrieval Engine (GraphRAG) **[MVP]**
+Line 872: ### 3.3 Citation & Source Attribution Engine **[MVP]**
+Line 891: ### 3.4 Confidence Scoring & Answer Quality Signals **[MVP]**
+Line 909: ### 3.5 Role-Based Access Scoping for Answers **[MVP]**
+Line 927: ### 3.6 Multi-Turn Conversation & Context Management **[MVP]**
+Line 945: ### 3.7 Query Analytics & Knowledge Gap Detection **[Demo Extension]**
+Line 965: ## Phase 4 - Maintenance Intelligence & RCA Agent
+Line 969: ### 4.1 Work Order & Maintenance History Enrichment **[MVP]**
+Line 987: ### 4.2 Predictive Maintenance Signal Engine **[MVP]**
+Line 1006: ### 4.3 Root Cause Analysis (RCA) Agent **[MVP]**
+Line 1026: ### 4.4 Maintenance Scheduling Optimiser **[Demo Extension]**
+Line 1044: ### 4.5 Failure Pattern Library & Cross-Equipment Learning **[Demo Extension]**
+Line 1064: ## Phase 5 - Quality & Regulatory Compliance Intelligence
+Line 1066: **Goal of this phase:** the second demo-breadth pillar - mapping regulatory obligations against what the plant's own documents say it actually does, surfacing the gap before an external auditor does. Like Phase 4, this adds no new ingestion or retrieval infrastructure; it is a new lens over the existing graph (Guiding Principle 1).
+Line 1068: ### 5.1 Regulatory Corpus Ingestion & Clause-Level Mapping **[MVP]**
+Line 1087: ### 5.2 Compliance Gap Detection Agent **[MVP]**
+Line 1107: ### 5.3 Audit Evidence Package Generator **[MVP]**
+Line 1126: ### 5.4 Compliance Dashboard & Deviation Tracking **[Demo Extension]**
+Line 1146: ## Phase 6 - Lessons Learned & Failure Intelligence Engine
+Line 1150: ### 6.1 Incident & Near-Miss Ingestion Enrichment **[MVP]**
+Line 1168: ### 6.2 Cross-Incident Pattern Detection Agent **[MVP]**
+Line 1172: **Key Capabilities:** clustering by shared contributing conditions, equipment type, or location; each pattern presented with its full supporting incident set and cited evidence, never an unexplained alert; cross-checked against the Phase 4.5 failure pattern library.
+Line 1185: **Dependencies:** 6.1, Phase 4.5, Phase 2.3.
+Line 1187: ### 6.3 Proactive Warning & Notification Push **[MVP]**
+Line 1206: ### 6.4 Lessons Learned Repository & Search **[Demo Extension]**
+Line 1226: ## Phase 7 - Knowledge Retention, Notifications & Analytics
+Line 1231: ### 7.1 Expert Knowledge Capture Interview Tool **[Post-Hackathon Roadmap]**
+Line 1250: ### 7.2 Unified Notification Preference Centre **[Post-Hackathon Roadmap]**
+Line 1268: ### 7.3 Leadership Analytics & Cross-Functional Dashboard **[Post-Hackathon Roadmap]**
+Line 1286: ### 7.4 Regional Language Support & Localisation **[Post-Hackathon Roadmap]**
+Line 1306: ## Phase 8 - Mobile, Offline & Multi-Modal Field Experience
+Line 1311: ### 8.1 Offline-First Sync Engine **[Post-Hackathon Roadmap]**
+Line 1330: ### 8.2 Voice Interface (Speech-to-Text / Text-to-Speech) **[Post-Hackathon Roadmap]**
+Line 1348: ### 8.3 Camera-Based Equipment Lookup **[Post-Hackathon Roadmap]**
+Line 1364: **Dependencies:** Phase 2.2, Phase 4.1.
+Line 1366: ### 8.4 Native Mobile Push & Wearable-Ready Notification Payloads **[Post-Hackathon Roadmap]**
+Line 1385: ## Phase 9 - Security, Governance & Platform Hardening
+Line 1390: ### 9.1 Sensitive Data Protection Scanning Pipeline **[MVP]**
+Line 1408: ### 9.2 Model Armor Coverage Across All Agents **[MVP]**
+Line 1424: **Dependencies:** Phase 3 (Model Armor pattern established), Phase 4.3, 5.2, 6.2.
+Line 1426: ### 9.3 VPC Service Controls & Network Perimeter Hardening **[MVP]**
+Line 1444: ### 9.4 Fine-Grained RBAC/ABAC Refinement & Access Reviews **[Post-Hackathon Roadmap]**
+Line 1461: ### 9.5 Disaster Recovery & Multi-Region Resilience **[Post-Hackathon Roadmap]**
+Line 1479: ### 9.6 Continuous Security Scanning & Penetration Testing **[Post-Hackathon Roadmap]**
+Line 1498: ## Phase 10 - Evaluation, Benchmarking & Hackathon Deliverables
+Line 1502: ### 10.1 Benchmark Harness & Golden Dataset **[MVP]**
+Line 1521: ### 10.2 Domain-Expert Answer Quality Evaluation **[MVP]**
+Line 1538: **Dependencies:** Phase 3, Phase 4.3, Phase 5.2, Phase 6.2, Feature 10.1.
+Line 1540: ### 10.3 Architecture Diagram, Presentation Deck & Written Submission **[MVP]**
+Line 1558: ### 10.4 Demo Video & Live Demo Script **[MVP]**
+Line 1562: **Key Capabilities:** a scripted demo narrative following one realistic scenario end-to-end - a document gets ingested (Phase 1), appears in the graph (Phase 2), gets asked about via the Copilot (Phase 3), triggers an RCA (Phase 4), surfaces a compliance angle (Phase 5), and connects to a lesson pattern (Phase 6) - demonstrating "one substrate, many lenses" concretely; a recorded fallback video in case of live connectivity issues during judging.
+Line 1576: ### 10.5 Judging Criteria Self-Assessment **[MVP]**
+Line 1595: ## 11. Non-Functional Requirements
+Line 1597: ### 11.1 Performance
+Line 1607: ### 11.2 Scalability
+Line 1614: ### 11.3 Reliability & Availability
+Line 1620: ### 11.4 Accessibility & Usability
+Line 1625: ### 11.5 Data Retention & Lifecycle
+Line 1631: ### 11.6 Cost Governance
+Line 1639: ## 12. Security, Privacy & Compliance
+Line 1641: ### 12.1 Threat Model Summary
+Line 1645: ### 12.2 Data Classification & Sensitive Data Handling
+Line 1652: ### 12.3 Encryption & Key Management
+Line 1658: ### 12.4 Audit Trail
+Line 1664: ### 12.5 AI-Specific Safeguards
+Line 1666: - **Model Armor** screens every prompt and every response for injection attempts, jailbreaks, and sensitive-data leakage, applied consistently across the Copilot and every Phase 4–6 agent (Phase 9.2) - no agent is allowed to bypass this screening, by design, via a shared middleware library rather than a per-service reimplementation.
+Line 1670: ### 12.6 Regulatory & Compliance Posture
+Line 1677: ## 13. Risks & Mitigations
+Line 1692: ## 14. Success Metrics & Judging Criteria Alignment
+Line 1694: ### 14.1 Objective-Level Success Metrics (recap of Section 3, measured by Phase 10)
+Line 1705: ### 14.2 Judging Criteria Mapping
+Line 1717: ## 15. Team, Roles & RACI
+Line 1738: ## 16. Glossary & References

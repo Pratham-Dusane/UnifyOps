@@ -1,5 +1,5 @@
 """
-UnifyOps — Gateway Health Check
+UnifyOps - Gateway Health Check
 
 Top-level health endpoint for the API gateway itself.
 """

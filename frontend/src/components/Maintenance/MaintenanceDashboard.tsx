@@ -7,7 +7,7 @@ import styles from "./MaintenanceDashboard.module.css";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface Event {
-  id: str;
+  id: string;
   event_type: "work_order" | "incident" | "inspection" | "sop";
   title: string;
   timestamp: string;
@@ -62,6 +62,11 @@ export default function MaintenanceDashboard() {
   const [rcaRequestText, setRcaRequestText] = useState("");
   const [activeRca, setActiveRca] = useState<RCADraft | null>(null);
   
+  // Historical RCAs state
+  const [tagRcas, setTagRcas] = useState<RCADraft[]>([]);
+  const [isRcasLoading, setIsRcasLoading] = useState(false);
+  const [showRcaInput, setShowRcaInput] = useState(false);
+
   const [isTimelineLoading, setIsTimelineLoading] = useState(false);
   const [isRcaGenerating, setIsRcaGenerating] = useState(false);
   const [isRcaSaving, setIsRcaSaving] = useState(false);
@@ -96,8 +101,26 @@ export default function MaintenanceDashboard() {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [getHeaders, selectedTag]);
+
+  // Load RCAs for selected tag
+  const loadTagRcas = useCallback(async () => {
+    if (!selectedTag) return;
+    setIsRcasLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/v1/maintenance/equipment/${selectedTag}/rcas`, {
+        headers: getHeaders(),
+      });
+      if (res.ok) {
+        setTagRcas(await res.json());
+      }
+    } catch {
+      // ignore
+    } finally {
+      setIsRcasLoading(false);
+    }
+  }, [selectedTag, getHeaders]);
 
   useEffect(() => {
     if (user && profile) {
@@ -128,8 +151,11 @@ export default function MaintenanceDashboard() {
     if (user && selectedTag) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       loadTimeline();
+      loadTagRcas();
+      setActiveRca(null);
+      setShowRcaInput(false);
     }
-  }, [user, selectedTag, loadTimeline]);
+  }, [user, selectedTag, loadTimeline, loadTagRcas]);
 
   const handleRunRca = async () => {
     if (!selectedTag || !rcaRequestText.trim() || isRcaGenerating) return;
@@ -154,6 +180,9 @@ export default function MaintenanceDashboard() {
         setEditedContributing(data.contributing_factors);
         setEditedCorrective(data.corrective_actions);
         setReviewerNotes("");
+        setRcaRequestText("");
+        setShowRcaInput(false);
+        await loadTagRcas();
       }
     } catch {
       // Handle error
@@ -184,6 +213,7 @@ export default function MaintenanceDashboard() {
         setActiveRca(data);
         // Reload list of signals (might update counts)
         loadAttentionSignals();
+        await loadTagRcas();
       }
     } catch {
       // Handle error
@@ -196,6 +226,15 @@ export default function MaintenanceDashboard() {
     const updated = [...editedFiveWhys];
     updated[index] = val;
     setEditedFiveWhys(updated);
+  };
+
+  const handleSelectRca = (rca: RCADraft) => {
+    setActiveRca(rca);
+    setEditedImmediateCause(rca.immediate_cause);
+    setEditedFiveWhys(rca.five_whys);
+    setEditedContributing(rca.contributing_factors);
+    setEditedCorrective(rca.corrective_actions);
+    setReviewerNotes(rca.reviewer_notes || "");
   };
 
   return (
@@ -236,19 +275,16 @@ export default function MaintenanceDashboard() {
                   score > 70
                     ? styles.scoreHigh
                     : score > 40
-                    ? styles.scoreMedium
-                    : styles.scoreLow;
+                      ? styles.scoreMedium
+                      : styles.scoreLow;
 
                 return (
                   <div
                     key={item.equipment_tag}
-                    className={`${styles.attentionCard} ${
-                      selectedTag === item.equipment_tag ? styles.selectedCard : ""
-                    }`}
+                    className={`${styles.attentionCard} ${selectedTag === item.equipment_tag ? styles.selectedCard : ""
+                      }`}
                     onClick={() => {
                       setSelectedTag(item.equipment_tag);
-                      setActiveRca(null);
-                      setRcaRequestText("");
                     }}
                   >
                     <div className={styles.cardHeader}>
@@ -299,13 +335,12 @@ export default function MaintenanceDashboard() {
                       <div key={ev.id} className={styles.timelineItem}>
                         <div className={styles.timelineIconWrap}>
                           <span
-                            className={`${styles.timelineBadge} ${
-                              ev.event_type === "incident"
+                            className={`${styles.timelineBadge} ${ev.event_type === "incident"
                                 ? styles.badgeIncident
                                 : ev.event_type === "work_order"
-                                ? styles.badgeWorkOrder
-                                : styles.badgeSop
-                            }`}
+                                  ? styles.badgeWorkOrder
+                                  : styles.badgeSop
+                              }`}
                           />
                         </div>
                         <div className={styles.timelineContent}>
@@ -344,11 +379,27 @@ export default function MaintenanceDashboard() {
 
               {/* RCA Workspace */}
               <div className={styles.sectionCard}>
-                <h3 className={styles.sectionTitle}>Root Cause Analysis Agent</h3>
-                
-                {/* Request Box */}
-                {!activeRca && (
+                <div className={styles.rcaTitleRow}>
+                  <h3 className={styles.sectionTitle}>Root Cause Analysis Agent</h3>
+                  {!activeRca && !showRcaInput && (
+                    <button
+                      className={styles.newRcaBtn}
+                      onClick={() => setShowRcaInput(true)}
+                    >
+                      + Generate New RCA
+                    </button>
+                  )}
+                </div>
+
+                {/* Case 1: Display failure prompt input form */}
+                {!activeRca && showRcaInput && (
                   <div className={styles.rcaRequestBox}>
+                    <button
+                      className={styles.backBtn}
+                      onClick={() => setShowRcaInput(false)}
+                    >
+                      ← Back to RCA Records
+                    </button>
                     <textarea
                       className={styles.rcaInput}
                       value={rcaRequestText}
@@ -373,11 +424,60 @@ export default function MaintenanceDashboard() {
                   </div>
                 )}
 
-                {/* Active RCA Draft Workspace */}
+                {/* Case 2: Display list of existing drafts/approvals */}
+                {!activeRca && !showRcaInput && (
+                  <div className={styles.rcaRecordsList}>
+                    {isRcasLoading ? (
+                      <div className={styles.loaderWrap}>
+                        <div className={styles.spinner} />
+                      </div>
+                    ) : tagRcas.length === 0 ? (
+                      <div className={styles.emptyRcaRecords}>
+                        No RCA drafts have been compiled for {selectedTag} yet. Click <b>&quot;Generate New RCA&quot;</b> above to run the AI assistant.
+                      </div>
+                    ) : (
+                      <div className={styles.rcaGrid}>
+                        {tagRcas.map((rca) => (
+                          <div
+                            key={rca.rca_id}
+                            className={styles.rcaRecordCard}
+                            onClick={() => handleSelectRca(rca)}
+                          >
+                            <div className={styles.rcaRecordHeader}>
+                              <span className={styles.rcaRecordTitle}>
+                                {rca.failure_description}
+                              </span>
+                              <span
+                                className={`${styles.rcaRecordStatus} ${
+                                  rca.status === "approved" ? styles.statusApproved : styles.statusDraft
+                                }`}
+                              >
+                                {rca.status.toUpperCase()}
+                              </span>
+                            </div>
+                            <div className={styles.rcaRecordMeta}>
+                              Created: {new Date(rca.generated_at).toLocaleDateString()}
+                              {rca.approved_at && ` · Approved: ${new Date(rca.approved_at).toLocaleDateString()}`}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Case 3: Active RCA Draft Workspace */}
                 {activeRca && (
                   <div className={styles.rcaWorkspace}>
+                    <button
+                      className={styles.backBtn}
+                      onClick={() => setActiveRca(null)}
+                    >
+                      ← Back to RCA Records
+                    </button>
+
                     <div className={styles.warningBanner}>
-                      ⚠️ AI-assisted draft — requires engineer review and sign-off
+                      AI-assisted draft — requires engineer review and sign-off
                     </div>
 
                     <div className={styles.rcaForm}>

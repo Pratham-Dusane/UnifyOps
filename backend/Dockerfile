@@ -1,4 +1,4 @@
-# UnifyOps Backend — Dockerfile
+# UnifyOps Backend - Dockerfile
 # Multi-stage build for production deployment to Cloud Run
 
 FROM python:3.12-slim AS base
