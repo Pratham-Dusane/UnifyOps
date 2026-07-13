@@ -185,19 +185,44 @@ export default function LessonsDashboard() {
       {/* Header */}
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Lessons Learned &amp; Failure Intelligence</h1>
+          <span className={styles.eyebrow}>Failure intelligence</span>
+          <h1 className={styles.title}>Lessons Learned</h1>
           <p className={styles.subtitle}>
             Cross-incident pattern detection surfacing systemic failure modes with proactive
             warnings
           </p>
         </div>
+        <div className={styles.headerRight}>
+          <div className={styles.headerSignal}>
+            <span>Pending warnings</span>
+            <strong>{stats?.pending_warnings ?? 0}</strong>
+          </div>
         <button
           className={styles.detectBtn}
           onClick={handleDetect}
           disabled={isDetecting}
         >
-          {isDetecting ? "Analyzing..." : "🔍 Run Pattern Detection"}
+          {isDetecting ? "Analyzing..." : "Run Pattern Detection"}
         </button>
+        </div>
+      </div>
+
+      <div className={styles.insightRibbon}>
+        <div>
+          <span className={styles.ribbonLabel}>Review queue</span>
+          <strong>{stats?.candidate_patterns ?? 0}</strong>
+          <span>candidate patterns</span>
+        </div>
+        <div>
+          <span className={styles.ribbonLabel}>Signal strength</span>
+          <strong>{stats?.confirmed_patterns ?? 0}</strong>
+          <span>confirmed learnings</span>
+        </div>
+        <div>
+          <span className={styles.ribbonLabel}>Protection</span>
+          <strong>{stats?.total_warnings ?? 0}</strong>
+          <span>warnings generated</span>
+        </div>
       </div>
 
       {/* Stats Row */}
@@ -291,14 +316,14 @@ export default function LessonsDashboard() {
                       <span className={styles.patternMeta}>
                         {pattern.contributing_incident_ids.length} incidents
                         {pattern.contributing_equipment_tags.length > 0 &&
-                          ` · ${pattern.contributing_equipment_tags.join(", ")}`}
+                          ` - ${pattern.contributing_equipment_tags.join(", ")}`}
                       </span>
                     </div>
                     <span className={`${styles.statusBadge} ${statusClass(pattern.status)}`}>
                       {pattern.status.toUpperCase()}
                     </span>
                     <span className={styles.expandArrow}>
-                      {expandedPatternId === pattern.pattern_id ? "▲" : "▼"}
+                      {expandedPatternId === pattern.pattern_id ? "Collapse" : "Open"}
                     </span>
                   </div>
 

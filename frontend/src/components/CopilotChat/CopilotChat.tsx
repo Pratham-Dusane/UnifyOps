@@ -338,6 +338,7 @@ export default function CopilotChat() {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
+          <span className={styles.eyebrow}>Plant knowledge assistant</span>
           <h1 className={styles.title}>Expert Knowledge Copilot</h1>
           <span className={styles.subtitle}>
             Ask questions about your plant&apos;s documents, equipment, and operations
@@ -407,8 +408,15 @@ export default function CopilotChat() {
       <div className={styles.messagesArea}>
         {isEmpty ? (
           <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>
-              <CopilotLargeIcon />
+            <div className={styles.copilotHeroCard}>
+              <div className={styles.emptyIcon}>
+                <CopilotLargeIcon />
+              </div>
+              <div className={styles.heroSignalGrid}>
+                <span>Source-bound</span>
+                <span>Low-confidence flags</span>
+                <span>Plant context</span>
+              </div>
             </div>
             <h2 className={styles.emptyTitle}>How can I help you today?</h2>
             <p className={styles.emptyDescription}>

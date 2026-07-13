@@ -177,7 +177,8 @@ export default function ComplianceDashboard() {
       {/* Top Banner */}
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Regulatory Compliance & Deviation Posture</h1>
+          <span className={styles.eyebrow}>Compliance control</span>
+          <h1 className={styles.title}>Regulatory Posture</h1>
           <p className={styles.subtitle}>
             Continuous mapping of plant procedures against federal safety & environmental obligations
           </p>
@@ -194,6 +195,28 @@ export default function ComplianceDashboard() {
         </div>
       </div>
 
+      <div className={styles.postureBand}>
+        <div className={styles.postureMeter}>
+          <span>Conformance health</span>
+          <strong>{conformancePct}%</strong>
+          <div className={styles.meterTrack}>
+            <div style={{ width: `${conformancePct}%` }} />
+          </div>
+        </div>
+        <div className={styles.postureStat}>
+          <span>High severity</span>
+          <strong>{stats?.severity_counts.high ?? 0}</strong>
+        </div>
+        <div className={styles.postureStat}>
+          <span>Missing procedures</span>
+          <strong>{stats?.check_type_counts.missing_procedure ?? 0}</strong>
+        </div>
+        <div className={styles.postureStat}>
+          <span>Stale procedures</span>
+          <strong>{stats?.check_type_counts.stale_procedure ?? 0}</strong>
+        </div>
+      </div>
+
       {/* Main Layout Grid: interactive viz on top, control desk on bottom */}
       <div className={styles.workspace}>
         
@@ -202,9 +225,9 @@ export default function ComplianceDashboard() {
           
           {/* Plant Conformance Grid Visualizer */}
           <div className={styles.visualizerCard}>
-            <h3 className={styles.cardTitle}>Plant Conformance Grid (Heatmap)</h3>
+            <h3 className={styles.cardTitle}>Plant Conformance Grid</h3>
             <p className={styles.cardDesc}>
-              Filter gaps lists below by clicking on any category cell
+              Filter open gaps by unit and obligation type.
             </p>
             <div className={styles.heatmapGrid}>
               <div className={styles.heatmapHeaderRow}>
@@ -274,7 +297,7 @@ export default function ComplianceDashboard() {
                   setSelectedTypeFilter(null);
                 }}
               >
-                Clear Heatmap Filters ✕
+                Clear heatmap filters
               </button>
             )}
           </div>
@@ -282,7 +305,7 @@ export default function ComplianceDashboard() {
           {/* Audit Evidence Package Builder (Interactive Workspace) */}
           <div className={styles.packagerCard}>
             <h3 className={styles.cardTitle}>Evidence Package Builder</h3>
-            <p className={styles.cardDesc}>Select regulatory clauses to compile a citation-backed PDF report</p>
+            <p className={styles.cardDesc}>Select regulatory clauses to compile a citation-backed report.</p>
             <div className={styles.clauseList}>
               {clauses.length === 0 ? (
                 <div className={styles.emptyClauses}>
@@ -327,7 +350,7 @@ export default function ComplianceDashboard() {
           {/* Main Gaps control console */}
           <div className={`${styles.gapsCard} ${filteredGaps.length === 0 ? styles.gapsCardCollapsed : ""}`}>
             <div className={styles.gapsHeader}>
-              <h3 className={styles.cardTitle}>Open Deviations & Gaps Control</h3>
+              <h3 className={styles.cardTitle}>Open Deviations</h3>
               <span className={styles.countBadge}>
                 {filteredGaps.length === 0
                   ? "All governing procedures match regulatory conditions. No deviations found."
@@ -366,7 +389,7 @@ export default function ComplianceDashboard() {
                         </span>
                       </div>
                       <span className={styles.expandArrow}>
-                        {expandedGapId === gap.gap_id ? "▲" : "▼"}
+                        {expandedGapId === gap.gap_id ? "Collapse" : "Open"}
                       </span>
                     </div>
 
@@ -386,7 +409,7 @@ export default function ComplianceDashboard() {
                             <p className={styles.detailText}>{gap.details}</p>
                           </div>
                           <div className={styles.fullWidth}>
-                            <span className={styles.detailLabel}>Absent/Present Evidence context:</span>
+                            <span className={styles.detailLabel}>Evidence Context:</span>
                             <p className={styles.detailText}>{gap.evidence}</p>
                           </div>
                         </div>
@@ -431,7 +454,7 @@ export default function ComplianceDashboard() {
                   className={styles.closePreviewBtn}
                   onClick={() => setGeneratedPackage(null)}
                 >
-                  ✕ Close
+                  Close
                 </button>
               </div>
               <div className={styles.previewContent}>

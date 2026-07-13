@@ -416,6 +416,44 @@ export default function DocumentsPage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.pageHeader}>
+        <div>
+          <span className={styles.eyebrow}>Document intelligence</span>
+          <h2 className={styles.pageTitle}>Evidence intake and review</h2>
+          <p className={styles.pageIntro}>
+            Upload plant files, monitor extraction quality, and review the entities that feed the knowledge graph.
+          </p>
+        </div>
+        <div className={styles.headerMeta}>
+          <span>Graph-ready files</span>
+          <strong>{stats?.completed ?? 0}</strong>
+        </div>
+      </div>
+
+      <div className={styles.workflowStrip}>
+        <div className={styles.workflowStep}>
+          <span className={styles.stepNumber}>01</span>
+          <div>
+            <strong>Ingest</strong>
+            <span>Plant files, reports, drawings</span>
+          </div>
+        </div>
+        <div className={styles.workflowStep}>
+          <span className={styles.stepNumber}>02</span>
+          <div>
+            <strong>Extract</strong>
+            <span>Entities, chunks, topology</span>
+          </div>
+        </div>
+        <div className={styles.workflowStep}>
+          <span className={styles.stepNumber}>03</span>
+          <div>
+            <strong>Review</strong>
+            <span>Confidence and human checks</span>
+          </div>
+        </div>
+      </div>
+
       {/* ─── Stats Row (FR-1.7.1) ─── */}
       {stats && (
         <div className={styles.statsRow}>
@@ -461,6 +499,7 @@ export default function DocumentsPage() {
         tabIndex={0}
         aria-label="Upload documents"
       >
+        <div className={styles.uploadGlow} />
         <input
           ref={fileInputRef}
           type="file"
@@ -479,6 +518,12 @@ export default function DocumentsPage() {
           PDF, DOCX, XLSX, CSV, PNG, JPEG, TIFF, ZIP, CAD formats. Up to 200MB
           per file.
         </p>
+        <div className={styles.uploadFormats}>
+          <span>PDF</span>
+          <span>CAD</span>
+          <span>Images</span>
+          <span>Office</span>
+        </div>
       </div>
 
       {/* Upload Progress */}

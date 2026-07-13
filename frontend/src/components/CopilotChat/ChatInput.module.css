@@ -9,14 +9,18 @@
 }
 
 .inputWrapper {
+  position: relative;
   display: flex;
   align-items: flex-end;
   gap: 8px;
   padding: 8px 12px;
-  background: var(--bg-elevated);
+  background:
+    linear-gradient(90deg, rgba(59, 130, 246, 0.05), transparent 34%),
+    var(--bg-elevated);
   border: 1px solid var(--border-primary);
-  border-radius: var(--border-radius-lg);
+  border-radius: 12px;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
 .inputWrapper:focus-within {
