@@ -55,6 +55,12 @@ const navItems: NavItem[] = [
     phase: "Phase 6",
   },
   {
+    label: "Knowledge Capture",
+    href: "/interviews",
+    icon: <CaptureIcon />,
+    phase: "Phase 7",
+  },
+  {
     label: "Admin",
     href: "/admin",
     icon: <AdminIcon />,
@@ -222,6 +228,16 @@ function SettingsIcon() {
       <line x1="1" y1="14" x2="7" y2="14" />
       <line x1="9" y1="8" x2="15" y2="8" />
       <line x1="17" y1="16" x2="23" y2="16" />
+    </svg>
+  );
+}
+
+function CaptureIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="22" />
     </svg>
   );
 }

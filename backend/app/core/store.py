@@ -33,6 +33,9 @@ from app.models.copilot import (
 from app.models.maintenance import RCADraft
 from app.models.compliance import RegulatoryClause, ComplianceGap
 from app.models.lessons import IncidentEnrichment, LessonPattern, PatternWarning
+from app.models.interviews import InterviewSession
+from app.models.notifications import NotificationPreference, NotificationRecord
+
 
 DB_FILE = "db.json"
 
@@ -62,6 +65,12 @@ class DataStore:
         self._incident_enrichments: dict[str, IncidentEnrichment] = {}  # keyed by enrichment id
         self._lesson_patterns: dict[str, LessonPattern] = {}  # keyed by pattern_id
         self._pattern_warnings: dict[str, PatternWarning] = {}  # keyed by warning_id
+        # Phase 7 - Knowledge Retention, Notifications & Analytics
+        self._interview_sessions: dict[str, InterviewSession] = {}  # keyed by session_id
+        self._notification_preferences: dict[str, NotificationPreference] = {}  # keyed by user_uid
+        self._notifications: dict[str, NotificationRecord] = {}  # keyed by notification_id
+        self._model_armor_events: list[dict] = []  # Phase 9 security logging
+
 
         # Load persisted data on initialization (unless running tests)
         if os.environ.get("TESTING") != "1":
@@ -109,6 +118,16 @@ class DataStore:
                 "pattern_warnings": [
                     w.model_dump() for w in self._pattern_warnings.values()
                 ],
+                "interview_sessions": [
+                    i.model_dump() for i in self._interview_sessions.values()
+                ],
+                "notification_preferences": [
+                    p.model_dump() for p in self._notification_preferences.values()
+                ],
+                "notifications": [
+                    n.model_dump() for n in self._notifications.values()
+                ],
+                "model_armor_events": self._model_armor_events,
             }
 
             # Custom datetime serializer to ISO format
@@ -220,8 +239,28 @@ class DataStore:
                 warn = PatternWarning(**item)
                 self._pattern_warnings[warn.warning_id] = warn
 
+            for item in data.get("interview_sessions", []):
+                item["created_at"] = parse_dt(item["created_at"])
+                item["updated_at"] = parse_dt(item["updated_at"])
+                for turn in item.get("turns", []):
+                    turn["timestamp"] = parse_dt(turn["timestamp"])
+                session = InterviewSession(**item)
+                self._interview_sessions[session.session_id] = session
+
+            for item in data.get("notification_preferences", []):
+                item["updated_at"] = parse_dt(item["updated_at"])
+                pref = NotificationPreference(**item)
+                self._notification_preferences[pref.user_uid] = pref
+
+            for item in data.get("notifications", []):
+                item["created_at"] = parse_dt(item["created_at"])
+                notif = NotificationRecord(**item)
+                self._notifications[notif.id] = notif
+
+            self._model_armor_events = data.get("model_armor_events", [])
+
             print(
-                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges, {len(self._sessions)} sessions, {len(self._rca_drafts)} RCAs, {len(self._regulatory_clauses)} clauses, {len(self._compliance_gaps)} gaps, {len(self._lesson_patterns)} patterns)"
+                f"[DataStore] Loaded persisted state from db.json ({len(self._users)} users, {len(self._documents)} documents, {len(self._candidate_merges)} merges, {len(self._sessions)} sessions, {len(self._rca_drafts)} RCAs, {len(self._regulatory_clauses)} clauses, {len(self._compliance_gaps)} gaps, {len(self._lesson_patterns)} patterns, {len(self._interview_sessions)} interviews)"
             )
         except Exception as e:
             print(f"[DataStore] Failed to load state from db.json: {e}")
@@ -1141,6 +1180,79 @@ class DataStore:
 
     def list_pattern_warnings(self, org_id: str) -> list[PatternWarning]:
         return [w for w in self._pattern_warnings.values() if w.org_id == org_id]
+
+    # ──────────────────────────── Interviews (Phase 7.1) ────────────────
+    def create_interview_session(self, session: InterviewSession) -> None:
+        with self._lock:
+            self._interview_sessions[session.session_id] = session
+            self._save()
+
+    def get_interview_session(self, session_id: str) -> InterviewSession | None:
+        return self._interview_sessions.get(session_id)
+
+    def update_interview_session(self, session_id: str, **kwargs) -> InterviewSession | None:
+        with self._lock:
+            session = self._interview_sessions.get(session_id)
+            if session:
+                for k, v in kwargs.items():
+                    setattr(session, k, v)
+                session.updated_at = datetime.now(timezone.utc)
+                self._save()
+                return session
+            return None
+
+    def list_interview_sessions(self, org_id: str) -> list[InterviewSession]:
+        return [i for i in self._interview_sessions.values() if i.org_id == org_id]
+
+    # ──────────────────────────── Notification Preferences (Phase 7.2) ──
+    def get_notification_preference(self, user_uid: str) -> NotificationPreference | None:
+        return self._notification_preferences.get(user_uid)
+
+    def create_or_update_notification_preference(self, pref: NotificationPreference) -> None:
+        with self._lock:
+            self._notification_preferences[pref.user_uid] = pref
+            self._save()
+
+    # ──────────────────────────── User Notifications (Phase 7.2) ────────
+    def create_notification(self, notif: NotificationRecord) -> None:
+        with self._lock:
+            self._notifications[notif.id] = notif
+            self._save()
+
+    def list_notifications(self, org_id: str, user_uid: str) -> list[NotificationRecord]:
+        return [
+            n for n in self._notifications.values()
+            if n.org_id == org_id and n.user_uid == user_uid
+        ]
+
+    def mark_notification_read(self, notification_id: str) -> bool:
+        with self._lock:
+            notif = self._notifications.get(notification_id)
+            if notif:
+                notif.is_read = True
+                self._save()
+                return True
+            return False
+
+    def log_model_armor_event(self, source: str, status: str, prompt_snippet: str, block_reason: str) -> None:
+        with self._lock:
+            event = {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "source": source,
+                "status": status,  # "allowed" | "blocked"
+                "prompt_snippet": prompt_snippet,
+                "block_reason": block_reason
+            }
+            self._model_armor_events.append(event)
+            # Cap logs size to prevent db.json bloating
+            if len(self._model_armor_events) > 200:
+                self._model_armor_events = self._model_armor_events[-200:]
+            self._save()
+
+    def get_model_armor_events(self) -> list[dict]:
+        return self._model_armor_events
+
+
 
 
 # Singleton instance

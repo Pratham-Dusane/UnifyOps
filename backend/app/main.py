@@ -25,6 +25,8 @@ from app.routers import (
     lessons,
     notifications,
     admin,
+    interviews,
+    voice,
 )
 
 
@@ -82,3 +84,5 @@ app.include_router(compliance.router)
 app.include_router(lessons.router)
 app.include_router(notifications.router)
 app.include_router(admin.router)
+app.include_router(interviews.router)
+app.include_router(voice.router)

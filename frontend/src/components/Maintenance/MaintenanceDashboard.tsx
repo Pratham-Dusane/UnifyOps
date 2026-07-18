@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./MaintenanceDashboard.module.css";
+import CameraLookup from "./CameraLookup";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -66,6 +67,7 @@ export default function MaintenanceDashboard() {
   const [tagRcas, setTagRcas] = useState<RCADraft[]>([]);
   const [isRcasLoading, setIsRcasLoading] = useState(false);
   const [showRcaInput, setShowRcaInput] = useState(false);
+  const [showCameraLookup, setShowCameraLookup] = useState(false);
 
   const [isTimelineLoading, setIsTimelineLoading] = useState(false);
   const [isRcaGenerating, setIsRcaGenerating] = useState(false);
@@ -247,13 +249,22 @@ export default function MaintenanceDashboard() {
             Diagnose failure recurrence patterns and draft cited Root Cause Analyses
           </p>
         </div>
-        <div className={styles.tabs}>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
           <button
-            className={`${styles.tabBtn} ${activeTab === "attention" ? styles.activeTab : ""}`}
-            onClick={() => setActiveTab("attention")}
+            className={styles.tabBtn}
+            onClick={() => setShowCameraLookup(true)}
+            style={{ display: "flex", alignItems: "center", gap: "6px" }}
           >
-            Attention Signals
+            <span>📷</span> Scan Tag Plate
           </button>
+          <div className={styles.tabs}>
+            <button
+              className={`${styles.tabBtn} ${activeTab === "attention" ? styles.activeTab : ""}`}
+              onClick={() => setActiveTab("attention")}
+            >
+              Attention Signals
+            </button>
+          </div>
         </div>
       </div>
 
@@ -582,6 +593,13 @@ export default function MaintenanceDashboard() {
           )}
         </div>
       </div>
+      {showCameraLookup && (
+        <CameraLookup
+          onClose={() => setShowCameraLookup(false)}
+          onMatch={(tag) => setSelectedTag(tag)}
+          headers={getHeaders()}
+        />
+      )}
     </div>
   );
 }

@@ -45,6 +45,8 @@ from app.models.ingestion import (
 from app.services.storage import storage_service
 from app.services.document_ai import document_ai_service
 from app.services.gemini import gemini_service
+from app.services.sdp_service import sdp_service
+from fastapi.responses import StreamingResponse
 
 router = APIRouter(prefix="/api/v1/ingestion", tags=["Ingestion Service"])
 
@@ -342,6 +344,17 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
         )
         return
 
+    # Phase 9.1: Sensitive Data Protection Scanning Pipeline
+    # Scan full_text and page_texts for sensitive data (PII) before chunking/indexing
+    clean_text, info_types = sdp_service.scan_and_mask(full_text)
+    clean_page_texts = []
+    for p_txt in page_texts:
+        p_clean, _ = sdp_service.scan_and_mask(p_txt)
+        clean_page_texts.append(p_clean)
+        
+    full_text = clean_text
+    page_texts = clean_page_texts
+
     # Save OCR layout data
     layout_path = f"gs://{settings.gcs_bucket_name}/{org_id}/{doc_id}/layout.json"
     try:
@@ -360,6 +373,8 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
         PipelineStage.TEXT_EXTRACTED,
         page_count=pages,
         extracted_text_path=layout_path,
+        sensitive_data_types=info_types,
+        sensitive_data_status="redacted" if info_types else "scanned_clean",
     )
 
     # ──── 2. Classification (FR-1.2) - Now uses OCR text ────
@@ -1124,3 +1139,37 @@ async def get_ingestion_stats(
 ) -> IngestionStats:
     """Get ingestion pipeline statistics for the dashboard (FR-1.7.1)."""
     return store.get_ingestion_stats(x_user_org)
+
+
+@router.get("/documents/{document_id}/download")
+async def download_unredacted_document(
+    document_id: str,
+    x_user_org: str = Header(..., description="User's organisation ID"),
+    x_user_role: str = Header("viewer", description="User's role"),
+):
+    """
+    FR-9.1.3: The original unredacted document remains accessible in Cloud Storage
+    only to roles with explicit permission (admin/supervisor/manager).
+    """
+    doc = store.get_document(document_id)
+    if not doc or doc.org_id != x_user_org:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # Enforce role restriction (FR-9.1.3)
+    role_lower = x_user_role.lower()
+    if not ("admin" in role_lower or "supervisor" in role_lower or "manager" in role_lower):
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden: Standard operators or viewers are not permitted to download the unredacted source files containing PII."
+        )
+
+    try:
+        file_content = storage_service.download_file(doc.filename)
+        return StreamingResponse(
+            io.BytesIO(file_content),
+            media_type=doc.mime_type,
+            headers={"Content-Disposition": f"attachment; filename={doc.original_filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve file from storage: {e}")
+

@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 
 from app.core.config import settings
 from app.core.store import store
+from app.services.model_armor import model_armor_service, SecurityBlockException
+from app.services.sdp_service import sdp_service
 from app.models.copilot import (
     Citation,
     ConversationSession,
@@ -307,6 +309,7 @@ class CopilotService:
         retrieved_chunks: list[tuple[DocumentChunk, float, str]],
         conversation_history: list[ConversationTurn] | None = None,
         user_role: str = "",
+        user_language: str = "en",
     ) -> tuple[str, list[Citation], bool]:
         """
         Generate an answer using Gemini with structured citation tags.
@@ -354,6 +357,18 @@ class CopilotService:
                 "\n\nPREVIOUS CONVERSATION:\n" + "\n".join(turns_text) + "\n"
             )
 
+        lang_map = {
+            "en": "English",
+            "hi": "Hindi",
+            "mr": "Marathi",
+            "ta": "Tamil",
+            "kn": "Kannada",
+        }
+        lang_name = lang_map.get(user_language.lower(), "English")
+        language_instruction = ""
+        if lang_name != "English":
+            language_instruction = f"\n8. CRITICAL: Generate the final response in {lang_name}. Make sure it is grammatically correct and fluent, but keep all source citation tags like [source_1], [source_2] exactly as they are (do not translate the words 'source')."
+
         # Build the generation prompt
         prompt = f"""You are UnifyOps Expert Knowledge Copilot - an industrial knowledge assistant
 for plant operations. You answer questions about equipment, maintenance, safety procedures,
@@ -366,7 +381,7 @@ CRITICAL RULES:
 4. Be concise and technically precise - this is for industrial plant professionals.
 5. If the sources don't contain enough information, say so honestly.
 6. Never fabricate equipment tags, dates, measurements, or procedures.
-{f"7. The user's role is '{user_role}' - tailor technical depth accordingly." if user_role else ""}
+{f"7. The user's role is '{user_role}' - tailor technical depth accordingly." if user_role else ""}{language_instruction}
 
 SOURCE DOCUMENTS:
 {context_block}
@@ -487,6 +502,13 @@ Provide a clear, well-structured answer with citation tags."""
 
         return citations, has_uncited
 
+    def _translate_text(self, text: str, target_lang: str) -> str:
+        """Helper to translate text using Gemini with local fallback (Phase 7.4)."""
+        prompt = f"""You are a professional translator. Translate the following text into {target_lang}.
+Text: "{text}"
+Provide ONLY the translated text. Do not add any introduction, greeting, or explanations."""
+        return self._call_gemini(prompt).strip()
+
     # ──────────────────── 5. Confidence Scoring (FR-3.4.1) ─────────────────
 
     def compute_confidence(
@@ -572,9 +594,11 @@ Provide a clear, well-structured answer with citation tags."""
         user_role: str = "",
         plant_id: str = "",
         department: str = "",
+        user_language: str = "en",
     ) -> CopilotResponse:
         """
         Full RAG pipeline: parse → retrieve → generate → cite → score.
+        Supports regional language translation (Phase 7.4).
         """
         raw_query = query.query
 
@@ -591,14 +615,53 @@ Provide a clear, well-structured answer with citation tags."""
         user_turn = ConversationTurn(role="user", content=raw_query)
         store.add_turn_to_session(session_id, user_turn)
 
+        # Model Armor Screening (FR-9.2)
+        try:
+            model_armor_service.screen_interaction(resolved_query, "copilot-agent")
+        except SecurityBlockException as e:
+            blocked_response = CopilotResponse(
+                answer=f"Blocked by Model Armor: {e.reason}",
+                citations=[],
+                confidence_score=0.0,
+                is_low_confidence=True,
+                session_id=session_id,
+                has_uncited_claims=False,
+                retrieval_count=0
+            )
+            # Log the blocked assistant response
+            assistant_turn = ConversationTurn(
+                role="assistant",
+                content=blocked_response.answer,
+                citations=[],
+                confidence_score=0.0
+            )
+            store.add_turn_to_session(session_id, assistant_turn)
+            return blocked_response
+
+        # Regional Language Support (FR-7.4.1)
+        lang_map = {
+            "en": "English",
+            "hi": "Hindi",
+            "mr": "Marathi",
+            "ta": "Tamil",
+            "kn": "Kannada",
+        }
+        lang_name = lang_map.get(user_language.lower(), "English")
+        
+        # Translate query to English for retrieval and entity parsing
+        if lang_name != "English":
+            query_for_retrieval = self._translate_text(resolved_query, "English")
+        else:
+            query_for_retrieval = resolved_query
+
         # Step 1: Parse entity mentions from query (FR-3.2.2)
-        mentions = self.parse_entity_mentions(resolved_query)
+        mentions = self.parse_entity_mentions(query_for_retrieval)
         entity_ids = self.resolve_entity_ids(org_id, mentions)
 
         # Step 2: Hybrid retrieval (FR-3.2.1)
         retrieved = self.retrieve(
             org_id=org_id,
-            query=resolved_query,
+            query=query_for_retrieval,
             entity_ids=entity_ids,
             plant_id=plant_id,
             department=department,
@@ -607,11 +670,21 @@ Provide a clear, well-structured answer with citation tags."""
         # Step 3: Generate answer with citations (FR-3.3.1)
         conversation_history = session.turns[:-1]  # Exclude the turn we just added
         answer_text, citations, has_uncited = self.generate_answer(
-            query=resolved_query,
+            query=query_for_retrieval,
             retrieved_chunks=retrieved,
             conversation_history=conversation_history if len(conversation_history) > 0 else None,
             user_role=user_role,
+            user_language=user_language,
         )
+
+        # Screen output response
+        try:
+            model_armor_service.screen_interaction(answer_text, "copilot-agent")
+        except SecurityBlockException as e:
+            answer_text = f"Response blocked by Model Armor due to sensitive content leakage: {e.reason}"
+
+        # Resolve sensitive PII data according to user role
+        answer_text = sdp_service.resolve_sensitive_data(answer_text, user_role)
 
         # Step 4: Compute confidence (FR-3.4.1)
         confidence = self.compute_confidence(retrieved, citations, answer_text)

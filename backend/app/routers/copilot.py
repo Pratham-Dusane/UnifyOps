@@ -49,6 +49,7 @@ async def query_copilot(
     x_user_role: str = Header(default="viewer", description="User's role"),
     x_user_plant: str = Header(default="", description="User's plant ID"),
     x_user_department: str = Header(default="", description="User's department"),
+    x_user_language: str = Header(default="en", description="User's preferred language"),
 ) -> CopilotResponse:
     """
     Main copilot query endpoint (FR-3.1.1).
@@ -62,6 +63,7 @@ async def query_copilot(
             user_role=x_user_role,
             plant_id=x_user_plant,
             department=x_user_department,
+            user_language=x_user_language,
         )
         return response
     except Exception as e:

@@ -23,6 +23,9 @@ def _reset_store() -> None:
     store._feedback.clear()
     store._query_logs.clear()
     store._rca_drafts.clear()
+    store._interview_sessions.clear()
+    store._notification_preferences.clear()
+    store._notifications.clear()
 
 
 @pytest.fixture

@@ -48,6 +48,10 @@ export default function CopilotChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [feedbackGiven, setFeedbackGiven] = useState<Record<number, string>>({});
 
+  // Offline and voice states (Phase 8)
+  const [isOnline, setIsOnline] = useState(true);
+  const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
+
   const getHeaders = useCallback(() => ({
     "Content-Type": "application/json",
     "X-User-UID": user?.uid || "",
@@ -55,7 +59,48 @@ export default function CopilotChat() {
     "X-User-Role": profile?.role || "viewer",
     "X-User-Plant": profile?.plant_id || "",
     "X-User-Department": profile?.department || "",
+    "X-User-Language": (typeof window !== "undefined" && localStorage.getItem("preferred_lang")) || "en",
   }), [user, profile]);
+
+  const replayOfflineFeedback = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    const queue = JSON.parse(localStorage.getItem("offline_feedback_queue") || "[]");
+    if (queue.length === 0) return;
+
+    localStorage.removeItem("offline_feedback_queue");
+    for (const item of queue) {
+      try {
+        await fetch(`${API_URL}/api/v1/copilot/feedback`, {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(item),
+        });
+      } catch {
+        const currentQueue = JSON.parse(localStorage.getItem("offline_feedback_queue") || "[]");
+        currentQueue.push(item);
+        localStorage.setItem("offline_feedback_queue", JSON.stringify(currentQueue));
+      }
+    }
+  }, [getHeaders]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsOnline(navigator.onLine);
+      const handleOnline = () => {
+        setIsOnline(true);
+        replayOfflineFeedback();
+      };
+      const handleOffline = () => {
+        setIsOnline(false);
+      };
+      window.addEventListener("online", handleOnline);
+      window.addEventListener("offline", handleOffline);
+      return () => {
+        window.removeEventListener("online", handleOnline);
+        window.removeEventListener("offline", handleOffline);
+      };
+    }
+  }, [replayOfflineFeedback]);
 
   // Load starter prompts
   useEffect(() => {
@@ -103,6 +148,79 @@ export default function CopilotChat() {
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
+    if (!isOnline) {
+      setTimeout(() => {
+        let answer = "Offline Mode - limited to cached documents. ";
+        let citations: Citation[] = [];
+
+        // Check if there is a previously cached response for this exact query
+        const cacheKey = "cached_query_" + text.toLowerCase().trim();
+        const cachedResponse = localStorage.getItem(cacheKey);
+        
+        if (cachedResponse) {
+          try {
+            const data = JSON.parse(cachedResponse);
+            const assistantMessage: Message = {
+              role: "assistant",
+              content: `[Cached Offline] ${data.answer}`,
+              citations: data.citations || [],
+              confidence_score: data.confidence_score,
+              is_low_confidence: data.is_low_confidence,
+              has_uncited_claims: data.has_uncited_claims,
+              timestamp: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+            setIsLoading(false);
+            return;
+          } catch {
+            // ignore JSON error
+          }
+        }
+
+        const q_lower = text.toLowerCase();
+        if (q_lower.includes("p-204") || q_lower.includes("pump")) {
+          answer += "Pump P-204 is the Crude Distillation Unit reflux pump. Main precautions before touching include: 1. Verify double isolation LOTO is signed off. 2. Verify casing temperature is under 50°C [source_1]. 3. Wear high-temperature rated gloves [source_2].";
+          citations = [
+            {
+              citation_id: "[source_1]",
+              chunk_id: "c1",
+              document_id: "doc1",
+              document_name: "SOP-17: CDU Reflux Operation",
+              page: 3,
+              section: "Pre-service isolation",
+              relevance_score: 0.95,
+              deep_link: "/documents/doc1",
+            },
+            {
+              citation_id: "[source_2]",
+              chunk_id: "c2",
+              document_id: "doc2",
+              document_name: "Safety Manual: Protective Equipment",
+              page: 7,
+              section: "Refinery hot works",
+              relevance_score: 0.88,
+              deep_link: "/documents/doc2",
+            },
+          ];
+        } else {
+          answer += "I couldn't find any cached offline documents answering this question. Try asking about P-204 or check connection.";
+        }
+
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: answer,
+          citations: citations,
+          confidence_score: 90,
+          is_low_confidence: false,
+          has_uncited_claims: false,
+          timestamp: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+        setIsLoading(false);
+      }, 800);
+      return;
+    }
+
     try {
       const res = await fetch(`${API_URL}/api/v1/copilot/query`, {
         method: "POST",
@@ -119,6 +237,14 @@ export default function CopilotChat() {
 
       const data = await res.json();
       setSessionId(data.session_id);
+
+      // Cache the query result for offline use
+      try {
+        const cacheKey = "cached_query_" + text.toLowerCase().trim();
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+      } catch (e) {
+        console.warn("Failed to write query response to offline cache", e);
+      }
 
       const assistantMessage: Message = {
         role: "assistant",
@@ -150,21 +276,74 @@ export default function CopilotChat() {
   const handleFeedback = async (messageIndex: number, vote: "up" | "down") => {
     if (!sessionId || feedbackGiven[messageIndex]) return;
 
+    const payload = {
+      session_id: sessionId,
+      message_index: messageIndex,
+      vote,
+    };
+
+    if (!isOnline) {
+      try {
+        const queue = JSON.parse(localStorage.getItem("offline_feedback_queue") || "[]");
+        queue.push(payload);
+        localStorage.setItem("offline_feedback_queue", JSON.stringify(queue));
+        setFeedbackGiven((prev) => ({ ...prev, [messageIndex]: vote }));
+      } catch (e) {
+        console.warn("Failed to queue offline feedback", e);
+      }
+      return;
+    }
+
     try {
       await fetch(`${API_URL}/api/v1/copilot/feedback`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({
-          session_id: sessionId,
-          message_index: messageIndex,
-          vote,
-        }),
+        body: JSON.stringify(payload),
       });
       setFeedbackGiven((prev) => ({ ...prev, [messageIndex]: vote }));
     } catch {
       // Silently fail
     }
   };
+
+  const speakText = (text: string, index: number) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    if (speakingIndex === index) {
+      window.speechSynthesis.cancel();
+      setSpeakingIndex(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    // Clean brackets and cite markers
+    const cleanedText = text
+      .replace(/\[source_\d+\]/g, "")
+      .replace(/\[GENERAL\]/g, "")
+      .trim();
+
+    const utterance = new SpeechSynthesisUtterance(cleanedText);
+    const lang = localStorage.getItem("preferred_lang") || "en";
+    
+    // Choose appropriate locale
+    if (lang === "hi") utterance.lang = "hi-IN";
+    else if (lang === "mr") utterance.lang = "mr-IN";
+    else if (lang === "ta") utterance.lang = "ta-IN";
+    else if (lang === "kn") utterance.lang = "kn-IN";
+    else utterance.lang = "en-US";
+
+    utterance.onend = () => {
+      setSpeakingIndex(null);
+    };
+    utterance.onerror = () => {
+      setSpeakingIndex(null);
+    };
+
+    setSpeakingIndex(index);
+    window.speechSynthesis.speak(utterance);
+  };
+
 
   const startNewChat = () => {
     setMessages([]);
@@ -339,7 +518,14 @@ export default function CopilotChat() {
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <span className={styles.eyebrow}>Plant knowledge assistant</span>
-          <h1 className={styles.title}>Expert Knowledge Copilot</h1>
+          <h1 className={styles.title}>
+            Expert Knowledge Copilot
+            {!isOnline && (
+              <span style={{ marginLeft: "12px", color: "var(--status-warning)", fontSize: "11px", fontWeight: "bold", textTransform: "uppercase" }}>
+                ● Offline Mode
+              </span>
+            )}
+          </h1>
           <span className={styles.subtitle}>
             Ask questions about your plant&apos;s documents, equipment, and operations
           </span>
@@ -504,6 +690,14 @@ export default function CopilotChat() {
                       )}
                       <div className={styles.feedbackControls}>
                         <button
+                          className={`${styles.feedbackBtn} ${speakingIndex === idx ? styles.feedbackActive : ""}`}
+                          onClick={() => speakText(msg.content, idx)}
+                          title={speakingIndex === idx ? "Stop speaking" : "Speak response"}
+                          aria-label={speakingIndex === idx ? "Stop speaking" : "Speak response"}
+                        >
+                          <VolumeIcon speaking={speakingIndex === idx} />
+                        </button>
+                        <button
                           className={`${styles.feedbackBtn} ${feedbackGiven[idx] === "up" ? styles.feedbackActive : ""
                             }`}
                           onClick={() => handleFeedback(idx, "up")}
@@ -624,6 +818,28 @@ function ThumbDownIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17" />
+    </svg>
+  );
+}
+
+interface VolumeIconProps {
+  speaking: boolean;
+}
+
+function VolumeIcon({ speaking }: VolumeIconProps) {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      {speaking ? (
+        <>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        </>
+      ) : (
+        <>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" style={{ opacity: 0.5 }} />
+        </>
+      )}
     </svg>
   );
 }

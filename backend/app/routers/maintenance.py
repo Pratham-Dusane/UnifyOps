@@ -10,10 +10,13 @@ Endpoints:
 """
 
 from datetime import datetime, timezone
-from fastapi import APIRouter, Header, HTTPException, Query
+from fastapi import APIRouter, Header, HTTPException, Query, UploadFile, File
 
 from app.core.config import settings
 from app.core.store import store
+from app.services.ocr_service import ocr_service
+import re
+
 from app.models.common import HealthResponse
 from app.models.maintenance import (
     TimelineEvent,
@@ -23,6 +26,7 @@ from app.models.maintenance import (
     RCADraft,
     RCAApproval,
 )
+from app.models.ingestion import EntityType
 from app.services.maintenance_service import maintenance_service
 
 router = APIRouter(prefix="/api/v1/maintenance", tags=["Maintenance & RCA Service"])
@@ -163,3 +167,69 @@ async def list_equipment_rcas(
     """Retrieve all RCAs generated for a specific equipment tag."""
     rcas = [r for r in store.list_rca_drafts(x_user_org) if r.equipment_tag.upper() == tag.upper()]
     return rcas
+
+
+@router.post("/equipment/lookup-camera")
+async def lookup_equipment_via_camera(
+    file: UploadFile = File(...),
+    x_user_org: str = Header(..., description="User's organisation ID"),
+) -> dict:
+    """
+    FR-8.3.1: OCRs uploaded image of equipment tag plate,
+    resolves against existing equipment registry (normalisation & fuzzy match).
+    """
+    try:
+        content = await file.read()
+        ocr_text = ocr_service.extract_text_from_image(
+            content, file.content_type or "image/png", file.filename or ""
+        )
+
+        # Look for tag patterns (e.g. P-204, V-301)
+        tag_pattern = re.compile(r"\b([P|V|HE|C|HX]\-?\d{3}[A-Z]?)\b", re.IGNORECASE)
+        matches = tag_pattern.findall(ocr_text)
+
+        if not matches:
+            return {
+                "matched": False,
+                "extracted_text": ocr_text,
+                "message": "No equipment tags recognized from photo. Try manual search.",
+            }
+
+        # Query existing equipment entities in organization
+        all_ents = store.get_entities_by_org(x_user_org)
+        equip_entities = [e for e in all_ents if e.entity_type == EntityType.EQUIPMENT_TAG]
+
+        matched_entity = None
+        for match in matches:
+            norm_match = match.upper().replace(" ", "").replace("-", "").replace("_", "")
+            for eq in equip_entities:
+                norm_eq = eq.value.upper().replace(" ", "").replace("-", "").replace("_", "")
+                if norm_match == norm_eq:
+                    matched_entity = eq
+                    break
+            if matched_entity:
+                break
+
+        if matched_entity:
+            # Found exact resolved node
+            return {
+                "matched": True,
+                "equipment_tag": matched_entity.value,
+                "unit": getattr(matched_entity, "unit", "CDU"),
+                "timeline_url": f"/maintenance?tag={matched_entity.value}",
+            }
+
+        # Fallback to the first matched text token if not resolved in store yet
+        return {
+            "matched": True,
+            "equipment_tag": matches[0].upper(),
+            "unit": "Unknown Unit",
+            "timeline_url": f"/maintenance?tag={matches[0].upper()}",
+            "message": "Extracted tag not found in registry; showing dynamic timeline search.",
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Camera equipment lookup failed: {str(e)}",
+        )
+

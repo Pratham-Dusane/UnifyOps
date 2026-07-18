@@ -108,13 +108,19 @@ Regulation Text: {text}"""
 
         if gemini_service.enabled:
             try:
+                from app.services.model_armor import model_armor_service
+                # Screen input
+                model_armor_service.screen_interaction(prompt, "compliance-agent")
+
                 import google.generativeai as genai
                 model = genai.GenerativeModel("gemini-2.0-flash")
                 res = model.generate_content(prompt)
                 if res.text:
+                    # Screen output
+                    model_armor_service.screen_interaction(res.text, "compliance-agent")
                     return res.text.strip()
-            except:
-                pass
+            except Exception as e:
+                print(f"[ComplianceService] Clause summary failed or blocked: {e}")
 
         # Fallback summary
         return text[:100] + ("..." if len(text) > 100 else "")

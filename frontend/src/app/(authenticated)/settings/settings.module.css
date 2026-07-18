@@ -109,3 +109,104 @@
   color: var(--text-secondary);
   min-width: 36px;
 }
+
+.selectInput {
+  padding: 8px 12px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-md);
+  font-size: 13px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  outline: none;
+  min-width: 160px;
+}
+
+.selectInput:focus {
+  border-color: var(--accent-primary);
+}
+
+.sectionDesc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.prefTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13px;
+}
+
+.prefTh {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid var(--border-primary);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.prefTr {
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.prefTd {
+  padding: 12px 10px;
+  vertical-align: middle;
+  color: var(--text-primary);
+}
+
+.prefTd input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent-primary);
+}
+
+.frequencySelect {
+  padding: 6px 10px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  outline: none;
+  font-size: 12px;
+}
+
+.saveBtn {
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
+  padding: 10px 20px;
+  border-radius: var(--border-radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color var(--transition-fast);
+}
+
+.saveBtn:hover:not(:disabled) {
+  background-color: var(--accent-primary-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.alertError {
+  background-color: var(--status-error-light);
+  color: var(--status-error);
+  padding: 12px;
+  border-radius: var(--border-radius-md);
+  font-size: 13px;
+  margin-top: 16px;
+  line-height: 1.5;
+}
+
+.alertSuccess {
+  background-color: var(--status-success-light);
+  color: var(--status-success);
+  padding: 12px;
+  border-radius: var(--border-radius-md);
+  font-size: 13px;
+  margin-top: 16px;
+}

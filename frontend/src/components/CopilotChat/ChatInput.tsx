@@ -40,6 +40,52 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
     }
   };
 
+  const [isListening, setIsListening] = useState(false);
+  const [recognition, setRecognition] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const rec = new SpeechRecognition();
+        rec.continuous = false;
+        rec.interimResults = false;
+        rec.lang = "en-US";
+
+        rec.onstart = () => {
+          setIsListening(true);
+        };
+
+        rec.onend = () => {
+          setIsListening(false);
+        };
+
+        rec.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          if (transcript) {
+            setValue(transcript);
+          }
+        };
+
+        rec.onerror = () => {
+          setIsListening(false);
+        };
+
+        setRecognition(rec);
+      }
+    }
+  }, []);
+
+  const toggleListening = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!recognition) return;
+    if (isListening) {
+      recognition.stop();
+    } else {
+      recognition.start();
+    }
+  };
+
   return (
     <form className={styles.inputContainer} onSubmit={handleSubmit}>
       <div className={styles.inputWrapper}>
@@ -55,6 +101,18 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
           aria-label="Ask a question"
           id="copilot-query-input"
         />
+        {recognition && (
+          <button
+            type="button"
+            className={`${styles.micBtn} ${isListening ? styles.micBtnActive : ""}`}
+            onClick={toggleListening}
+            disabled={isLoading}
+            aria-label={isListening ? "Stop listening" : "Start voice input"}
+            title={isListening ? "Stop listening" : "Start voice input"}
+          >
+            <MicIcon />
+          </button>
+        )}
         <button
           type="submit"
           className={`${styles.sendBtn} ${
@@ -75,6 +133,16 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
         Answers are AI-generated from your documents. Always verify critical information.
       </p>
     </form>
+  );
+}
+
+function MicIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="22" />
+    </svg>
   );
 }
 

@@ -21,7 +21,9 @@ class DocumentType(str, Enum):
     OPERATING_INSTRUCTION = "operating_instruction"
     INCIDENT_REPORT = "incident_report"  # Incident / near-miss reports
     REGULATORY = "regulatory"  # Regulatory documents
+    CAPTURED_KNOWLEDGE = "captured_knowledge"  # Phase 7 Captured Knowledge transcripts
     UNKNOWN = "unknown"  # Unclassified
+
 
 
 class PipelineStage(str, Enum):
@@ -93,6 +95,8 @@ class DocumentRecord(BaseModel):
     reviewed_by: str | None = Field(default=None)
     reviewed_at: datetime | None = Field(default=None)
     status: str = Field(default="active", description="active|superseded (FR-2.6.2)")
+    sensitive_data_types: list[str] = Field(default_factory=list)
+    sensitive_data_status: str = Field(default="scanned_clean")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 

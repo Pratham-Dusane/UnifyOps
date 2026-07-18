@@ -1,10 +1,22 @@
 "use client";
 
-import React from "react";
-import { usePathname } from "next/navigation";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import styles from "./TopBar.module.css";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+interface NotificationRecord {
+  id: string;
+  category: "compliance_gap" | "maintenance_attention" | "safety_warning";
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
 
 const routeNames: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -14,14 +26,21 @@ const routeNames: Record<string, string> = {
   "/maintenance": "Maintenance Intelligence",
   "/compliance": "Regulatory Compliance",
   "/lessons": "Lessons Learned",
+  "/interviews": "Knowledge Capture Centre",
   "/admin": "Administration",
   "/settings": "Settings",
 };
 
 export default function TopBar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+
+  // Notification states
+  const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const currentRoute = Object.keys(routeNames).find(
     (key) => pathname === key || (key !== "/dashboard" && pathname.startsWith(key))
@@ -30,6 +49,87 @@ export default function TopBar() {
 
   const userInitial = profile?.display_name?.[0]?.toUpperCase() ||
     user?.email?.[0]?.toUpperCase() || "U";
+
+  const getHeaders = useCallback(() => ({
+    "Content-Type": "application/json",
+    "X-User-UID": user?.uid || "",
+    "X-User-Org": profile?.org_id || "",
+    "X-User-Role": profile?.role || "viewer",
+    "X-User-Plant": profile?.plant_id || "",
+    "X-User-Department": profile?.department || "",
+  }), [user, profile]);
+
+  const loadNotifications = useCallback(async () => {
+    if (!user || !profile) return;
+    try {
+      const res = await fetch(`${API_URL}/api/v1/notifications`, {
+        headers: getHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data);
+      }
+    } catch {
+      // Keep empty
+    }
+  }, [user, profile, getHeaders]);
+
+  useEffect(() => {
+    if (user && profile) {
+      loadNotifications();
+    }
+  }, [user, profile, loadNotifications]);
+
+  // Poll for notifications every 30 seconds
+  useEffect(() => {
+    if (!user || !profile) return;
+    const interval = setInterval(() => {
+      loadNotifications();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [user, profile, loadNotifications]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleMarkAsRead = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const res = await fetch(`${API_URL}/api/v1/notifications/${id}/read`, {
+        method: "POST",
+        headers: getHeaders(),
+      });
+      if (res.ok) {
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+        );
+      }
+    } catch {
+      // Ignore error
+    }
+  };
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const getCategoryClass = (cat: string) => {
+    if (cat === "safety_warning") return styles.catSafety;
+    if (cat === "maintenance_attention") return styles.catMaintenance;
+    return styles.catCompliance;
+  };
+
+  const getCategoryLabel = (cat: string) => {
+    if (cat === "safety_warning") return "Safety";
+    if (cat === "maintenance_attention") return "Attention";
+    return "Compliance";
+  };
 
   return (
     <header className={styles.topbar}>
@@ -51,10 +151,75 @@ export default function TopBar() {
           {theme === "light" ? <MoonIcon /> : <SunIcon />}
         </button>
 
-        {/* Notification bell placeholder */}
-        <button className={styles.iconBtn} aria-label="Notifications" title="Notifications">
-          <BellIcon />
-        </button>
+        {/* Notifications Dropdown (Phase 7.2) */}
+        <div className={styles.notificationContainer} ref={dropdownRef}>
+          <button
+            className={styles.iconBtn}
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Notifications"
+            title="Notifications"
+          >
+            <BellIcon />
+            {unreadCount > 0 && <span className={styles.badge}>{unreadCount}</span>}
+          </button>
+
+          {isOpen && (
+            <div className={styles.dropdown}>
+              <div className={styles.dropdownHeader}>
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
+                    {unreadCount} unread
+                  </span>
+                )}
+              </div>
+
+              <ul className={styles.dropdownList}>
+                {notifications.length === 0 ? (
+                  <li className={styles.noNotifs}>No notifications</li>
+                ) : (
+                  notifications.map((n) => (
+                    <li
+                      key={n.id}
+                      className={`${styles.dropdownItem} ${!n.is_read ? styles.unreadItem : ""}`}
+                    >
+                      <div className={styles.itemHeader}>
+                        <span className={`${styles.itemCategory} ${getCategoryClass(n.category)}`}>
+                          {getCategoryLabel(n.category)}
+                        </span>
+                        {!n.is_read && (
+                          <button
+                            className={styles.readBtn}
+                            onClick={(e) => handleMarkAsRead(n.id, e)}
+                          >
+                            Mark Read
+                          </button>
+                        )}
+                      </div>
+                      <span className={styles.itemTitle}>{n.title}</span>
+                      <p className={styles.itemMessage}>{n.message}</p>
+                      <div className={styles.itemFooter}>
+                        <span className={styles.itemTime}>
+                          {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </li>
+                  ))
+                )}
+              </ul>
+
+              <div className={styles.dropdownFooter}>
+                <Link
+                  href="/settings"
+                  className={styles.settingsLink}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Configure Notification Settings
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* User menu */}
         <div className={styles.userSection}>

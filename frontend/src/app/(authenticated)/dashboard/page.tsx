@@ -123,11 +123,26 @@ export default function DashboardPage() {
   const [totalDocs, setTotalDocs] = useState(0);
   const [attentionItems, setAttentionItems] = useState<AttentionItem[]>([]);
   const [openGapsCount, setOpenGapsCount] = useState(0);
+  const [completenessScore, setCompletenessScore] = useState(82.4);
+  const [lessonPatternsCount, setLessonPatternsCount] = useState(3);
   const [selectedAsset, setSelectedAsset] = useState<AttentionItem | null>(fallbackAssets[0]);
   const [activeLens, setActiveLens] = useState<DemoLens>("plant_head");
   const [quickLessonText, setQuickLessonText] = useState("");
   const [lessonSubmitted, setLessonSubmitted] = useState(false);
   const [isSubmittingLesson, setIsSubmittingLesson] = useState(false);
+
+  // Security stats state (Phase 9)
+  const [securityStats, setSecurityStats] = useState<{
+    model_armor_blocked_count: number;
+    model_armor_total_count: number;
+    sensitive_documents_count: number;
+    sensitive_documents: { id: string; name: string; types: string[] }[];
+  }>({
+    model_armor_blocked_count: 0,
+    model_armor_total_count: 0,
+    sensitive_documents_count: 0,
+    sensitive_documents: [],
+  });
 
   const getHeaders = useCallback(() => ({
     "Content-Type": "application/json",
@@ -141,10 +156,11 @@ export default function DashboardPage() {
   const loadDashboardData = useCallback(async () => {
     try {
       const headers = getHeaders();
-      const [docsRes, maintRes, gapsRes] = await Promise.all([
+      const [docsRes, maintRes, gapsRes, analyticsRes] = await Promise.all([
         fetch(`${API_URL}/api/v1/ingestion/documents`, { headers }),
         fetch(`${API_URL}/api/v1/maintenance/attention`, { headers }),
         fetch(`${API_URL}/api/v1/compliance/gaps`, { headers }),
+        fetch(`${API_URL}/api/v1/admin/dashboard-analytics`, { headers }),
       ]);
 
       if (docsRes.ok) {
@@ -163,6 +179,21 @@ export default function DashboardPage() {
       if (gapsRes.ok) {
         const data = (await gapsRes.json()) as ComplianceGap[];
         setOpenGapsCount(data.filter((g) => g.status === "open").length);
+      }
+
+      if (analyticsRes.ok) {
+        const data = await analyticsRes.json();
+        if (data.completeness_score !== undefined) setCompletenessScore(data.completeness_score);
+        if (data.confirmed_lesson_patterns !== undefined) setLessonPatternsCount(data.confirmed_lesson_patterns);
+        if (data.attention_equipment && data.attention_equipment.length > 0) {
+          setAttentionItems(data.attention_equipment);
+        }
+        setSecurityStats({
+          model_armor_blocked_count: data.model_armor_blocked_count || 0,
+          model_armor_total_count: data.model_armor_total_count || 0,
+          sensitive_documents_count: data.sensitive_documents_count || 0,
+          sensitive_documents: data.sensitive_documents || [],
+        });
       }
     } catch {
       // Fallback data keeps the hackathon demo readable when services are not running.
@@ -267,7 +298,14 @@ export default function DashboardPage() {
             <span className={styles.linkLineFive} />
           </div>
           <div className={styles.signalGrid}>
-            {substrateSignals.map((signal) => (
+            {[
+              { label: "P&ID", value: "48 tags" },
+              { label: "SOP", value: "31 steps" },
+              { label: "WO", value: "92 events" },
+              { label: "Incidents", value: "12 cases" },
+              { label: "Clauses", value: "24 rules" },
+              { label: "Lessons", value: `${lessonPatternsCount} fixes` },
+            ].map((signal) => (
               <span key={signal.label}>
                 <strong>{signal.value}</strong>
                 {signal.label}
@@ -277,7 +315,7 @@ export default function DashboardPage() {
           <div className={styles.brainStats}>
             <span>{docsForDisplay} docs</span>
             <span>{graphLinks} graph links</span>
-            <span>{highestRisk}% top risk</span>
+            <span>{completenessScore}% graph integrity</span>
           </div>
         </div>
       </section>
@@ -299,7 +337,7 @@ export default function DashboardPage() {
         <MetricCard label="Search time saved" value="70%" detail="From hunting files to cited answers" tone="blue" />
         <MetricCard label="Plant conformance" value={`${conformancePct}%`} detail={`${gapsForDisplay} open evidence gaps`} tone="green" />
         <MetricCard label="Assets under alert" value={String(assets.length)} detail="Cross-linked failure signals" tone="red" />
-        <MetricCard label="Knowledge coverage" value={`${docsForDisplay}`} detail="Parsed operational files" tone="amber" />
+        <MetricCard label="Knowledge completeness" value={`${completenessScore}%`} detail="Dynamic graph completeness metric" tone="amber" />
       </section>
 
       <section className={styles.storyRail}>
@@ -390,6 +428,64 @@ export default function DashboardPage() {
             {lessonSubmitted && <span className={styles.successText}>Archived into Lessons Learned.</span>}
           </form>
         </aside>
+      </section>
+
+      {/* Security Telemetry Section (Phase 9) */}
+      <section className={styles.securityTelemetry} aria-label="Security and governance logs">
+        <div className={styles.telemetryHeader}>
+          <div>
+            <span className={styles.kicker}>VPC-SC Perimeter & Agent Shielding</span>
+            <h3 className={styles.telemetryTitle}>Security & Governance Telemetry</h3>
+          </div>
+          <span className={styles.telemetryBadge}>
+            ● Model Armor Active · {securityStats.model_armor_total_count} scans
+          </span>
+        </div>
+
+        <div className={styles.telemetryGrid}>
+          {/* Blocked Attacks summary */}
+          <div className={styles.telemetryCard}>
+            <div className={styles.telemetryCardHeader}>
+              <span className={styles.telemetryCardIcon}>🛡️</span>
+              <div>
+                <strong>Model Armor Shield</strong>
+                <small>Prompt injection blocks</small>
+              </div>
+            </div>
+            <div className={styles.telemetryBigNumber}>
+              {securityStats.model_armor_blocked_count} <small>Blocked</small>
+            </div>
+            <p className={styles.telemetryText}>
+              All queries and agent inputs are screened dynamically for jailbreaks and prompt injections.
+            </p>
+          </div>
+
+          {/* Sensitive Documents summary */}
+          <div className={styles.telemetryCard}>
+            <div className={styles.telemetryCardHeader}>
+              <span className={styles.telemetryCardIcon}>🔍</span>
+              <div>
+                <strong>PII / SDP Scans</strong>
+                <small>Documents redacted during ingestion</small>
+              </div>
+            </div>
+            <div className={styles.telemetryBigNumber}>
+              {securityStats.sensitive_documents_count} <small>Redacted</small>
+            </div>
+            <div className={styles.sensitiveList}>
+              {securityStats.sensitive_documents.length === 0 ? (
+                <p className={styles.telemetryText} style={{ margin: 0 }}>No documents containing PII detected.</p>
+              ) : (
+                securityStats.sensitive_documents.slice(0, 3).map((doc) => (
+                  <div key={doc.id} className={styles.sensitiveItem}>
+                    <span className={styles.sensitiveDocName}>{doc.name}</span>
+                    <small className={styles.sensitiveTypes}>{doc.types.join(", ")}</small>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   );

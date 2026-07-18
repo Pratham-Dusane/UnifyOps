@@ -11,6 +11,7 @@ Features:
 import json
 import google.generativeai as genai
 from app.core.config import settings
+from app.services.model_armor import model_armor_service, SecurityBlockException
 
 
 class GeminiService:
@@ -46,9 +47,15 @@ class GeminiService:
                 model = genai.GenerativeModel("gemini-2.0-flash")
                 prompt = self._build_extraction_prompt(doc_text, doc_type)
 
+                # Screen input prompt
+                model_armor_service.screen_interaction(prompt, "entity-extractor")
+
                 response = model.generate_content(
                     prompt, generation_config={"response_mime_type": "application/json"}
                 )
+
+                # Screen output response
+                model_armor_service.screen_interaction(response.text, "entity-extractor")
 
                 try:
                     entities = json.loads(response.text)
@@ -226,6 +233,10 @@ Return ONLY a JSON object with key "entities" containing a list. Each entity:
         """
         if self.enabled and text_chunks:
             try:
+                # Screen each chunk text before generating embeddings
+                for chunk in text_chunks:
+                    model_armor_service.screen_interaction(chunk, "embedding-service")
+
                 response = genai.embed_content(
                     model="models/gemini-embedding-exp-03-07",
                     content=text_chunks,

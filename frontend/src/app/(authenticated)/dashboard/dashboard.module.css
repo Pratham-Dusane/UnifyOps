@@ -617,3 +617,134 @@
     flex-direction: column;
   }
 }
+
+/* Security & Governance Telemetry Styles (Phase 9) */
+.securityTelemetry {
+  margin-top: 10px;
+  padding: 22px;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.04), transparent), var(--bg-elevated);
+}
+
+.telemetryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.telemetryTitle {
+  font-size: 1.15rem;
+  margin: 3px 0 0 0;
+  font-weight: 800;
+}
+
+.telemetryBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.telemetryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.telemetryCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+}
+
+.telemetryCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.telemetryCardHeader strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.telemetryCardHeader small {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+}
+
+.telemetryCardIcon {
+  font-size: 1.4rem;
+}
+
+.telemetryBigNumber {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.telemetryBigNumber small {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.telemetryText {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.sensitiveList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.sensitiveItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  font-size: 0.74rem;
+}
+
+.sensitiveDocName {
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.sensitiveTypes {
+  color: #f43f5e;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
