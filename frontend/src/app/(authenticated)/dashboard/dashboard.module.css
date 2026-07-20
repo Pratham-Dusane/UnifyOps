@@ -748,3 +748,27 @@
   font-size: 0.7rem;
 }
 
+/* ─── Pulsing Glow for High-Risk Nodes ─── */
+.assetPulsing {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+  border-color: var(--risk-crimson) !important;
+}
+
+.riskLabel {
+  color: var(--risk-crimson);
+  font-weight: 800;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ─── Updated Risk Colors ─── */
+.highRisk { --risk: var(--risk-crimson, #f43f5e); }
+.mediumRisk { --risk: var(--risk-amber, #b7791f); }
+.lowRisk { --risk: var(--risk-emerald, #22c55e); }
+
+/* ─── Persona Widget Animation ─── */
+.widgetAnimated {
+  animation: slide-in-up 0.35s ease;
+}
+

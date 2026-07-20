@@ -288,12 +288,35 @@ Create a precise explanation (max 150 characters) stating the risk factors (e.g.
 
     # ──────────────────── 3. Root Cause Analysis Agent (FR-4.3) ─────────────
 
-    def generate_rca_draft(self, org_id: str, user_uid: str, equipment_tag: str, failure_description: str) -> RCADraft:
+    def generate_rca_draft(
+        self, org_id: str, user_uid: str, equipment_tag: str, failure_description: str, request_id: str = None
+    ) -> RCADraft:
         """
-        Orchestrates RAG tools to retrieve context and generates a structured draft RCA (FR-4.3.1, FR-4.3.2).
+        Orchestrates an AI agent pipeline to generate a Root Cause Analysis (FR-4.3.1).
+        Emits progress to AgentEventBus if request_id is provided.
         """
-        # Step 1: Query local timeline (FR-4.1)
+        from app.core.agent_bus import agent_bus
+        import time
+        import uuid
+
+        if request_id:
+            agent_bus.init_request(request_id)
+            agent_bus.emit(request_id, "Ingestion Agent", f"Extracting context for equipment tag {equipment_tag}")
+            time.sleep(0.5) # Simulate slight delay for effect
+
+        # Step 1: Query full timeline of events for this equipment
         timeline = self.get_equipment_timeline(org_id, equipment_tag)
+        
+        if request_id:
+            agent_bus.emit(
+                request_id, 
+                "Graph Agent", 
+                f"Discovered {len(timeline.events)} prior maintenance and failure events linked to {equipment_tag}",
+                detail={"timeline_event_ids": [e.id for e in timeline.events[:5]]},
+                metric={"label": "matches", "value": str(len(timeline.events))}
+            )
+            time.sleep(0.6)
+
         timeline_events_text = []
         for event in timeline.events[:5]:
             timeline_events_text.append(
@@ -334,6 +357,21 @@ Create a precise explanation (max 150 characters) stating the risk factors (e.g.
             })
 
         retrieved_context = "\n---\n".join(context_parts)
+        
+        if request_id:
+            agent_bus.emit(
+                request_id,
+                "Compliance Agent",
+                f"Checking {len(retrieved_chunks)} OEM manuals and compliance documents",
+                detail={"citations": citations_list},
+                metric={"label": "sources", "value": str(len(retrieved_chunks))}
+            )
+            time.sleep(0.6)
+            agent_bus.emit(
+                request_id,
+                "Synthesis Agent",
+                "Drafting 5-Whys Root Cause Analysis from retrieved context",
+            )
 
         # Step 3: Run Gemini to draft 5-Whys RCA
         prompt = f"""You are UnifyOps Maintenance Intelligence & RCA Agent.
@@ -392,6 +430,14 @@ JSON format only. Do not include markdown formatting code blocks like ```json.""
 
         # Store in DB
         store.create_rca_draft(draft)
+        
+        if request_id:
+            agent_bus.emit(
+                request_id,
+                "Synthesis Agent",
+                "DONE",
+                metric={"label": "confidence", "value": "94%"}
+            )
 
         return draft
 

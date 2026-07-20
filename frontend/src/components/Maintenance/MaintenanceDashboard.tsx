@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./MaintenanceDashboard.module.css";
 import CameraLookup from "./CameraLookup";
+import { AgentConsole } from "@/components/AgentConsole";
+import { CitationChip } from "@/components/CitationChip";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -62,7 +64,8 @@ export default function MaintenanceDashboard() {
   const [timeline, setTimeline] = useState<Event[]>([]);
   const [rcaRequestText, setRcaRequestText] = useState("");
   const [activeRca, setActiveRca] = useState<RCADraft | null>(null);
-  
+  const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
+
   // Historical RCAs state
   const [tagRcas, setTagRcas] = useState<RCADraft[]>([]);
   const [isRcasLoading, setIsRcasLoading] = useState(false);
@@ -163,6 +166,8 @@ export default function MaintenanceDashboard() {
     if (!selectedTag || !rcaRequestText.trim() || isRcaGenerating) return;
     setIsRcaGenerating(true);
     setActiveRca(null);
+    const reqId = `req-${Math.random().toString(36).substr(2, 9)}`;
+    setCurrentRequestId(reqId);
 
     try {
       const res = await fetch(`${API_URL}/api/v1/maintenance/rca/generate`, {
@@ -171,6 +176,7 @@ export default function MaintenanceDashboard() {
         body: JSON.stringify({
           equipment_tag: selectedTag,
           failure_description: rcaRequestText,
+          request_id: reqId,
         }),
       });
       if (res.ok) {
@@ -255,7 +261,7 @@ export default function MaintenanceDashboard() {
             onClick={() => setShowCameraLookup(true)}
             style={{ display: "flex", alignItems: "center", gap: "6px" }}
           >
-            <span>📷</span> Scan Tag Plate
+            <span></span> Scan Tag Plate
           </button>
           <div className={styles.tabs}>
             <button
@@ -347,10 +353,10 @@ export default function MaintenanceDashboard() {
                         <div className={styles.timelineIconWrap}>
                           <span
                             className={`${styles.timelineBadge} ${ev.event_type === "incident"
-                                ? styles.badgeIncident
-                                : ev.event_type === "work_order"
-                                  ? styles.badgeWorkOrder
-                                  : styles.badgeSop
+                              ? styles.badgeIncident
+                              : ev.event_type === "work_order"
+                                ? styles.badgeWorkOrder
+                                : styles.badgeSop
                               }`}
                           />
                         </div>
@@ -432,6 +438,11 @@ export default function MaintenanceDashboard() {
                         "Generate RCA Report Draft"
                       )}
                     </button>
+                    {isRcaGenerating && currentRequestId && (
+                       <div className="mt-4">
+                         <AgentConsole requestId={currentRequestId} title="RCA Pipeline Collaboration Console" />
+                       </div>
+                    )}
                   </div>
                 )}
 
@@ -459,9 +470,8 @@ export default function MaintenanceDashboard() {
                                 {rca.failure_description}
                               </span>
                               <span
-                                className={`${styles.rcaRecordStatus} ${
-                                  rca.status === "approved" ? styles.statusApproved : styles.statusDraft
-                                }`}
+                                className={`${styles.rcaRecordStatus} ${rca.status === "approved" ? styles.statusApproved : styles.statusDraft
+                                  }`}
                               >
                                 {rca.status.toUpperCase()}
                               </span>
@@ -488,7 +498,7 @@ export default function MaintenanceDashboard() {
                     </button>
 
                     <div className={styles.warningBanner}>
-                      AI-assisted draft — requires engineer review and sign-off
+                      AI-assisted draft  -  requires engineer review and sign-off
                     </div>
 
                     <div className={styles.rcaForm}>
@@ -535,6 +545,24 @@ export default function MaintenanceDashboard() {
                         />
                       </div>
 
+                      {/* Citations & Traceability (Read Only) */}
+                      <div className={styles.formField}>
+                        <label className={styles.formLabel}>Grounding Evidence & Citations</label>
+                        <div className="flex flex-wrap gap-2 mt-2 bg-slate-50 p-4 border border-slate-200 rounded-lg">
+                           {activeRca.citations && activeRca.citations.length > 0 ? (
+                             activeRca.citations.map((cite: any, i: number) => (
+                               <CitationChip 
+                                 key={i} 
+                                 citationId={cite.citation_id || `[${i+1}]`} 
+                                 sourceDocumentName={cite.document_name} 
+                               />
+                             ))
+                           ) : (
+                             <span className="text-sm text-slate-500 italic">No citations linked to this draft.</span>
+                           )}
+                        </div>
+                      </div>
+
                       {/* Corrective Actions */}
                       <div className={styles.formField}>
                         <label className={styles.formLabel}>Recommended Corrective Actions</label>
@@ -570,7 +598,7 @@ export default function MaintenanceDashboard() {
                         </div>
                       ) : (
                         <div className={styles.approvedSection}>
-                          <div className={styles.approvedTick}>✓ RCA Approved & Sealed</div>
+                          <div className={styles.approvedTick}> RCA Approved & Sealed</div>
                           <div className={styles.approvedMeta}>
                             Signed off at {new Date(activeRca.approved_at!).toLocaleString()}
                           </div>

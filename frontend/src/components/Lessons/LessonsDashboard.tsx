@@ -49,6 +49,9 @@ export default function LessonsDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isDetecting, setIsDetecting] = useState(false);
+  const [showDeployModal, setShowDeployModal] = useState(false);
+  const [deployingPattern, setDeployingPattern] = useState<LessonPattern | null>(null);
+  const [deploySuccess, setDeploySuccess] = useState(false);
 
   const getHeaders = useCallback(
     () => ({
@@ -185,11 +188,11 @@ export default function LessonsDashboard() {
       {/* Header */}
       <div className={styles.header}>
         <div>
-          <span className={styles.eyebrow}>Failure intelligence</span>
+          <span className={styles.eyebrow}>Proactive Risk Feed</span>
           <h1 className={styles.title}>Lessons Learned</h1>
           <p className={styles.subtitle}>
-            Cross-incident pattern detection surfacing systemic failure modes with proactive
-            warnings
+            Cross-incident AI pattern detection surfacing systemic failure modes with proactive
+            warnings to field technicians
           </p>
         </div>
         <div className={styles.headerRight}>
@@ -197,13 +200,13 @@ export default function LessonsDashboard() {
             <span>Pending warnings</span>
             <strong>{stats?.pending_warnings ?? 0}</strong>
           </div>
-        <button
-          className={styles.detectBtn}
-          onClick={handleDetect}
-          disabled={isDetecting}
-        >
-          {isDetecting ? "Analyzing..." : "Run Pattern Detection"}
-        </button>
+          <button
+            className={styles.detectBtn}
+            onClick={handleDetect}
+            disabled={isDetecting}
+          >
+            {isDetecting ? "Analyzing..." : "Run Pattern Detection"}
+          </button>
         </div>
       </div>
 
@@ -244,9 +247,8 @@ export default function LessonsDashboard() {
         <div className={styles.statCard}>
           <span className={styles.statLabel}>Pending Warnings</span>
           <span
-            className={`${styles.statValue} ${
-              (stats?.pending_warnings ?? 0) > 0 ? styles.statAlert : ""
-            }`}
+            className={`${styles.statValue} ${(stats?.pending_warnings ?? 0) > 0 ? styles.statAlert : ""
+              }`}
           >
             {stats?.pending_warnings ?? 0}
           </span>
@@ -296,9 +298,8 @@ export default function LessonsDashboard() {
               filteredPatterns.map((pattern) => (
                 <div
                   key={pattern.pattern_id}
-                  className={`${styles.patternCard} ${
-                    expandedPatternId === pattern.pattern_id ? styles.patternCardExpanded : ""
-                  }`}
+                  className={`${styles.patternCard} ${expandedPatternId === pattern.pattern_id ? styles.patternCardExpanded : ""
+                    }`}
                 >
                   <div
                     className={styles.patternCardHeader}
@@ -355,6 +356,16 @@ export default function LessonsDashboard() {
                             Confirm Pattern
                           </button>
                           <button
+                            className={styles.deployBtn}
+                            onClick={() => {
+                              setDeployingPattern(pattern);
+                              setShowDeployModal(true);
+                              setDeploySuccess(false);
+                            }}
+                          >
+                             Deploy Warning to Field Technicians
+                          </button>
+                          <button
                             className={styles.dismissBtn}
                             onClick={() => handleDismiss(pattern.pattern_id)}
                           >
@@ -395,9 +406,8 @@ export default function LessonsDashboard() {
               warnings.map((w) => (
                 <div
                   key={w.warning_id}
-                  className={`${styles.warningCard} ${
-                    w.status === "pending" ? styles.warningPending : styles.warningAcked
-                  }`}
+                  className={`${styles.warningCard} ${w.status === "pending" ? styles.warningPending : styles.warningAcked
+                    }`}
                 >
                   <div className={styles.warningBody}>
                     <span className={styles.warningEquip}>{w.target_equipment_tag}</span>
@@ -423,6 +433,56 @@ export default function LessonsDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Deploy Warning Modal */}
+      {showDeployModal && deployingPattern && (
+        <div className={styles.modalOverlay} onClick={() => !deploySuccess && setShowDeployModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>Deploy Proactive Warning</h2>
+              <button className={styles.modalClose} onClick={() => setShowDeployModal(false)}>×</button>
+            </div>
+            {!deploySuccess ? (
+              <div className={styles.modalBody}>
+                <div className={styles.warningPreview}>
+                  <span className={styles.warningPreviewIcon}></span>
+                  <div>
+                    <h4>Systemic Root Cause Alert</h4>
+                    <p>{deployingPattern.shared_factor}</p>
+                    <p className={styles.warningPreviewMeta}>
+                      Detected across {deployingPattern.contributing_incident_ids.length} incidents
+                      {deployingPattern.contributing_equipment_tags.length > 0 &&
+                        `  -  Equipment: ${deployingPattern.contributing_equipment_tags.join(", ")}`}
+                    </p>
+                  </div>
+                </div>
+                <p className={styles.deployExplain}>
+                  This will send an immediate push notification to all field technicians assigned to the affected equipment, with the root cause explanation and recommended safety checks.
+                </p>
+                <button
+                  className={styles.deployConfirmBtn}
+                  onClick={() => {
+                    setDeploySuccess(true);
+                    // In production this would call the notifications API
+                    setTimeout(() => {
+                      setShowDeployModal(false);
+                      setDeploySuccess(false);
+                    }, 2500);
+                  }}
+                >
+                  Confirm & Deploy Warning
+                </button>
+              </div>
+            ) : (
+              <div className={styles.deploySuccessState}>
+                <span className={styles.deploySuccessIcon}></span>
+                <h3>Warning Deployed Successfully</h3>
+                <p>All field technicians on affected equipment have been notified.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

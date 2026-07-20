@@ -1,5 +1,5 @@
 /*
- * LessonsDashboard — Failure Intelligence Styles
+ * LessonsDashboard  -  Failure Intelligence Styles
  */
 
 .container {
@@ -670,4 +670,174 @@
   .workspaceGrid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ─── Deploy Warning Button ─── */
+.deployBtn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--risk-crimson), #dc2626);
+  color: white;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 0.82rem;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 14px var(--risk-crimson-glow);
+}
+
+.deployBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px var(--risk-crimson-glow);
+}
+
+/* ─── Deploy Modal ─── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fade-in 0.2s ease;
+}
+
+.modalContent {
+  width: min(560px, 92vw);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: 14px;
+  box-shadow: var(--shadow-xl);
+  animation: slide-in-up 0.3s ease;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.modalHeader h2 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.modalClose {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  transition: all var(--transition-fast);
+}
+
+.modalClose:hover {
+  background: var(--bg-tertiary);
+}
+
+.modalBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.warningPreview {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--risk-crimson-light);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.warningPreviewIcon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.warningPreview h4 {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--risk-crimson);
+  margin: 0 0 6px;
+}
+
+.warningPreview p {
+  font-size: 0.84rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.warningPreviewMeta {
+  color: var(--text-secondary) !important;
+  font-size: 0.78rem !important;
+  margin-top: 4px !important;
+}
+
+.deployExplain {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.deployConfirmBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--risk-crimson), #dc2626);
+  color: white;
+  font-weight: 800;
+  font-size: 0.92rem;
+  transition: all var(--transition-fast);
+  box-shadow: 0 6px 20px var(--risk-crimson-glow);
+}
+
+.deployConfirmBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px var(--risk-crimson-glow);
+}
+
+.deploySuccessState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  animation: slide-in-up 0.3s ease;
+}
+
+.deploySuccessIcon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--risk-emerald);
+  color: white;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.deploySuccessState h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.deploySuccessState p {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  margin: 0;
 }

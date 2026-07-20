@@ -81,7 +81,7 @@ export default function AdminPage() {
         const data = await res.json();
         setDocuments(data.documents || []);
       }
-    } catch {}
+    } catch { }
   }, [profile, user?.uid]);
 
   // 2. Fetch Proposed Merges
@@ -93,7 +93,7 @@ export default function AdminPage() {
       if (res.ok) {
         setCandidateMerges(await res.json());
       }
-    } catch {}
+    } catch { }
   }, [profile, user?.uid]);
 
   // 3. Fetch Completeness Metrics
@@ -105,7 +105,7 @@ export default function AdminPage() {
       if (res.ok) {
         setCompleteness(await res.json());
       }
-    } catch {}
+    } catch { }
   }, [profile, user?.uid]);
 
   useEffect(() => {
@@ -150,7 +150,7 @@ export default function AdminPage() {
       if (res.ok) {
         fetchDocuments();
       }
-    } catch {}
+    } catch { }
   };
 
   // 5. Submit candidate merge resolution
@@ -169,7 +169,7 @@ export default function AdminPage() {
         fetchCandidateMerges();
         fetchCompleteness();
       }
-    } catch {}
+    } catch { }
   };
 
   // Utility badge styling helper
@@ -240,7 +240,7 @@ export default function AdminPage() {
                       </div>
                     </td>
                     <td className={styles.td}>
-                      {doc.plant_id || "—"} / {doc.unit || "—"}
+                      {doc.plant_id || " - "} / {doc.unit || " - "}
                     </td>
                     <td className={styles.td}>
                       <span className={`${styles.stageBadge} ${getStageClass(doc.pipeline_stage)}`}>
@@ -300,7 +300,7 @@ export default function AdminPage() {
                       {(merge.similarity * 100).toFixed(0)}% Match
                     </span>
                   </div>
-                  
+
                   <div className={styles.comparisonBox}>
                     <div className={styles.entityTerm}>
                       <span className={styles.termLabel}>Source Candidate</span>
@@ -365,8 +365,8 @@ export default function AdminPage() {
               <div className={styles.reviewCard}>
                 <h4 style={{ fontWeight: 600, fontSize: "0.95rem" }}>Graph completeness insights</h4>
                 <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
-                  This metric measures how tightly coupled your extracted plant assets are. Equipment nodes linked 
-                  to Incidents, Safety SOPs, and Work Orders contribute to a higher index. Clean up unlinked nodes by 
+                  This metric measures how tightly coupled your extracted plant assets are. Equipment nodes linked
+                  to Incidents, Safety SOPs, and Work Orders contribute to a higher index. Clean up unlinked nodes by
                   running Entity Resolution or uploading related manuals.
                 </p>
               </div>

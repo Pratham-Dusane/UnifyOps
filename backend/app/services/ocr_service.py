@@ -1,5 +1,5 @@
 """
-UnifyOps — OCR Service (Phase 8.3)
+UnifyOps  -  OCR Service (Phase 8.3)
 
 Extracts text from images using Google Cloud Document AI layout/OCR
 processor with a robust local simulation fallback.

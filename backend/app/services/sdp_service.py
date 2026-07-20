@@ -1,5 +1,5 @@
 """
-UnifyOps — Sensitive Data Protection (SDP) Service (Phase 9.1)
+UnifyOps  -  Sensitive Data Protection (SDP) Service (Phase 9.1)
 
 Integrates with Google Cloud Sensitive Data Protection (DLP) API
 with local regex/rule fallbacks for development and testing.

@@ -77,6 +77,7 @@ class RCARequest(BaseModel):
 
     equipment_tag: str = Field(min_length=2, description="Target equipment tag e.g. P-204")
     failure_description: str = Field(min_length=5, description="Brief description of current failure")
+    request_id: str | None = Field(default=None, description="Optional ID for Agent Console SSE streaming")
 
 
 class RCADraft(BaseModel):

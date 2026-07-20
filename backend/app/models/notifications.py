@@ -1,5 +1,5 @@
 """
-UnifyOps — Notification Models (Phase 7.2)
+UnifyOps  -  Notification Models (Phase 7.2)
 
 Models for user notification preference centre and user notification records.
 """

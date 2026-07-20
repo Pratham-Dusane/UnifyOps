@@ -1,5 +1,5 @@
 """
-UnifyOps — Model Armor Service (Phase 9.2)
+UnifyOps  -  Model Armor Service (Phase 9.2)
 
 Provides input and output validation shielding for Vertex AI LLM calls,
 filtering prompt injections, jailbreaks, and sensitive data leakage.

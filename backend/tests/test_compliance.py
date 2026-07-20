@@ -1,5 +1,5 @@
 """
-UnifyOps — Regulatory Compliance & Deletion Tests (Phase 5)
+UnifyOps  -  Regulatory Compliance & Deletion Tests (Phase 5)
 
 Tests for:
 - Cascading Document Deletion (FR-5.2.3)

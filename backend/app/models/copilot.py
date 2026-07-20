@@ -66,6 +66,33 @@ class Citation(BaseModel):
     )
 
 
+class GraphPathStep(BaseModel):
+    node_id: str
+    node_type: str
+    edge_label: str | None = None
+    step_order: int
+
+
+class CitationDocument(BaseModel):
+    id: str
+    title: str
+    type: str  # "pdf" | "text"
+    url: str
+    page: int | None = None
+    bbox: list[float] | None = None
+    char_range: list[int] | None = None
+
+
+class CitationVerificationResponse(BaseModel):
+    """Response model for Source Verification Drawer (Feature A)"""
+    claim_text: str
+    document: CitationDocument
+    graph_path: list[GraphPathStep]
+    confidence_score: float
+    grounding_threshold: float
+    reasoning_summary: str
+
+
 class CopilotResponse(BaseModel):
     """Full copilot answer payload (FR-3.1, FR-3.3, FR-3.4)."""
 

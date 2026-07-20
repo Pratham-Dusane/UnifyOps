@@ -3,242 +3,226 @@
  * Upload zone, stats grid, document table with pipeline status.
  */
 
-.page {
-  width: min(1180px, 100%);
+.pageContainer {
+  width: 100%;
+  max-width: 1280px;
   margin: 0 auto;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
-.pageHeader {
-  position: relative;
+/* ─── 1. TOP HEADER ─── */
+.topHeader {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 18px 20px;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, var(--accent-primary-light) 0%, var(--accent-secondary-light) 100%);
   border: 1px solid var(--border-primary);
   border-radius: 12px;
-  background:
-    linear-gradient(135deg, rgba(59, 130, 246, 0.1), transparent 42%),
-    linear-gradient(90deg, var(--bg-elevated), var(--bg-secondary));
-  overflow: hidden;
+  gap: 24px;
+  box-shadow: var(--shadow-sm);
 }
 
-.pageHeader::after {
-  content: "";
-  position: absolute;
-  right: 24px;
-  bottom: -34px;
-  width: 240px;
-  height: 86px;
-  border: 1px solid rgba(59, 130, 246, 0.18);
-  border-radius: 999px;
-  transform: rotate(-8deg);
-  pointer-events: none;
-}
-
-.eyebrow {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--accent-primary);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .pageTitle {
   margin: 0;
-  color: var(--text-primary);
-  font-size: 1.35rem;
-  font-weight: 750;
-  line-height: 1.2;
-}
-
-.pageIntro {
-  max-width: 680px;
-  margin: 5px 0 0;
-  color: var(--text-secondary);
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-
-.headerMeta {
-  position: relative;
-  min-width: 170px;
-  padding: 14px 16px;
-  border: 1px solid var(--border-primary);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
-  text-align: right;
-  box-shadow: var(--shadow-sm);
-  z-index: 1;
-}
-
-[data-theme="dark"] .headerMeta {
-  background: rgba(30, 41, 59, 0.78);
-}
-
-.workflowStrip {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  max-width: 900px;
-  border: 1px solid var(--border-primary);
-  border-radius: 10px;
-  background: var(--bg-elevated);
-  overflow: hidden;
-}
-
-.workflowStep {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-right: 1px solid var(--border-primary);
-}
-
-.workflowStep:last-child {
-  border-right: none;
-}
-
-.stepNumber {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: var(--accent-primary-light);
-  color: var(--accent-primary);
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
-.workflowStep strong {
-  display: block;
-  color: var(--text-primary);
-  font-size: 0.86rem;
-  line-height: 1.2;
-}
-
-.workflowStep span:last-child {
-  display: block;
-  color: var(--text-tertiary);
-  font-size: 0.76rem;
-  line-height: 1.35;
-}
-
-.headerMeta span {
-  display: block;
-  color: var(--text-tertiary);
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.headerMeta strong {
-  display: block;
-  color: var(--text-primary);
   font-size: 1.5rem;
-  line-height: 1.1;
-}
-
-/* ─── Stats Row (FR-1.7.1) ─── */
-.statsRow {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(120px, 1fr));
-  gap: 10px;
-  max-width: 920px;
-}
-
-.statCard {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 14px 16px;
-  background-color: var(--bg-elevated);
-  border: 1px solid var(--border-primary);
-  border-radius: 8px;
-  transition: background-color var(--transition-base), border-color var(--transition-base);
-  overflow: hidden;
-}
-
-.statCard::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--accent-primary);
-  opacity: 0.45;
-}
-
-.statValue {
-  font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 
-.statProcessing {
-  color: var(--accent-primary);
+.pageIntro {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
 }
 
-.statCompleted {
-  color: var(--status-success);
+/* ─── 2. METRICS ROW ─── */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
-.statFailed {
-  color: var(--status-error);
+@media (min-width: 768px) {
+  .metricsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-.statReview {
-  color: var(--status-warning);
-}
-
-.statLabel {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-/* ─── Upload Zone ─── */
-.uploadZone {
+.metricCard {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   justify-content: center;
-  gap: 8px;
-  max-width: 720px;
-  min-height: 124px;
-  padding: 20px 24px 20px 84px;
-  background:
-    radial-gradient(circle at 12% 28%, rgba(59, 130, 246, 0.12), transparent 28%),
-    var(--bg-elevated);
+  height: 104px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.metricCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--accent-primary), var(--accent-primary-light));
+  opacity: 0.85;
+}
+
+/* Different accents for each card */
+.metricCard:nth-child(2)::before {
+  background: linear-gradient(to bottom, var(--status-success), #86efac);
+}
+.metricCard:nth-child(3)::before {
+  background: linear-gradient(to bottom, var(--status-warning), #fde047);
+}
+.metricCard:nth-child(4)::before {
+  background: linear-gradient(to bottom, var(--status-error), #fca5a5);
+}
+
+.metricLabel {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+  z-index: 1;
+}
+
+.metricValue {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  z-index: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+/* ─── 3. PIPELINE STEPPER ─── */
+.pipelineCard {
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--bg-card);
   border: 1px solid var(--border-primary);
   border-radius: 12px;
+}
+
+.pipelineBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pipelineStep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.stepDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-primary);
+  transition: all var(--transition-fast);
+}
+
+.stepComplete {
+  color: var(--status-success);
+}
+
+.stepComplete .stepDot {
+  background: var(--status-success);
+}
+
+.stepActive {
+  color: var(--accent-primary);
+}
+
+.stepActive .stepDot {
+  background: var(--accent-primary);
+  box-shadow: 0 0 0 4px var(--accent-primary-light);
+  animation: pulse-glow 2s infinite;
+}
+
+.pipelineConnector {
+  flex: 1;
+  height: 2px;
+  background: var(--border-primary);
+  margin: 0 8px;
+  border-radius: 2px;
+}
+
+/* ─── 4. INTAKE CONTROLS (Upload) ─── */
+.uploadCard {
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+}
+
+.uploadCard .sectionTitle {
+  display: none; /* Hide title to make it purely a sleek dropzone strip */
+}
+
+.uploadZone {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 72px;
+  padding: 16px 24px;
+  background: rgba(96, 165, 250, 0.1);
+  border: 2px dashed #93c5fd;
+  border-radius: 12px;
   cursor: pointer;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: all var(--transition-fast);
+}
+
+/* ─── 5. DOCUMENT REPOSITORY (Table) ─── */
+.tableCard {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .uploadZone:hover,
 .uploadZoneActive {
-  border-color: var(--accent-primary);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
-}
-
-.uploadGlow {
-  position: absolute;
-  inset: 10px auto 10px 10px;
-  width: 50px;
-  border-radius: 10px;
-  background: linear-gradient(180deg, var(--accent-primary), var(--status-success));
-  opacity: 0.12;
+  border-color: #3b82f6;
+  background: rgba(96, 165, 250, 0.2);
 }
 
 .fileInput {
@@ -249,34 +233,26 @@
 }
 
 .uploadIcon {
-  position: absolute;
-  left: 24px;
-  top: 28px;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.uploadZone:hover .uploadIcon {
   color: var(--accent-primary);
-  z-index: 1;
 }
 
 .uploadTitle {
-  position: relative;
-  font-size: 15px;
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary);
-}
-
-.uploadDesc {
-  position: relative;
-  font-size: 13px;
-  color: var(--text-tertiary);
-  text-align: left;
-  max-width: 560px;
+  color: #1d4ed8;
+  margin: 0;
 }
 
 .uploadFormats {
-  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 2px;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
 }
 
 .uploadFormats span {
@@ -284,8 +260,8 @@
   border: 1px solid var(--border-primary);
   border-radius: 999px;
   color: var(--text-secondary);
-  background: var(--bg-secondary);
-  font-size: 0.72rem;
+  background: var(--bg-primary);
+  font-size: 0.65rem;
   font-weight: 600;
 }
 
@@ -293,16 +269,17 @@
 .progressList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .progressItem {
-  font-size: 13px;
+  font-size: 0.8rem;
   color: var(--text-secondary);
-  padding: 6px 12px;
-  background-color: var(--accent-primary-light);
-  border-radius: var(--border-radius-sm);
+  padding: 8px 12px;
+  background-color: var(--bg-secondary);
+  border-left: 3px solid var(--accent-primary);
+  border-radius: 4px;
 }
 
 /* ─── Filters ─── */
@@ -311,8 +288,7 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 4px;
-  margin-bottom: -2px;
-  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .sectionTitle {
@@ -320,6 +296,7 @@
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
+  margin: 0;
 }
 
 .filters {
@@ -359,6 +336,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  table-layout: fixed;
 }
 
 .table thead {
@@ -366,7 +344,7 @@
 }
 
 .table th {
-  padding: 10px 14px;
+  padding: 12px 16px;
   text-align: left;
   font-weight: 600;
   font-size: 12px;
@@ -376,8 +354,16 @@
   border-bottom: 1px solid var(--border-primary);
 }
 
+.table th:nth-child(1) { width: 30%; } /* Filename */
+.table th:nth-child(2) { width: 12%; } /* Type */
+.table th:nth-child(3) { width: 15%; } /* Stage */
+.table th:nth-child(4) { width: 10%; } /* Size */
+.table th:nth-child(5) { width: 10%; } /* Entities */
+.table th:nth-child(6) { width: 15%; } /* Uploaded */
+.table th:nth-child(7) { width: 8%; text-align: center; } /* Actions */
+
 .table td {
-  padding: 11px 14px;
+  padding: 12px 16px;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-primary);
   vertical-align: middle;
@@ -386,7 +372,6 @@
 .table tbody tr:last-child td {
   border-bottom: none;
 }
-
 .table tbody tr:hover {
   background-color: rgba(59, 130, 246, 0.045);
 }
@@ -1066,4 +1051,31 @@
   background-color: rgba(239, 68, 68, 0.15);
   border-color: rgba(239, 68, 68, 0.28);
   color: var(--status-error);
+}
+
+/* ─── Entity Chips ─── */
+.entityChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: var(--accent-primary-light);
+  color: var(--accent-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  transition: all var(--transition-fast);
+}
+
+.entityChip:hover {
+  background: var(--accent-primary);
+  color: white;
+  transform: scale(1.05);
+}
+
+.entityChipEmpty {
+  color: var(--text-tertiary);
+  font-size: 0.82rem;
 }

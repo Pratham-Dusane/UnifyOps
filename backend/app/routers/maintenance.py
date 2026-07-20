@@ -105,6 +105,7 @@ async def generate_rca_draft(
             user_uid=x_user_uid,
             equipment_tag=body.equipment_tag,
             failure_description=body.failure_description,
+            request_id=body.request_id,
         )
         return draft
     except Exception as e:

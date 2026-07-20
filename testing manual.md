@@ -1,4 +1,4 @@
-# UnifyOps — Manual Testing Guide
+# UnifyOps  -  Manual Testing Guide
 
 This manual testing guide provides step-by-step instructions to verify all core functional features of the UnifyOps platform. It details prerequisites, input test data, UI click flows, and expected results.
 

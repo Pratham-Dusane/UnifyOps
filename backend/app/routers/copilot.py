@@ -25,6 +25,9 @@ from app.models.copilot import (
     SessionListResponse,
     StarterPromptsResponse,
     QueryAnalyticsResponse,
+    CitationVerificationResponse,
+    CitationDocument,
+    GraphPathStep,
 )
 from app.services.copilot_service import copilot_service
 
@@ -175,3 +178,34 @@ async def get_analytics(
 ) -> dict:
     """Query analytics and knowledge gap detection (FR-3.7.2)."""
     return copilot_service.get_analytics(x_user_org)
+
+
+@router.get("/citations/{citation_id}/verification", response_model=CitationVerificationResponse)
+async def get_citation_verification(
+    citation_id: str,
+    x_user_org: str = Header(..., description="User's organisation ID"),
+) -> CitationVerificationResponse:
+    """
+    Returns the source verification subgraph and document references for a citation (Feature A).
+    """
+    # Realistic fallback response for hackathon / mock data
+    return CitationVerificationResponse(
+        claim_text="Motor tripped due to high load.",
+        document=CitationDocument(
+            id="doc-wo-402",
+            title="WO-402: Pump Failure Report",
+            type="text",
+            url="/api/v1/ingestion/documents/doc-wo-402/download",
+            page=1,
+            bbox=None,
+            char_range=[120, 240]
+        ),
+        graph_path=[
+            GraphPathStep(node_id="sop-14", node_type="SOP", edge_label=None, step_order=0),
+            GraphPathStep(node_id="equip-p204", node_type="Equipment", edge_label="GOVERNS", step_order=1),
+            GraphPathStep(node_id="inc-0091", node_type="Incident", edge_label="FLAGGED_BY", step_order=2)
+        ],
+        confidence_score=0.91,
+        grounding_threshold=0.78,
+        reasoning_summary="Matched via semantic similarity to SOP-14 §3.2, corroborated by 2 linked work orders."
+    )

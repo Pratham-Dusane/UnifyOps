@@ -1,5 +1,5 @@
 """
-UnifyOps — Phase 9 Security, Governance & Hardening Unit Tests (Phase 9)
+UnifyOps  -  Phase 9 Security, Governance & Hardening Unit Tests (Phase 9)
 
 Validates Sensitive Data Protection, Model Armor screening,
 role-scoped data access, and security telemetry.

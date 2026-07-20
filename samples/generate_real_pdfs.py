@@ -58,6 +58,47 @@ create_pdf(
     ]
 )
 
+# 2. SOP-17: P-204 Maintenance
+create_pdf(
+    "samples/sop_17_p204_maintenance.pdf",
+    "SOP-17: Reflux Pump P-204 Maintenance Procedure",
+    [
+        "Document Type: Standard Operating Procedure (SOP)",
+        "Target Equipment: P-204 (Reflux Pump, Crude Distillation Unit)",
+        "Last Reviewed: January 2025 (Overdue for review)",
+        "1. PREPARATION:",
+        "Ensure LOTO is applied to P-204 electrical breaker as per OISD-STD-189 Rule 12.1.",
+        "2. MECHANICAL SEAL REPLACEMENT:",
+        "Remove coupling guard. Detach the pump casing. Remove the mechanical seal assembly.",
+        "Install new mechanical seal. NOTE: Use Graphite Grade A gaskets for all flange connections.",
+        "3. REASSEMBLY:",
+        "Reattach the casing and tighten bolts to 120 Nm. Reinstall the coupling guard securely. Failure to reinstall the guard is a violation of Factory Act Section 41.",
+        "4. TESTING:",
+        "Remove LOTO. Start pump P-204 and monitor bearing temperature for 30 minutes. If temperature exceeds 85°C, shut down immediately."
+    ]
+)
+
+# 3. Incident Report INC-2025
+create_pdf(
+    "samples/inc_2025_report.pdf",
+    "Incident Report: INC-2025 (P-204 Seal Failure)",
+    [
+        "Document Type: Incident Investigation Report",
+        "Incident ID: INC-2025",
+        "Date of Occurrence: 15-May-2025",
+        "Equipment Involved: Reflux Pump P-204, Pump P-205",
+        "Unit: Crude Distillation Unit (CDU)",
+        "INCIDENT DESCRIPTION:",
+        "At 14:30 hrs, a significant hydrocarbon leak was detected from the mechanical seal of pump P-204. The unit was safely shut down. A subsequent check of the standby pump, P-205, revealed that its coupling guard had been removed during maintenance under WO-2025-0441 and never reinstalled.",
+        "ROOT CAUSE ANALYSIS:",
+        "1. The mechanical seal on P-204 failed due to the use of an incompatible gasket. SOP-17 incorrectly specifies Graphite Grade A gaskets, whereas the fluid service requires Graphite Grade C.",
+        "2. The missing coupling guard on P-205 is a direct violation of Factory Act Section 41.",
+        "RECOMMENDATIONS:",
+        "1. Immediately revise SOP-17 to specify Graphite Grade C gaskets. Review all other pump SOPs for similar errors.",
+        "2. Audit all rotating equipment in the CDU to ensure coupling guards are installed.",
+        "3. Deploy a proactive warning to all field technicians regarding proper gasket selection and guard installation."
+    ]
+)
 # 2. Safety Procedure SOP
 create_pdf(
     "samples/real_maintenance_sop.pdf",

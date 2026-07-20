@@ -27,6 +27,7 @@ from app.routers import (
     admin,
     interviews,
     voice,
+    agents,
 )
 
 
@@ -86,3 +87,4 @@ app.include_router(notifications.router)
 app.include_router(admin.router)
 app.include_router(interviews.router)
 app.include_router(voice.router)
+app.include_router(agents.router)

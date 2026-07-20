@@ -1,5 +1,5 @@
 """
-UnifyOps — Phase 8 Unit Tests (Mobile, Offline & Voice)
+UnifyOps  -  Phase 8 Unit Tests (Mobile, Offline & Voice)
 
 Verifies:
 - Camera tag plate OCR lookup & entity matching.

@@ -1,5 +1,5 @@
 """
-UnifyOps — Lessons Learned & Failure Intelligence Service (Phase 6)
+UnifyOps  -  Lessons Learned & Failure Intelligence Service (Phase 6)
 
 Implements:
 - FR-6.1: Incident enrichment (structured extraction of severity, conditions, equipment)
@@ -347,7 +347,7 @@ class LessonsLearnedService:
                     triggered_by_doc_id=doc.id,
                     target_equipment_tag=", ".join(overlap),
                     message=(
-                        f"Pattern Alert: '{pattern.shared_factor}' — "
+                        f"Pattern Alert: '{pattern.shared_factor}'  -  "
                         f"A confirmed failure pattern involving {', '.join(overlap)} has been triggered by "
                         f"document '{doc.original_filename}'. "
                         f"Review the pattern evidence before proceeding."

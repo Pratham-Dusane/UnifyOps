@@ -1,5 +1,5 @@
 """
-UnifyOps — Quality & Regulatory Compliance Models (Phase 5)
+UnifyOps  -  Quality & Regulatory Compliance Models (Phase 5)
 
 Pydantic models for:
 - Regulatory Clauses (FR-5.1)

@@ -69,10 +69,59 @@
   --border-radius-lg: 12px;
   --border-radius-xl: 16px;
 
+  /* --- Risk Status Colors --- */
+  --risk-crimson: #EF4444;
+  --risk-crimson-light: rgba(239, 68, 68, 0.12);
+  --risk-crimson-glow: rgba(239, 68, 68, 0.35);
+  --risk-amber: #F59E0B;
+  --risk-amber-light: rgba(245, 158, 11, 0.12);
+  --risk-amber-glow: rgba(245, 158, 11, 0.30);
+  --risk-emerald: #10B981;
+  --risk-emerald-light: rgba(16, 185, 129, 0.12);
+  --risk-emerald-glow: rgba(16, 185, 129, 0.25);
+
   /* --- Transitions --- */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==============================
+   Global Keyframe Animations
+   ============================== */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px var(--risk-crimson-glow); }
+  50% { box-shadow: 0 0 22px var(--risk-crimson-glow), 0 0 40px rgba(239, 68, 68, 0.15); }
+}
+
+@keyframes pulse-glow-amber {
+  0%, 100% { box-shadow: 0 0 8px var(--risk-amber-glow); }
+  50% { box-shadow: 0 0 22px var(--risk-amber-glow), 0 0 40px rgba(245, 158, 11, 0.15); }
+}
+
+@keyframes gauge-fill {
+  from { stroke-dashoffset: var(--gauge-circumference, 440); }
+  to { stroke-dashoffset: var(--gauge-target, 97); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* ==============================

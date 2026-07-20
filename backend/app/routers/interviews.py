@@ -1,5 +1,5 @@
 """
-UnifyOps — Expert Knowledge Capture Router (Phase 7.1)
+UnifyOps  -  Expert Knowledge Capture Router (Phase 7.1)
 
 FastAPI router exposing endpoints for:
 - Retrieving suggested interview topics (FR-7.1.1)

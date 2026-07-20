@@ -1,5 +1,5 @@
 """
-UnifyOps — Lessons Learned Service Router (Phase 6)
+UnifyOps  -  Lessons Learned Service Router (Phase 6)
 
 Implements the Lessons Learned & Failure Intelligence Engine:
 - FR-6.1: Incident enrichment

@@ -1,5 +1,5 @@
 """
-UnifyOps — Quality & Regulatory Compliance Service (Phase 5)
+UnifyOps  -  Quality & Regulatory Compliance Service (Phase 5)
 
 Implements:
 - Clause segmentation & parsing (FR-5.1.1, FR-5.1.2)

@@ -187,7 +187,8 @@ export default function InterviewsPage() {
     <div className={styles.container}>
       {/* Sidebar Topics list */}
       <aside className={styles.sidebar} aria-label="Suggested interview topics">
-        <h2 className={styles.sidebarTitle}>Suggested Topics</h2>
+        <h2 className={styles.sidebarTitle}>Retirement Knowledge Extraction Agent</h2>
+        <p className={styles.sidebarSubtitle}>Capture unwritten operational judgment before it disappears</p>
         <div className={styles.topicList}>
           {topics.length === 0 ? (
             <p style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
@@ -238,13 +239,21 @@ export default function InterviewsPage() {
       <main className={styles.main}>
         {!session ? (
           <div className={styles.emptyState}>
-            <span className={styles.emptyIcon}>💬</span>
-            <h2 className={styles.emptyTitle}>Expert Knowledge Capture Workspace</h2>
+            <span className={styles.emptyIcon}></span>
+            <h2 className={styles.emptyTitle}>Retirement Knowledge Extraction Agent</h2>
             <p className={styles.emptyText}>
-              Select a suggested topic from the left sidebar or provide a custom topic to begin
-              a structured, AI-guided interview. This tool captures veteran judgment about plant
-              failures and maintenance before it disappears.
+              Capture decades of unwritten operational judgment from senior engineers before retirement.
+              This AI-guided interview tool conducts structured technical interviews to preserve
+              critical plant knowledge  -  failure patterns, workarounds, and tribal wisdom that
+              exists only in experienced minds.
             </p>
+            <div className={styles.expertBadge}>
+              <span className={styles.expertAvatar}>V</span>
+              <div>
+                <strong>Vikram Sharma</strong>
+                <span>Senior Instrument Engineer · 32 years experience · CDU & VDU specialist</span>
+              </div>
+            </div>
           </div>
         ) : session.status === "active" ? (
           <>
@@ -267,11 +276,18 @@ export default function InterviewsPage() {
               {session.turns.map((turn, index) => (
                 <div
                   key={index}
-                  className={`${styles.bubble} ${
-                    turn.role === "agent" ? styles.bubbleAgent : styles.bubbleExpert
-                  }`}
+                  className={`${styles.bubble} ${turn.role === "agent" ? styles.bubbleAgent : styles.bubbleExpert
+                    }`}
                 >
-                  {turn.content}
+                  <span className={turn.role === "agent" ? styles.agentAvatar : styles.vikramAvatar}>
+                    {turn.role === "agent" ? "AI" : "V"}
+                  </span>
+                  <div className={styles.bubbleContent}>
+                    <span className={styles.bubbleSender}>
+                      {turn.role === "agent" ? "UnifyOps Agent" : "Vikram Sharma"}
+                    </span>
+                    {turn.content}
+                  </div>
                 </div>
               ))}
               {chatLoading && (
@@ -336,7 +352,7 @@ export default function InterviewsPage() {
           </>
         ) : (
           <div className={styles.successPanel}>
-            <span className={styles.successIcon}>✓</span>
+            <span className={styles.successIcon}></span>
             <h2 className={styles.successTitle}>Transcript Ingested Successfully!</h2>
             <p className={styles.successText}>
               The captured knowledge transcript has been processed, chunked, and entity-resolved in the

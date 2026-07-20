@@ -194,7 +194,7 @@ export default function CameraLookup({ onClose, onMatch, headers }: CameraLookup
           {/* File Picker fallback */}
           {!streamActive && !imagePreview && (
             <div className={styles.fallbackPicker}>
-              <div className={styles.pickerIcon}>📷</div>
+              <div className={styles.pickerIcon}></div>
               <p className={styles.pickerPrompt}>
                 Allow camera permissions or upload a photograph of the physical equipment tag plate.
               </p>
@@ -219,7 +219,7 @@ export default function CameraLookup({ onClose, onMatch, headers }: CameraLookup
             <div className={styles.resultContainer}>
               {result.matched ? (
                 <div className={styles.successBox}>
-                  <div className={styles.successHeader}>✓ Match Found</div>
+                  <div className={styles.successHeader}> Match Found</div>
                   <div className={styles.tagLabel}>{result.equipment_tag}</div>
                   {result.unit && (
                     <div className={styles.unitLabel}>Unit: {result.unit}</div>

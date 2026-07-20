@@ -1,17 +1,18 @@
 """
-UnifyOps — Quality & Regulatory Compliance Router (Phase 5)
+UnifyOps  -  Quality & Regulatory Compliance Router (Phase 5)
 
 Endpoints:
-- GET  /clauses — List segmented regulatory clauses (FR-5.1)
-- GET  /gaps — List open/resolved compliance gaps (FR-5.2)
-- POST /gaps/{gap_id}/resolve — Resolve active compliance gap (FR-5.2.4)
-- POST /audit-package — Compile audit evidence reports (FR-5.3)
-- GET  /dashboard — Compliance heatmaps and deviations (FR-5.4)
-- POST /analyze — Run gap checking agent manually
+- GET  /clauses  -  List segmented regulatory clauses (FR-5.1)
+- GET  /gaps  -  List open/resolved compliance gaps (FR-5.2)
+- POST /gaps/{gap_id}/resolve  -  Resolve active compliance gap (FR-5.2.4)
+- POST /audit-package  -  Compile audit evidence reports (FR-5.3)
+- GET  /dashboard  -  Compliance heatmaps and deviations (FR-5.4)
+- POST /analyze  -  Run gap checking agent manually
 """
 
 from datetime import datetime, timezone
-from fastapi import APIRouter, Header, HTTPException, Query
+import asyncio
+from fastapi import APIRouter, Header, HTTPException, Query, Body
 
 from app.core.store import store
 from app.models.common import HealthResponse
@@ -196,3 +197,36 @@ async def trigger_compliance_check(
     """Manually triggers compliance agent sweep."""
     gaps = compliance_service.run_compliance_gap_agent(x_user_org)
     return {"message": f"Compliance check complete. Detected {len(gaps)} new gaps.", "gaps_count": len(gaps)}
+
+
+@router.post("/gaps/scan")
+async def scan_gaps_for_standard(
+    request_id: str = Body(..., embed=True),
+    standard_id: str = Body(..., embed=True),
+    x_user_org: str = Header(..., description="User's organisation ID"),
+):
+    """Simulates a targeted gap scan for the Agent Console."""
+    from app.core.agent_bus import agent_bus
+    import time
+    
+    agent_bus.init_request(request_id)
+    
+    # 1. Ingestion Agent
+    agent_bus.emit(request_id, "Ingestion Agent", f"Extracting regulatory clause {standard_id}...")
+    await asyncio.sleep(0.5)
+    
+    # 2. Graph Agent
+    agent_bus.emit(request_id, "Graph Agent", "Mapping linked SOPs and equipment", metric={"label": "sops", "value": "2"})
+    await asyncio.sleep(0.6)
+    
+    # 3. Compliance Agent
+    agent_bus.emit(request_id, "Compliance Agent", "Cross-referencing work orders & inspections", detail={"scanned_wos": ["WO-2025-0441", "WO-2025-0442"]})
+    await asyncio.sleep(0.6)
+    
+    # 4. Synthesis Agent
+    agent_bus.emit(request_id, "Synthesis Agent", "Generating compliance narrative and evidence package", metric={"label": "confidence", "value": "92%"})
+    await asyncio.sleep(0.4)
+    
+    agent_bus.emit(request_id, "Synthesis Agent", "DONE")
+    return {"status": "ok"}
+

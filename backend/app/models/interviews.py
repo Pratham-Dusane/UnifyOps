@@ -1,5 +1,5 @@
 """
-UnifyOps — Expert Knowledge Capture Models (Phase 7.1)
+UnifyOps  -  Expert Knowledge Capture Models (Phase 7.1)
 
 Pydantic models for the guided interview flow to capture veteran engineers'
 undocumented operational judgement.

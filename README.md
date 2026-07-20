@@ -112,7 +112,11 @@ GitHub Actions workflows run automatically on push/PR:
 
 See [PRD_V1.md](PRD_V1.md) for the full architecture, data model, and implementation roadmap.
 
-**Current phase: Phase 0 - Foundation & Platform Bootstrap**
+### Key New Features (Completed)
+- **Source Verification Drawer (Feature A):** Complete grounding traceability showing Graph Paths and Document Views linked via Citation Chips in the frontend.
+- **AI Agent Collaboration Console (Feature B):** Real-time streaming (SSE) UI showing multi-agent pipelines (Ingestion, Graph, Synthesis) working asynchronously for tasks like Root Cause Analysis and Compliance Gap Scanning.
+
+**Current phase: MVP Extensions - Feature A & Feature B Implemented**
 
 ---
 

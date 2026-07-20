@@ -415,239 +415,226 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.pageHeader}>
-        <div>
-          <span className={styles.eyebrow}>Document intelligence</span>
-          <h2 className={styles.pageTitle}>Evidence intake and review</h2>
+    <div className={styles.pageContainer}>
+      {/* 1. TOP HEADER */}
+      <div className={styles.topHeader}>
+        <div className={styles.headerLeft}>
+          <h2 className={styles.pageTitle}>Document Intelligence Hub</h2>
           <p className={styles.pageIntro}>
-            Upload plant files, monitor extraction quality, and review the entities that feed the knowledge graph.
+            Ingest, extract entities, and build the plant knowledge graph.
           </p>
         </div>
-        <div className={styles.headerMeta}>
-          <span>Graph-ready files</span>
-          <strong>{stats?.completed ?? 0}</strong>
+      </div>
+
+      {/* 2. METRICS ROW */}
+      <div className={styles.metricsGrid}>
+        <div className={styles.metricCard}>
+          <span className={styles.metricLabel}>Total Docs</span>
+          <strong className={styles.metricValue}>{stats?.total_documents ?? 0}</strong>
+        </div>
+        <div className={styles.metricCard}>
+          <span className={styles.metricLabel}>In Graph</span>
+          <strong className={styles.metricValue}>{stats?.completed ?? 0}</strong>
+        </div>
+        <div className={styles.metricCard}>
+          <span className={styles.metricLabel}>Processing</span>
+          <strong className={styles.metricValue}>{stats?.processing ?? 0}</strong>
+        </div>
+        <div className={styles.metricCard}>
+          <span className={styles.metricLabel}>Needs Review</span>
+          <strong className={styles.metricValue}>{stats?.needs_review ?? 0}</strong>
         </div>
       </div>
 
-      <div className={styles.workflowStrip}>
-        <div className={styles.workflowStep}>
-          <span className={styles.stepNumber}>01</span>
-          <div>
-            <strong>Ingest</strong>
-            <span>Plant files, reports, drawings</span>
+      {/* 3. PIPELINE STEPPER */}
+      <div className={styles.pipelineCard}>
+        <div className={styles.pipelineBar}>
+          <div className={`${styles.pipelineStep} ${styles.stepComplete}`}>
+            <span className={styles.stepDot}></span>
+            1. Upload
           </div>
-        </div>
-        <div className={styles.workflowStep}>
-          <span className={styles.stepNumber}>02</span>
-          <div>
-            <strong>Extract</strong>
-            <span>Entities, chunks, topology</span>
+          <div className={styles.pipelineConnector}></div>
+          <div className={`${styles.pipelineStep} ${styles.stepComplete}`}>
+            <span className={styles.stepDot}></span>
+            2. Layout OCR
           </div>
-        </div>
-        <div className={styles.workflowStep}>
-          <span className={styles.stepNumber}>03</span>
-          <div>
-            <strong>Review</strong>
-            <span>Confidence and human checks</span>
+          <div className={styles.pipelineConnector}></div>
+          <div className={`${styles.pipelineStep} ${styles.stepActive}`}>
+            <span className={styles.stepDot}></span>
+            3. Entity Extraction
+          </div>
+          <div className={styles.pipelineConnector}></div>
+          <div className={styles.pipelineStep}>
+            <span className={styles.stepDot}></span>
+            4. Knowledge Graph Integration
           </div>
         </div>
       </div>
 
-      {/* ─── Stats Row (FR-1.7.1) ─── */}
-      {stats && (
-        <div className={styles.statsRow}>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.total_documents}</span>
-            <span className={styles.statLabel}>Total Documents</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={`${styles.statValue} ${styles.statProcessing}`}>
-              {stats.processing}
-            </span>
-            <span className={styles.statLabel}>Processing</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={`${styles.statValue} ${styles.statCompleted}`}>
-              {stats.completed}
-            </span>
-            <span className={styles.statLabel}>Completed</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={`${styles.statValue} ${styles.statFailed}`}>
-              {stats.failed}
-            </span>
-            <span className={styles.statLabel}>Failed</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={`${styles.statValue} ${styles.statReview}`}>
-              {stats.needs_review}
-            </span>
-            <span className={styles.statLabel}>Needs Review</span>
-          </div>
-        </div>
-      )}
-
-      {/* ─── Upload Zone (FR-1.1.1) ─── */}
-      <div
-        className={`${styles.uploadZone} ${dragActive ? styles.uploadZoneActive : ""}`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-        role="button"
-        tabIndex={0}
-        aria-label="Upload documents"
-      >
-        <div className={styles.uploadGlow} />
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept=".pdf,.docx,.xlsx,.csv,.png,.jpg,.jpeg,.tiff,.tif,.zip,.dwg,.dxf"
-          onChange={(e) => e.target.files && handleUpload(e.target.files)}
-          className={styles.fileInput}
-        />
-        <div className={styles.uploadIcon}>
-          <UploadIcon />
-        </div>
-        <p className={styles.uploadTitle}>
-          {uploading ? "Uploading..." : "Drop files here or click to upload"}
-        </p>
-        <p className={styles.uploadDesc}>
-          PDF, DOCX, XLSX, CSV, PNG, JPEG, TIFF, ZIP, CAD formats. Up to 200MB
-          per file.
-        </p>
-        <div className={styles.uploadFormats}>
-          <span>PDF</span>
-          <span>CAD</span>
-          <span>Images</span>
-          <span>Office</span>
-        </div>
-      </div>
-
-      {/* Upload Progress */}
-      {uploadProgress.length > 0 && (
-        <div className={styles.progressList}>
-          {uploadProgress.map((msg, i) => (
-            <div key={i} className={styles.progressItem}>
-              {msg}
+      {/* 4. INTAKE CONTROLS */}
+      <div className={styles.uploadCard}>
+        <h3 className={styles.sectionTitle}>Intake Controls</h3>
+            
+            <div
+              className={`${styles.uploadZone} ${dragActive ? styles.uploadZoneActive : ""}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              role="button"
+              tabIndex={0}
+              aria-label="Upload documents"
+            >
+              <div className={styles.uploadGlow} />
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.docx,.xlsx,.csv,.png,.jpg,.jpeg,.tiff,.tif,.zip,.dwg,.dxf"
+                className={styles.fileInput}
+                onChange={(e) => e.target.files && handleUpload(e.target.files)}
+              />
+              <div className={styles.uploadIcon}>
+                <UploadIcon />
+              </div>
+              <p className={styles.uploadTitle}>
+                {uploading ? "Uploading..." : "Click or Drop files"}
+              </p>
+              <div className={styles.uploadFormats}>
+                <span>PDF</span>
+                <span>CAD</span>
+                <span>Images</span>
+                <span>Office</span>
+              </div>
             </div>
-          ))}
-        </div>
-      )}
 
-      {/* ─── Filters ─── */}
-      <div className={styles.filterRow}>
-        <h3 className={styles.sectionTitle}>Documents</h3>
-        <div className={styles.filters}>
-          <select
-            value={filterStage}
-            onChange={(e) => setFilterStage(e.target.value)}
-            className={styles.filterSelect}
-            aria-label="Filter by stage"
-          >
-            <option value="">All stages</option>
-            {Object.entries(STAGE_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className={styles.filterSelect}
-            aria-label="Filter by type"
-          >
-            <option value="">All types</option>
-            {Object.entries(DOC_TYPE_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* ─── Document Table (FR-1.7.1) ─── */}
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Filename</th>
-              <th>Type</th>
-              <th>Stage</th>
-              <th>Size</th>
-              <th>Entities</th>
-              <th>Chunks</th>
-              <th>Uploaded</th>
-              <th className={styles.centerHeader}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {documents.length === 0 ? (
-              <tr>
-                <td colSpan={7} className={styles.emptyRow}>
-                  No documents yet. Upload files above to begin ingestion.
-                </td>
-              </tr>
-            ) : (
-              documents.map((doc) => (
-                <tr
-                  key={doc.id}
-                  onClick={() => handleRowClick(doc.id)}
-                  className={styles.clickableRow}
-                >
-                  <td className={styles.filenameCell}>
-                    <span className={styles.filename}>
-                      {doc.original_filename}
-                    </span>
-                    {doc.needs_review && (
-                      <span className={styles.reviewBadge}>Review</span>
-                    )}
-                  </td>
-                  <td>
-                    <span className={styles.typeBadge}>
-                      {DOC_TYPE_LABELS[doc.doc_type] || doc.doc_type}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`${styles.stageBadge} ${
-                        doc.pipeline_stage === "completed"
-                          ? styles.stageCompleted
-                          : doc.pipeline_stage === "failed"
-                            ? styles.stageFailed
-                            : doc.pipeline_stage === "needs_review"
-                              ? styles.stageReview
-                              : styles.stageProcessing
-                      }`}
-                    >
-                      {STAGE_LABELS[doc.pipeline_stage] || doc.pipeline_stage}
-                    </span>
-                  </td>
-                  <td className={styles.numericCell}>
-                    {formatFileSize(doc.file_size)}
-                  </td>
-                  <td className={styles.numericCell}>{doc.entity_count}</td>
-                  <td className={styles.numericCell}>{doc.chunk_count}</td>
-                  <td className={styles.dateCell}>{formatDate(doc.created_at)}</td>
-                  <td className={styles.actionCell} onClick={(e) => e.stopPropagation()}>
-                    <button
-                      className={styles.deleteBtn}
-                      onClick={(e) => handleDeleteDoc(doc.id, e)}
-                      title="Delete Document"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
+            {/* Upload Progress */}
+            {uploadProgress.length > 0 && (
+              <div className={styles.progressList}>
+                {uploadProgress.map((msg, i) => (
+                  <div key={i} className={styles.progressItem}>
+                    {msg}
+                  </div>
+                ))}
+              </div>
             )}
-          </tbody>
-        </table>
       </div>
+
+      {/* 5. DOCUMENT REPOSITORY */}
+      <div className={styles.tableCard}>
+            <div className={styles.filterRow}>
+              <h3 className={styles.sectionTitle}>Document Repository</h3>
+              <div className={styles.filters}>
+                <select
+                  value={filterStage}
+                  onChange={(e) => setFilterStage(e.target.value)}
+                  className={styles.filterSelect}
+                  aria-label="Filter by stage"
+                >
+                  <option value="">All stages</option>
+                  {Object.entries(STAGE_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className={styles.filterSelect}
+                  aria-label="Filter by type"
+                >
+                  <option value="">All types</option>
+                  {Object.entries(DOC_TYPE_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Filename</th>
+                    <th>Type</th>
+                    <th>Stage</th>
+                    <th>Size</th>
+                    <th>Entities</th>
+                    <th>Uploaded</th>
+                    <th className={styles.centerHeader}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {documents.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className={styles.emptyRow}>
+                        No documents yet. Upload files to begin ingestion.
+                      </td>
+                    </tr>
+                  ) : (
+                    documents.map((doc) => (
+                      <tr
+                        key={doc.id}
+                        onClick={() => handleRowClick(doc.id)}
+                        className={styles.clickableRow}
+                      >
+                        <td className={styles.filenameCell}>
+                          <span className={styles.filename}>
+                            {doc.original_filename}
+                          </span>
+                          {doc.needs_review && (
+                            <span className={styles.reviewBadge}>Review</span>
+                          )}
+                        </td>
+                        <td>
+                          <span className={styles.typeBadge}>
+                            {DOC_TYPE_LABELS[doc.doc_type] || doc.doc_type}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={`${styles.stageBadge} ${doc.pipeline_stage === "completed"
+                                ? styles.stageCompleted
+                                : doc.pipeline_stage === "failed"
+                                  ? styles.stageFailed
+                                  : doc.pipeline_stage === "needs_review"
+                                    ? styles.stageReview
+                                    : styles.stageProcessing
+                              }`}
+                          >
+                            {STAGE_LABELS[doc.pipeline_stage] || doc.pipeline_stage}
+                          </span>
+                        </td>
+                        <td className={styles.numericCell}>
+                          {formatFileSize(doc.file_size)}
+                        </td>
+                        <td className={styles.numericCell}>
+                          {doc.entity_count > 0 ? (
+                            <span className={styles.entityChip}>{doc.entity_count}</span>
+                          ) : (
+                            <span className={styles.entityChipEmpty}>-</span>
+                          )}
+                        </td>
+                        <td className={styles.dateCell}>{formatDate(doc.created_at)}</td>
+                        <td className={styles.actionCell} onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className={styles.deleteBtn}
+                            onClick={(e) => handleDeleteDoc(doc.id, e)}
+                            title="Delete Document"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
       {/* ─── Detail Modal (FR-1.7.1, FR-1.7.2, FR-1.7.3) ─── */}
       {selectedDocId && (
@@ -677,15 +664,14 @@ export default function DocumentsPage() {
                       <div className={styles.metaRow}>
                         <span className={styles.metaLabel}>Pipeline Stage:</span>
                         <span
-                          className={`${styles.stageBadge} ${
-                            docDetail.document.pipeline_stage === "completed"
+                          className={`${styles.stageBadge} ${docDetail.document.pipeline_stage === "completed"
                               ? styles.stageCompleted
                               : docDetail.document.pipeline_stage === "failed"
                                 ? styles.stageFailed
                                 : docDetail.document.pipeline_stage === "needs_review"
                                   ? styles.stageReview
                                   : styles.stageProcessing
-                          }`}
+                            }`}
                         >
                           {STAGE_LABELS[docDetail.document.pipeline_stage] ||
                             docDetail.document.pipeline_stage}
@@ -820,9 +806,8 @@ export default function DocumentsPage() {
                             docDetail.entities.map((ent) => (
                               <div
                                 key={ent.id}
-                                className={`${styles.entityItem} ${
-                                  ent.needs_review ? styles.entityWarning : ""
-                                }`}
+                                className={`${styles.entityItem} ${ent.needs_review ? styles.entityWarning : ""
+                                  }`}
                               >
                                 <div className={styles.entityHeader}>
                                   <span className={styles.entityType}>
@@ -937,9 +922,8 @@ export default function DocumentsPage() {
                             docDetail.connections.map((conn) => (
                               <div
                                 key={conn.id}
-                                className={`${styles.entityItem} ${
-                                  conn.status === "pending" ? styles.entityWarning : ""
-                                }`}
+                                className={`${styles.entityItem} ${conn.status === "pending" ? styles.entityWarning : ""
+                                  }`}
                               >
                                 <div className={styles.entityHeader}>
                                   <span className={styles.entityType}>

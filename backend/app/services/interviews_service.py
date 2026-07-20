@@ -1,5 +1,5 @@
 """
-UnifyOps — Expert Knowledge Capture Service (Phase 7.1)
+UnifyOps  -  Expert Knowledge Capture Service (Phase 7.1)
 
 Orchestrates the conversational interview flow, topic generation,
 synthesis of transcripts, and ingestion of captured expert operational

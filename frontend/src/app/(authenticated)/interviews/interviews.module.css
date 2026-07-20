@@ -392,3 +392,90 @@
     height: 300px;
   }
 }
+
+/* ─── Sidebar Subtitle ─── */
+.sidebarSubtitle {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: -8px 0 4px;
+}
+
+/* ─── Expert Badge ─── */
+.expertBadge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08));
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  margin-top: 8px;
+}
+
+.expertAvatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  font-weight: 800;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.expertBadge strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.expertBadge span {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ─── Chat Avatars ─── */
+.agentAvatar,
+.vikramAvatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 0.68rem;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+.agentAvatar {
+  background: linear-gradient(135deg, var(--accent-primary), #2563eb);
+  color: white;
+}
+
+.vikramAvatar {
+  background: linear-gradient(135deg, var(--accent-secondary), #7c3aed);
+  color: white;
+}
+
+.bubbleContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bubbleSender {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+}

@@ -1,5 +1,5 @@
 """
-UnifyOps — Lessons Learned & Failure Intelligence Models (Phase 6)
+UnifyOps  -  Lessons Learned & Failure Intelligence Models (Phase 6)
 
 Data models for incident enrichment, cross-incident pattern detection,
 and proactive warning notifications.

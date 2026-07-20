@@ -42,9 +42,19 @@ const servicesList: ServiceHealth[] = [
 
 const fallbackAssets: AttentionItem[] = [
   {
+    equipment_tag: "INC-2025",
+    unit: "Crude Distillation",
+    attention_score: 84,
+    signal_details: {
+      failure_count: 5,
+      evidence_explanation:
+        "Incident INC-2025 cross-links 3 work orders, SOP-17, and OISD-STD-188 non-conformance. Root cause traces to inadequate mechanical seal specification on P-204 pump family.",
+    },
+  },
+  {
     equipment_tag: "P-204",
     unit: "Crude Distillation",
-    attention_score: 86,
+    attention_score: 84,
     signal_details: {
       failure_count: 4,
       evidence_explanation:
@@ -52,23 +62,23 @@ const fallbackAssets: AttentionItem[] = [
     },
   },
   {
-    equipment_tag: "HX-118",
-    unit: "Utilities",
+    equipment_tag: "P-205",
+    unit: "Crude Distillation",
     attention_score: 64,
     signal_details: {
       failure_count: 2,
       evidence_explanation:
-        "Inspection notes show fouling recurrence while the cleaning procedure has not been revised after the latest operating envelope change.",
+        "Coupling guard removal documented in WO-2025-0441 without confirmed reinstallation. Factory Act Section 41 non-conformance flagged.",
     },
   },
   {
     equipment_tag: "V-301",
     unit: "Storage",
-    attention_score: 42,
+    attention_score: 32,
     signal_details: {
       failure_count: 1,
       evidence_explanation:
-        "Pressure relief inspection is current, but one linked regulatory clause lacks proof of operator acknowledgement.",
+        "Pressure relief inspection is current and all linked regulatory clauses have proof of operator acknowledgement.",
     },
   },
 ];
@@ -88,6 +98,14 @@ const substrateSignals = [
   { label: "Clauses", value: "24 rules" },
   { label: "Lessons", value: "16 fixes" },
 ];
+
+// Persona-based widget visibility config
+const PERSONA_WIDGETS: Record<DemoLens, { stats: boolean; story: boolean; attention: boolean; evidence: boolean; security: boolean }> = {
+  plant_head: { stats: true, story: true, attention: true, evidence: true, security: true },
+  field: { stats: true, story: false, attention: true, evidence: true, security: false },
+  compliance: { stats: true, story: false, attention: false, evidence: true, security: true },
+  reliability: { stats: true, story: true, attention: true, evidence: true, security: false },
+};
 
 const lensCopy: Record<DemoLens, { title: string; question: string; action: string; href: string }> = {
   plant_head: {
@@ -333,14 +351,17 @@ export default function DashboardPage() {
         ))}
       </section>
 
-      <section className={styles.statsRow}>
+      {PERSONA_WIDGETS[activeLens].stats && (
+      <section className={`${styles.statsRow} ${styles.widgetAnimated}`}>
         <MetricCard label="Search time saved" value="70%" detail="From hunting files to cited answers" tone="blue" />
-        <MetricCard label="Plant conformance" value={`${conformancePct}%`} detail={`${gapsForDisplay} open evidence gaps`} tone="green" />
+        <MetricCard label="Conformance Health" value="78%" detail="2 high-severity gaps, 1 stale SOP" tone="green" />
         <MetricCard label="Assets under alert" value={String(assets.length)} detail="Cross-linked failure signals" tone="red" />
-        <MetricCard label="Knowledge completeness" value={`${completenessScore}%`} detail="Dynamic graph completeness metric" tone="amber" />
+        <MetricCard label="Graph Integrity" value={`${completenessScore}%`} detail="Dynamic graph completeness metric" tone="amber" />
       </section>
+      )}
 
-      <section className={styles.storyRail}>
+      {PERSONA_WIDGETS[activeLens].story && (
+      <section className={`${styles.storyRail} ${styles.widgetAnimated}`}>
         {storySteps.map((step, index) => (
           <button key={step.label} className={styles.storyStep} onClick={() => router.push(step.href)}>
             <span className={styles.stepNumber}>0{index + 1}</span>
@@ -349,8 +370,10 @@ export default function DashboardPage() {
           </button>
         ))}
       </section>
+      )}
 
-      <section className={styles.workspaceGrid}>
+      {PERSONA_WIDGETS[activeLens].attention && (
+      <section className={`${styles.workspaceGrid} ${styles.widgetAnimated}`}>
         <div className={styles.commandPanel}>
           <div className={styles.panelHeader}>
             <div>
@@ -364,20 +387,35 @@ export default function DashboardPage() {
             {assets.map((asset) => {
               const score = asset.attention_score;
               const statusClass = score > 70 ? styles.highRisk : score > 50 ? styles.mediumRisk : styles.lowRisk;
+              const isPulsing = score > 70;
               return (
                 <button
                   key={asset.equipment_tag}
-                  className={`${styles.assetCard} ${statusClass} ${selectedAsset?.equipment_tag === asset.equipment_tag ? styles.assetActive : ""}`}
+                  className={`${styles.assetCard} ${statusClass} ${isPulsing ? styles.assetPulsing : ""} ${selectedAsset?.equipment_tag === asset.equipment_tag ? styles.assetActive : ""}`}
                   onClick={() => setSelectedAsset(asset)}
                 >
                   <span className={styles.assetGlow} style={{ opacity: Math.max(score / 100, 0.35) }} />
                   <span className={styles.assetTag}>{asset.equipment_tag}</span>
                   <span className={styles.assetUnit}>{asset.unit}</span>
                   <span className={styles.assetScore}>{score}</span>
+                  {/* Gradient risk bar */}
                   <span className={styles.riskTrack}>
-                    <span className={styles.riskFill} style={{ width: `${score}%` }} />
+                    <span
+                      className={styles.riskFill}
+                      style={{
+                        width: `${score}%`,
+                        background: score > 70
+                          ? 'linear-gradient(90deg, var(--risk-amber) 0%, var(--risk-crimson) 100%)'
+                          : score > 30
+                          ? 'linear-gradient(90deg, var(--risk-emerald) 0%, var(--risk-amber) 100%)'
+                          : 'var(--risk-emerald)',
+                      }}
+                    />
                   </span>
-                  <span className={styles.assetMeta}>{asset.signal_details.failure_count} linked failures</span>
+                  <span className={styles.assetMeta}>
+                    {asset.signal_details.failure_count} linked failures
+                    {isPulsing && <span className={styles.riskLabel}> · HIGH RISK</span>}
+                  </span>
                 </button>
               );
             })}
@@ -429,9 +467,11 @@ export default function DashboardPage() {
           </form>
         </aside>
       </section>
+      )}
 
       {/* Security Telemetry Section (Phase 9) */}
-      <section className={styles.securityTelemetry} aria-label="Security and governance logs">
+      {PERSONA_WIDGETS[activeLens].security && (
+      <section className={`${styles.securityTelemetry} ${styles.widgetAnimated}`} aria-label="Security and governance logs">
         <div className={styles.telemetryHeader}>
           <div>
             <span className={styles.kicker}>VPC-SC Perimeter & Agent Shielding</span>
@@ -446,7 +486,7 @@ export default function DashboardPage() {
           {/* Blocked Attacks summary */}
           <div className={styles.telemetryCard}>
             <div className={styles.telemetryCardHeader}>
-              <span className={styles.telemetryCardIcon}>🛡️</span>
+              <span className={styles.telemetryCardIcon}>️</span>
               <div>
                 <strong>Model Armor Shield</strong>
                 <small>Prompt injection blocks</small>
@@ -463,7 +503,7 @@ export default function DashboardPage() {
           {/* Sensitive Documents summary */}
           <div className={styles.telemetryCard}>
             <div className={styles.telemetryCardHeader}>
-              <span className={styles.telemetryCardIcon}>🔍</span>
+              <span className={styles.telemetryCardIcon}></span>
               <div>
                 <strong>PII / SDP Scans</strong>
                 <small>Documents redacted during ingestion</small>
@@ -487,6 +527,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
+      )}
     </div>
   );
 }
