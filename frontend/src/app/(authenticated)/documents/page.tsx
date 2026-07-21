@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 import styles from "./documents.module.css";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -841,7 +844,14 @@ export default function DocumentsPage() {
                                   </div>
                                 ) : (
                                   <div className={styles.entityBody}>
-                                    <span className={styles.entityValue}>{ent.value}</span>
+                                    <div className={styles.entityValue}>
+                                      <ReactMarkdown 
+                                        remarkPlugins={[remarkGfm, remarkBreaks]}
+                                        components={{ p: ({node, ...props}) => <span {...props} /> }}
+                                      >
+                                        {ent.value}
+                                      </ReactMarkdown>
+                                    </div>
                                     <div className={styles.entityActions}>
                                       <button
                                         onClick={() => {
@@ -906,7 +916,11 @@ export default function DocumentsPage() {
                                     <strong>Context:</strong> {chk.heading_context}
                                   </div>
                                 )}
-                                <p className={styles.chunkText}>{chk.text}</p>
+                                <div className={styles.chunkText}>
+                                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                                    {chk.text.replace(/\]\s*#/g, "]\n\n#")}
+                                  </ReactMarkdown>
+                                </div>
                               </div>
                             ))
                           )}

@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
+import React, { useState } from "react";
+import { VerificationDrawer } from "@/components/VerificationDrawer";
 import styles from "./CitationChip.module.css";
 
 interface Citation {
@@ -25,22 +25,34 @@ interface CitationChipProps {
  * Shows document name, page/section, and relevance score.
  */
 export default function CitationChip({ citation, index }: CitationChipProps) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const pageInfo = citation.page ? `p.${citation.page}` : "";
   const sectionInfo = citation.section || "";
   const locationParts = [pageInfo, sectionInfo].filter(Boolean).join(" · ");
 
   return (
-    <Link
-      href={`/documents/${citation.document_id}`}
-      className={styles.chip}
-      title={`Open ${citation.document_name}${locationParts ? ` - ${locationParts}` : ""}`}
-      id={`citation-chip-${index}`}
-    >
-      <span className={styles.chipNumber}>[{index}]</span>
-      <span className={styles.chipName}>{citation.document_name}</span>
-      {locationParts && (
-        <span className={styles.chipLocation}>{locationParts}</span>
+    <>
+      <button
+        onClick={() => setIsDrawerOpen(true)}
+        className={styles.chip}
+        title={`Verify ${citation.document_name}${locationParts ? ` - ${locationParts}` : ""}`}
+        id={`citation-chip-${index}`}
+        type="button"
+      >
+        <span className={styles.chipNumber}>[{index}]</span>
+        <span className={styles.chipName}>{citation.document_name}</span>
+        {locationParts && (
+          <span className={styles.chipLocation}>{locationParts}</span>
+        )}
+      </button>
+
+      {isDrawerOpen && (
+        <VerificationDrawer 
+          citationId={citation.citation_id} 
+          onClose={() => setIsDrawerOpen(false)} 
+        />
       )}
-    </Link>
+    </>
   );
 }

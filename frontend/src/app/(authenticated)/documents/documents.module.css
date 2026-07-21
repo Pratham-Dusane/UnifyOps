@@ -980,6 +980,201 @@
   align-items: center;
   font-size: 11px;
   font-weight: 600;
+  height: 100%;
+}
+
+.tabHeader {
+  display: flex;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.tabBtn {
+  padding: 14px 24px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tabBtn:hover {
+  color: var(--text-primary);
+}
+
+.tabActive {
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
+}
+
+.tabContent {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* Entities list (FR-1.5) */
+.entityList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entityItem {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.entityWarning {
+  border-left: 3px solid var(--status-warning);
+  background-color: rgba(245, 158, 11, 0.03);
+}
+
+.entityHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.entityType {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+  background-color: var(--border-primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.entityConfidence {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.entityBody {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.entityValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.entityActions {
+  display: flex;
+  gap: 8px;
+}
+
+.entityActionBtn {
+  font-size: 12px;
+  color: var(--accent-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.entityActionBtn:hover {
+  background-color: var(--border-primary);
+}
+
+.btnTextApprove {
+  color: var(--status-success);
+}
+
+.btnTextReject {
+  color: var(--status-error);
+}
+
+.warningNote {
+  font-size: 10px;
+  color: var(--status-warning);
+  font-weight: 500;
+}
+
+/* Inline Entity Editing */
+.inlineEditField {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.inlineInput {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 13px;
+  color: var(--text-primary);
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-sm);
+  outline: none;
+}
+
+.inlineSaveBtn {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: white;
+  background-color: var(--status-success);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+}
+
+.inlineCancelBtn {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background-color: var(--border-primary);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+}
+
+/* Chunks list (FR-1.6) */
+.chunkList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chunkItem {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chunkHeader {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -1005,6 +1200,54 @@
   font-size: 13px;
   line-height: 1.6;
   color: var(--text-secondary);
+}
+
+.chunkText h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.chunkText h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.chunkText h3 {
+  font-size: 1.0rem;
+  font-weight: 600;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.chunkText p {
+  margin-bottom: 12px;
+}
+
+.chunkText ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+
+.chunkText ol {
+  list-style-type: decimal;
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+
+.chunkText li {
+  margin-bottom: 4px;
+}
+
+.chunkText strong {
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 @media (max-width: 900px) {

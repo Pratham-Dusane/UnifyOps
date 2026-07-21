@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import ReactMarkdown from "react-markdown";
 import styles from "./interviews.module.css";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -341,7 +342,9 @@ export default function InterviewsPage() {
                 below. Once approved, it will be ingested into the knowledge graph, making it
                 immediately citable in the Expert Copilot.
               </p>
-              <div className={styles.transcriptWrapper}>{session.transcript}</div>
+              <div className={styles.transcriptWrapper}>
+                <ReactMarkdown>{session.transcript}</ReactMarkdown>
+              </div>
             </div>
 
             <div className={styles.transcriptActions}>

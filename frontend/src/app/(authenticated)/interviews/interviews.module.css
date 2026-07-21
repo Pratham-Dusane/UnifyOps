@@ -308,13 +308,78 @@
   background-color: var(--bg-elevated);
   border: 1px solid var(--border-primary);
   border-radius: var(--border-radius-lg);
-  padding: 24px;
+  padding: 24px 32px;
   font-family: var(--font-sans);
   color: var(--text-primary);
   box-shadow: var(--shadow-sm);
-  white-space: pre-wrap;
   font-size: 14px;
   line-height: 1.6;
+}
+
+.transcriptWrapper h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-primary);
+  padding-bottom: 8px;
+}
+
+.transcriptWrapper h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.transcriptWrapper h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.transcriptWrapper p {
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+}
+
+.transcriptWrapper ul {
+  list-style-type: disc;
+  padding-left: 24px;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+}
+
+.transcriptWrapper ol {
+  list-style-type: decimal;
+  padding-left: 24px;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+}
+
+.transcriptWrapper li {
+  margin-bottom: 4px;
+}
+
+.transcriptWrapper strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.transcriptWrapper blockquote {
+  border-left: 4px solid var(--accent-primary);
+  padding-left: 16px;
+  margin-left: 0;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  font-style: italic;
+  background-color: var(--bg-secondary);
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-radius: 0 4px 4px 0;
 }
 
 .transcriptActions {
