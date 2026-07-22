@@ -244,7 +244,6 @@ class DataStore:
                 int_session = InterviewSession(**item)
                 self._interview_sessions[int_session.session_id] = int_session
 
-
             for item in data.get("notification_preferences", []):
                 item["updated_at"] = parse_dt(item["updated_at"])
                 pref = NotificationPreference(**item)

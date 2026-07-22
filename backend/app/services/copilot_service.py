@@ -440,7 +440,6 @@ Provide a clear, well-structured answer with citation tags."""
             except Exception as e:
                 print(f"[CopilotService] Groq generation failed: {e}")
 
-
         return (
             "I'm currently unable to generate an answer because the AI service "
             "is unavailable. Please try again shortly or contact your administrator."

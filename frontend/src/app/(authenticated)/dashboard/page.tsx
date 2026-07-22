@@ -133,7 +133,9 @@ export default function DashboardPage() {
   const [healthChecks, setHealthChecks] = useState(servicesList);
   const [totalDocs, setTotalDocs] = useState(0);
   const [attentionItems, setAttentionItems] = useState<AttentionItem[]>([]);
+  const [openGapsCount, setOpenGapsCount] = useState(0);
   const [completenessScore, setCompletenessScore] = useState(82.4);
+
 
   const [lessonPatternsCount, setLessonPatternsCount] = useState(3);
   const [selectedAsset, setSelectedAsset] = useState<AttentionItem | null>(fallbackAssets[0]);
@@ -242,7 +244,9 @@ export default function DashboardPage() {
   const healthyCount = healthChecks.filter((s) => s.status === "healthy").length;
   const serviceHealthLabel = healthyCount > 0 ? `${healthyCount}/${healthChecks.length} live` : "demo mode";
   const docsForDisplay = totalDocs || 18;
-  const graphLinks = docsForDisplay * 14 + assets.length * 9;
+  const gapsForDisplay = openGapsCount || 3;
+  const graphLinks = docsForDisplay * 14 + assets.length * 9 + gapsForDisplay * 2;
+
 
 
   const lens = lensCopy[activeLens];

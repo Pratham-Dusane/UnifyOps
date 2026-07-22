@@ -246,9 +246,7 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
         # 2. Extract Entities from the transcript text using Gemini
         try:
             # We treat the text as safety_procedure context to ensure rich extraction
-            extracted = gemini_service.extract_entities(
-                transcript, "safety_procedure"
-            )
+            extracted = gemini_service.extract_entities(transcript, "safety_procedure")
             entity_count = 0
             for ent in extracted:
                 try:

@@ -400,9 +400,10 @@ class LessonsLearnedService:
             docs = [
                 d
                 for d in all_docs
-                if d is not None and d.doc_type in (DocumentType.WORK_ORDER, DocumentType.INCIDENT_REPORT)
+                if d is not None
+                and d.doc_type
+                in (DocumentType.WORK_ORDER, DocumentType.INCIDENT_REPORT)
             ]
-
 
         for pattern in confirmed_patterns:
             for doc in docs:

@@ -83,7 +83,6 @@ async def get_dashboard_analytics(
                     "failure_count": item.signal_details.failure_count,
                     "evidence_explanation": item.signal_details.evidence_explanation,
                 },
-
             }
             for item in attention_list[:5]
         ]
