@@ -27,18 +27,18 @@ jobs:
           gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
           gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
 
-      - name: Enable GCP Required Services
-        run: |
-          gcloud services enable artifactregistry.googleapis.com run.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-
       - name: Ensure Artifact Registry Repository Exists
         run: |
-          gcloud artifacts repositories describe unifyops-repo --location=asia-south1 --project=${{ secrets.GCP_PROJECT_ID }} || \
-          gcloud artifacts repositories create unifyops-repo \
-            --repository-format=docker \
-            --location=asia-south1 \
-            --project=${{ secrets.GCP_PROJECT_ID }} \
-            --description="UnifyOps Docker Container Repository"
+          if ! gcloud artifacts repositories describe unifyops-repo --location=asia-south1 --project=${{ secrets.GCP_PROJECT_ID }} >/dev/null 2>&1; then
+            echo "Repository unifyops-repo not found. Attempting creation..."
+            gcloud artifacts repositories create unifyops-repo \
+              --repository-format=docker \
+              --location=asia-south1 \
+              --project=${{ secrets.GCP_PROJECT_ID }} \
+              --description="UnifyOps Docker Container Repository" || true
+          else
+            echo "Artifact Registry repository unifyops-repo exists."
+          fi
 
 
       # ── 1. Backend Build & Deploy ──
