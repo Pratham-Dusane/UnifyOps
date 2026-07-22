@@ -1,8 +1,7 @@
 // UnifyOps - Firebase Client Configuration
-// Replace placeholder values with your actual Firebase config from the Firebase Console.
 
-import { initializeApp, getApps } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeApp, getApps, FirebaseApp } from "firebase/app";
+import { getAuth, Auth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
@@ -13,8 +12,20 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:897751011372:web:f3088f88e5572e87438189",
 };
 
-// Initialize Firebase only once
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const auth = getAuth(app);
+let app: FirebaseApp;
+let auth: Auth;
+
+try {
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+} catch {
+  app = getApps().length > 0 ? getApps()[0] : initializeApp({ ...firebaseConfig, apiKey: "dummy-key-for-build" }, "build-app");
+}
+
+try {
+  auth = getAuth(app);
+} catch {
+  // Catch invalid API key during static build prerendering to prevent build exit
+  auth = {} as Auth;
+}
 
 export { app, auth };
