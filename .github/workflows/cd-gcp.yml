@@ -22,36 +22,37 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Set GCP Project & Configure Docker
+      - name: Configure Docker & Target Repository
         run: |
           gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
-          gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
+          gcloud auth configure-docker asia-south1-docker.pkg.dev,gcr.io --quiet
 
-      - name: Ensure Artifact Registry Repository Exists
-        run: |
-          if ! gcloud artifacts repositories describe unifyops-repo --location=asia-south1 --project=${{ secrets.GCP_PROJECT_ID }} >/dev/null 2>&1; then
-            echo "Repository unifyops-repo not found. Attempting creation..."
-            gcloud artifacts repositories create unifyops-repo \
-              --repository-format=docker \
-              --location=asia-south1 \
-              --project=${{ secrets.GCP_PROJECT_ID }} \
-              --description="UnifyOps Docker Container Repository" || true
+          # Try creating Artifact Registry repository if missing
+          gcloud artifacts repositories create unifyops-repo \
+            --repository-format=docker \
+            --location=asia-south1 \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --description="UnifyOps Docker Container Repository" 2>/dev/null || true
+
+          if gcloud artifacts repositories describe unifyops-repo --location=asia-south1 --project=${{ secrets.GCP_PROJECT_ID }} >/dev/null 2>&1; then
+            echo "Using Artifact Registry repository: asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/unifyops-repo"
+            echo "REPO_PREFIX=asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/unifyops-repo" >> $GITHUB_ENV
           else
-            echo "Artifact Registry repository unifyops-repo exists."
+            echo "Artifact Registry repo 'unifyops-repo' not available. Falling back to Google Container Registry (gcr.io)"
+            echo "REPO_PREFIX=gcr.io/${{ secrets.GCP_PROJECT_ID }}" >> $GITHUB_ENV
           fi
-
 
       # ── 1. Backend Build & Deploy ──
       - name: Build & Push Backend Container
         run: |
-          IMAGE_URI="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/unifyops-repo/backend"
+          IMAGE_URI="${{ env.REPO_PREFIX }}/backend"
           docker build -t ${IMAGE_URI}:${{ github.sha }} -t ${IMAGE_URI}:latest ./backend
           docker push ${IMAGE_URI}:${{ github.sha }}
           docker push ${IMAGE_URI}:latest
 
       - name: Deploy Backend to Cloud Run
         run: |
-          IMAGE_URI="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/unifyops-repo/backend:latest"
+          IMAGE_URI="${{ env.REPO_PREFIX }}/backend:latest"
           gcloud run deploy unifyops-backend \
             --image ${IMAGE_URI} \
             --region asia-south1 \
@@ -70,7 +71,7 @@ jobs:
       # ── 2. Frontend Build & Deploy ──
       - name: Build & Push Frontend Container
         run: |
-          IMAGE_URI="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/unifyops-repo/frontend"
+          IMAGE_URI="${{ env.REPO_PREFIX }}/frontend"
           docker build \
             --build-arg NEXT_PUBLIC_API_URL=${{ env.BACKEND_URL }} \
             -t ${IMAGE_URI}:${{ github.sha }} \
@@ -80,7 +81,7 @@ jobs:
 
       - name: Deploy Frontend to Cloud Run
         run: |
-          IMAGE_URI="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/unifyops-repo/frontend:latest"
+          IMAGE_URI="${{ env.REPO_PREFIX }}/frontend:latest"
           gcloud run deploy unifyops-frontend \
             --image ${IMAGE_URI} \
             --region asia-south1 \
