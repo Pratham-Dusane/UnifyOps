@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unifyops"
+version = "0.1.0"
+description = "AI Industrial Knowledge Intelligence Platform Python SDK for Plant Operations, RAG Copilot, Root Cause Analysis, and Regulatory Compliance"
+readme = "README.md"
+authors = [
+    { name = "UnifyOps Team", email = "info@unifyops.ai" }
+]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Manufacturing",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+keywords = ["industrial-ai", "rag", "knowledge-graph", "root-cause-analysis", "compliance", "unifyops"]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0.0",
+    "httpx>=0.24.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/Pratham-Dusane/UnifyOps"
+Repository = "https://github.com/Pratham-Dusane/UnifyOps"
+
+[tool.setuptools.packages.find]
+where = ["src"]
