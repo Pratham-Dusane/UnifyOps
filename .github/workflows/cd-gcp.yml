@@ -58,3 +58,15 @@ jobs:
             --set-env-vars NEXT_PUBLIC_API_URL=${{ env.BACKEND_URL }} \
             --quiet
 
+      - name: Show Cloud Build Logs on Failure
+        if: failure()
+        run: |
+          echo "=== Last 5 Cloud Build logs ==="
+          BUILD_ID=$(gcloud builds list --region=asia-south1 --project=${{ secrets.GCP_PROJECT_ID }} --limit=1 --format='value(id)' 2>/dev/null || true)
+          if [ -n "$BUILD_ID" ]; then
+            gcloud builds log "$BUILD_ID" --region=asia-south1 --project=${{ secrets.GCP_PROJECT_ID }} 2>/dev/null || \
+            gcloud builds log "$BUILD_ID" --project=${{ secrets.GCP_PROJECT_ID }} 2>/dev/null || \
+            echo "Could not fetch build logs"
+          else
+            echo "No build ID found"
+          fi
