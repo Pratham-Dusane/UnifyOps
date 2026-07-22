@@ -9,6 +9,7 @@ FastAPI router exposing endpoints for:
 """
 
 from fastapi import APIRouter, Header, HTTPException
+from pydantic import BaseModel
 
 from app.core.config import settings
 from app.core.store import store
@@ -43,20 +44,12 @@ async def list_topics(
     return interviews_service.get_suggested_topics(x_user_org)
 
 
-class StartInterviewRequest(com := str):
-    # Pydantic schema for start request
-    from pydantic import BaseModel
-    class StartRequest(BaseModel):
-        topic: str
-    pass
-
-from pydantic import BaseModel
-
 class StartRequest(BaseModel):
     topic: str
 
 
 @router.post("/start", response_model=InterviewSession)
+
 async def start_interview(
     body: StartRequest,
     x_user_uid: str = Header(..., description="Firebase UID"),

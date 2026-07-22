@@ -29,7 +29,7 @@ async def agent_console_stream(
                     
                     if payload.get("action_summary") == "DONE":
                         # Optional sentinel convention to close stream gracefully if we want
-                        yield f"event: done\ndata: {{}}\n\n"
+                        yield "event: done\ndata: {}\n\n"
                         break
                         
                 except asyncio.TimeoutError:

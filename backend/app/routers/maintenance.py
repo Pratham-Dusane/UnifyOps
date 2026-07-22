@@ -19,7 +19,6 @@ import re
 
 from app.models.common import HealthResponse
 from app.models.maintenance import (
-    TimelineEvent,
     EquipmentTimelineResponse,
     NeedsAttentionItem,
     RCARequest,

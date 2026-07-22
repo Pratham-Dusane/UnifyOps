@@ -5,7 +5,6 @@ Provides input and output validation shielding for Vertex AI LLM calls,
 filtering prompt injections, jailbreaks, and sensitive data leakage.
 """
 
-from datetime import datetime, timezone
 import os
 import re
 

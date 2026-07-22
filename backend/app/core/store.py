@@ -27,8 +27,6 @@ from app.models.copilot import (
     ConversationSession,
     ConversationTurn,
     QueryLogEntry,
-    FeedbackRequest,
-    FeedbackVote,
 )
 from app.models.maintenance import RCADraft
 from app.models.compliance import RegulatoryClause, ComplianceGap

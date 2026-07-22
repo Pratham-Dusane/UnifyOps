@@ -24,7 +24,6 @@ from app.models.copilot import (
     SessionListItem,
     SessionListResponse,
     StarterPromptsResponse,
-    QueryAnalyticsResponse,
     CitationVerificationResponse,
     CitationDocument,
     GraphPathStep,

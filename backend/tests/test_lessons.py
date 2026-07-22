@@ -9,7 +9,6 @@ Tests:
 """
 
 import os
-import pytest
 from fastapi.testclient import TestClient
 
 os.environ["TESTING"] = "1"

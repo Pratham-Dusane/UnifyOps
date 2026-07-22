@@ -212,7 +212,7 @@ Regulation Text: {text}"""
         username = user.display_name if user else "Compliance Officer"
 
         package_markdown = []
-        package_markdown.append(f"# Quality & Safety Audit Evidence Package")
+        package_markdown.append("# Quality & Safety Audit Evidence Package")
         package_markdown.append(f"**Generated on**: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}")
         package_markdown.append(f"**Compiled by**: {username}")
         package_markdown.append(f"**Plant Location**: {org_id}")
@@ -241,7 +241,7 @@ Regulation Text: {text}"""
                     if proc:
                         files_included.add(proc.original_filename)
                         package_markdown.append(f"- **Document**: {proc.original_filename}")
-                        package_markdown.append(f"  - **Type**: Safety SOP")
+                        package_markdown.append("  - **Type**: Safety SOP")
                         package_markdown.append(f"  - **Date**: {proc.created_at.date().isoformat()}")
                         
                         # Add a snippet of LOTO or procedure chunks if available

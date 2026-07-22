@@ -12,7 +12,7 @@ Endpoints:
 
 from datetime import datetime, timezone
 import asyncio
-from fastapi import APIRouter, Header, HTTPException, Query, Body
+from fastapi import APIRouter, Header, HTTPException, Body
 
 from app.core.store import store
 from app.models.common import HealthResponse
@@ -207,7 +207,6 @@ async def scan_gaps_for_standard(
 ):
     """Simulates a targeted gap scan for the Agent Console."""
     from app.core.agent_bus import agent_bus
-    import time
     
     agent_bus.init_request(request_id)
     

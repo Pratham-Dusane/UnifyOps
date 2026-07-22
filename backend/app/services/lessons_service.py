@@ -10,10 +10,9 @@ Implements:
 
 import uuid
 from collections import Counter
-from datetime import datetime, timezone
 
 from app.core.store import store
-from app.models.ingestion import DocumentType, PipelineStage
+from app.models.ingestion import DocumentType
 from app.models.lessons import (
     IncidentEnrichment,
     IncidentSeverity,

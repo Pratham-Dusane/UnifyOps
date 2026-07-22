@@ -11,7 +11,7 @@ Features:
 import json
 import google.generativeai as genai
 from app.core.config import settings
-from app.services.model_armor import model_armor_service, SecurityBlockException
+from app.services.model_armor import model_armor_service
 
 
 class GeminiService:

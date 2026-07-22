@@ -2,7 +2,8 @@ name: CD - Deploy to GCP Cloud Run
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, feature_9]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -21,8 +22,9 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configure Docker for Artifact Registry
+      - name: Set GCP Project & Configure Docker
         run: |
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
           gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
 
       - name: Ensure Artifact Registry Repository Exists
@@ -30,6 +32,7 @@ jobs:
           gcloud artifacts repositories create unifyops-repo \
             --repository-format=docker \
             --location=asia-south1 \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
             --description="UnifyOps Docker Container Repository" || true
 
       # ── 1. Backend Build & Deploy ──
@@ -46,6 +49,7 @@ jobs:
           gcloud run deploy unifyops-backend \
             --image ${IMAGE_URI} \
             --region asia-south1 \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
             --platform managed \
             --allow-unauthenticated \
             --set-env-vars ENVIRONMENT=production
@@ -53,7 +57,7 @@ jobs:
       - name: Get Backend Cloud Run URL
         id: get-backend-url
         run: |
-          BACKEND_URL=$(gcloud run services describe unifyops-backend --region asia-south1 --format 'value(status.url)')
+          BACKEND_URL=$(gcloud run services describe unifyops-backend --region asia-south1 --project ${{ secrets.GCP_PROJECT_ID }} --format 'value(status.url)')
           echo "BACKEND_URL=${BACKEND_URL}" >> $GITHUB_ENV
           echo "Deployed Backend URL: ${BACKEND_URL}"
 
@@ -74,6 +78,7 @@ jobs:
           gcloud run deploy unifyops-frontend \
             --image ${IMAGE_URI} \
             --region asia-south1 \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
             --platform managed \
             --allow-unauthenticated \
             --set-env-vars NEXT_PUBLIC_API_URL=${{ env.BACKEND_URL }}

@@ -7,7 +7,6 @@ Tests for:
 - RCA Generation & Approval Workflow (FR-4.3)
 """
 
-import pytest
 from datetime import datetime, timezone, timedelta
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient

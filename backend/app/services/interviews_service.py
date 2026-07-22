@@ -49,8 +49,9 @@ class InterviewsService:
 
             for gap in gaps:
                 query_pattern = gap.get("query_pattern", "")
-                occurrence = gap.get("occurrence_count", 1)
+                _occurrence = gap.get("occurrence_count", 1)
                 avg_conf = gap.get("avg_confidence", 50.0)
+
 
                 # Heuristic scoring
                 criticality = 60

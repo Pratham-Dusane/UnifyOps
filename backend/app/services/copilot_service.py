@@ -14,8 +14,6 @@ The heart of the Expert Knowledge Copilot. Implements:
 
 import re
 import uuid
-import math
-from datetime import datetime, timezone
 
 from app.core.config import settings
 from app.core.store import store
@@ -264,9 +262,10 @@ class CopilotService:
         # Generate query embedding and compare with chunk embeddings
         query_embedding = gemini_service.generate_embeddings([query])
         if query_embedding and len(query_embedding) > 0:
-            q_emb = query_embedding[0]
-            all_chunks = store.get_all_chunks_for_org(org_id)
+            _q_emb = query_embedding[0]
+            _all_chunks = store.get_all_chunks_for_org(org_id)
             # NOTE: In a production system, embeddings would be stored alongside chunks.
+
             # For the MVP, we only have embeddings if they were generated during ingestion.
             # This is a graceful fallback - vector search adds to but doesn't replace
             # graph + fulltext retrieval.
@@ -740,13 +739,14 @@ Provide ONLY the translated text. Do not add any introduction, greeting, or expl
             }
 
         total = len(logs)
-        avg_conf = sum(l.confidence_score for l in logs) / total
-        low_conf = sum(1 for l in logs if l.confidence_score < LOW_CONFIDENCE_THRESHOLD)
+        avg_conf = sum(item.confidence_score for item in logs) / total
+        low_conf = sum(1 for item in logs if item.confidence_score < LOW_CONFIDENCE_THRESHOLD)
 
         # Find recurring low-confidence query patterns
         low_conf_queries = [
-            l for l in logs if l.confidence_score < LOW_CONFIDENCE_THRESHOLD
+            item for item in logs if item.confidence_score < LOW_CONFIDENCE_THRESHOLD
         ]
+
         # Simple clustering: group by first 3 significant words
         pattern_map: dict[str, list[QueryLogEntry]] = {}
         for entry in low_conf_queries:

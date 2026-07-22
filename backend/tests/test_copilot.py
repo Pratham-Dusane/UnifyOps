@@ -13,7 +13,6 @@ Tests for the Expert Knowledge Copilot endpoints:
 - Query analytics
 """
 
-import pytest
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 

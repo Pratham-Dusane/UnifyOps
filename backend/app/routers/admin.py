@@ -5,7 +5,10 @@ Skeleton endpoints for the Admin Console backend.
 Supports Deepak's and Mr. Iyer's dashboard analytics workflows.
 """
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Header, HTTPException
+
 
 from app.core.config import settings
 from app.core.store import store
@@ -158,7 +161,7 @@ async def get_dashboard_analytics(
             "model_armor_total_count": len(ma_events),
             "sensitive_documents_count": len(sensitive_docs),
             "sensitive_documents": sensitive_details,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
         raise HTTPException(
@@ -166,4 +169,3 @@ async def get_dashboard_analytics(
             detail=f"Failed to compile dashboard analytics: {str(e)}",
         )
 
-from datetime import datetime

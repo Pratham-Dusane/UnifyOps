@@ -9,7 +9,6 @@ Implements:
 
 import re
 import uuid
-import random
 from datetime import datetime, timezone
 
 from app.core.config import settings
@@ -23,7 +22,6 @@ from app.models.maintenance import (
     RCADraft,
 )
 from app.models.ingestion import DocumentType
-from app.models.copilot import CopilotQuery
 from app.services.copilot_service import copilot_service
 from app.services.gemini import gemini_service
 
@@ -279,8 +277,9 @@ Create a precise explanation (max 150 characters) stating the risk factors (e.g.
                 response = model.generate_content(prompt)
                 if response.text:
                     return response.text.strip()
-            except:
+            except Exception:
                 pass
+
 
         # Fallback explanation
         interval_text = f" vs a historical interval of {interval:.1f} months" if interval else ""
@@ -297,7 +296,6 @@ Create a precise explanation (max 150 characters) stating the risk factors (e.g.
         """
         from app.core.agent_bus import agent_bus
         import time
-        import uuid
 
         if request_id:
             agent_bus.init_request(request_id)
@@ -451,7 +449,7 @@ JSON format only. Do not include markdown formatting code blocks like ```json.""
                 response = model.generate_content(prompt)
                 if response.text:
                     raw_text = response.text
-            except:
+            except Exception:
                 pass
 
         if not raw_text and settings.groq_api_key:
@@ -469,7 +467,7 @@ JSON format only. Do not include markdown formatting code blocks like ```json.""
                 res = httpx.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=25.0)
                 if res.status_code == 200:
                     raw_text = res.json()["choices"][0]["message"]["content"]
-            except:
+            except Exception:
                 pass
 
         # Parse JSON
@@ -480,8 +478,9 @@ JSON format only. Do not include markdown formatting code blocks like ```json.""
                 cleaned = re.sub(r"\n```$", "", cleaned)
                 import json as json_mod
                 return json_mod.loads(cleaned)
-            except:
+            except Exception:
                 pass
+
 
         # Return empty dictionary default if parse fails
         return {}
