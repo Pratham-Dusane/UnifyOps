@@ -7,7 +7,7 @@ import CameraLookup from "./CameraLookup";
 import { AgentConsole } from "@/components/AgentConsole";
 import { CitationChip } from "@/components/CitationChip";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://unifyops-backend-381606738104.asia-south1.run.app";
 
 interface Event {
   id: string;

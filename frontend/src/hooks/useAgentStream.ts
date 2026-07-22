@@ -23,7 +23,8 @@ export function useAgentStream(requestId: string | null) {
     setError(null);
 
 
-    const eventSource = new EventSource(`http://localhost:8000/api/agent-console/stream?request_id=${requestId}`);
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://unifyops-backend-381606738104.asia-south1.run.app";
+    const eventSource = new EventSource(`${baseUrl}/api/agent-console/stream?request_id=${requestId}`);
 
     eventSource.addEventListener('agent_step', (event) => {
       try {

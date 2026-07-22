@@ -6,7 +6,7 @@ import styles from "./CopilotChat.module.css";
 import ChatInput from "./ChatInput";
 import CitationChip from "./CitationChip";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://unifyops-backend-381606738104.asia-south1.run.app";
 
 interface Citation {
   citation_id: string;
