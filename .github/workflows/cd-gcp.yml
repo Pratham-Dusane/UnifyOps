@@ -35,7 +35,8 @@ jobs:
             --project ${{ secrets.GCP_PROJECT_ID }} \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars ENVIRONMENT=production
+            --set-env-vars ENVIRONMENT=production \
+            --quiet
 
       - name: Get Backend Cloud Run URL
         id: get-backend-url
@@ -54,4 +55,6 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --set-build-env-vars NEXT_PUBLIC_API_URL=${{ env.BACKEND_URL }} \
-            --set-env-vars NEXT_PUBLIC_API_URL=${{ env.BACKEND_URL }}
+            --set-env-vars NEXT_PUBLIC_API_URL=${{ env.BACKEND_URL }} \
+            --quiet
+
