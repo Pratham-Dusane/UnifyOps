@@ -63,9 +63,12 @@ export default function CameraLookup({ onClose, onMatch, headers }: CameraLookup
 
   useEffect(() => {
     // Try to auto-start webcam
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     startWebcam();
     return () => stopWebcam();
   }, []);
+
+
 
   // Capture snapshot from webcam video
   const captureSnapshot = () => {
@@ -117,11 +120,11 @@ export default function CameraLookup({ onClose, onMatch, headers }: CameraLookup
     try {
       const authHeaders = { ...headers };
       // Let fetch set Content-Type boundary automatically for FormData
-      delete (authHeaders as any)["Content-Type"];
+      delete (authHeaders as Record<string, unknown>)["Content-Type"];
 
       const res = await fetch(`${API_URL}/api/v1/maintenance/equipment/lookup-camera`, {
         method: "POST",
-        headers: authHeaders,
+        headers: authHeaders as Record<string, string>,
         body: formData,
       });
 
@@ -150,7 +153,7 @@ export default function CameraLookup({ onClose, onMatch, headers }: CameraLookup
     setImageFile(null);
     setImagePreview(null);
     setResult(null);
-    startWebcam();
+    void startWebcam();
   };
 
   return (
@@ -175,7 +178,9 @@ export default function CameraLookup({ onClose, onMatch, headers }: CameraLookup
           {/* Captured or uploaded preview */}
           {imagePreview && (
             <div className={styles.previewContainer}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={imagePreview} alt="Tag plate preview" className={styles.previewImage} />
+
               <div className={styles.previewActions}>
                 <button className={styles.retakeBtn} onClick={handleRetake}>
                   Capture / Upload another

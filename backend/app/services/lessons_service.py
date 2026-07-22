@@ -393,15 +393,16 @@ class LessonsLearnedService:
 
         # Get recent documents (last ingested or specific doc)
         if new_doc_id:
-            docs = [store.get_document(new_doc_id)]
-            docs = [d for d in docs if d is not None]
+            target_doc = store.get_document(new_doc_id)
+            docs = [target_doc] if target_doc is not None else []
         else:
             all_docs, _ = store.list_documents(org_id=org_id, page_size=10)
             docs = [
                 d
                 for d in all_docs
-                if d.doc_type in (DocumentType.WORK_ORDER, DocumentType.INCIDENT_REPORT)
+                if d is not None and d.doc_type in (DocumentType.WORK_ORDER, DocumentType.INCIDENT_REPORT)
             ]
+
 
         for pattern in confirmed_patterns:
             for doc in docs:

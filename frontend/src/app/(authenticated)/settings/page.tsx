@@ -26,7 +26,12 @@ export default function SettingsPage() {
   const { user, profile } = useAuth();
 
   // Localisation and notification states
-  const [preferredLang, setPreferredLang] = useState("en");
+  const [preferredLang, setPreferredLang] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("preferred_lang") || "en";
+    }
+    return "en";
+  });
   const [preferenceData, setPreferenceData] = useState<NotificationPreference | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -45,11 +50,7 @@ export default function SettingsPage() {
 
   // Load preferences
   useEffect(() => {
-    // 1. Language
-    const savedLang = localStorage.getItem("preferred_lang") || "en";
-    setPreferredLang(savedLang);
-
-    // 2. Notification preferences
+    let isMounted = true;
     if (user && profile) {
       fetch(`${API_URL}/api/v1/notifications/preferences`, {
         headers: getHeaders(),
@@ -59,13 +60,17 @@ export default function SettingsPage() {
           throw new Error("Failed to load preferences");
         })
         .then((data) => {
-          setPreferenceData(data);
+          if (isMounted) setPreferenceData(data);
         })
         .catch(() => {
           // Keep defaults
         });
     }
+    return () => {
+      isMounted = false;
+    };
   }, [user, profile, getHeaders]);
+
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const lang = e.target.value;

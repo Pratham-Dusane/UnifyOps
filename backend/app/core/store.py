@@ -241,8 +241,9 @@ class DataStore:
                 item["updated_at"] = parse_dt(item["updated_at"])
                 for turn in item.get("turns", []):
                     turn["timestamp"] = parse_dt(turn["timestamp"])
-                session = InterviewSession(**item)
-                self._interview_sessions[session.session_id] = session
+                int_session = InterviewSession(**item)
+                self._interview_sessions[int_session.session_id] = int_session
+
 
             for item in data.get("notification_preferences", []):
                 item["updated_at"] = parse_dt(item["updated_at"])
@@ -1063,9 +1064,8 @@ class DataStore:
                 conn_id
                 for conn_id, conn in self._connections.items()
                 if conn.document_id == doc_id
-                or conn.from_entity_id in entities_to_remove
-                or conn.to_entity_id in entities_to_remove
             ]
+
             for conn_id in conns_to_remove:
                 del self._connections[conn_id]
 

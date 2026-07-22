@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { X, ExternalLink, ShieldCheck, Info } from "lucide-react";
+import { X, ExternalLink, ShieldCheck } from "lucide-react";
 import { GraphCanvas, GraphPathStep } from "./GraphCanvas";
 import { SourceDocumentViewer, CitationDocument } from "./SourceDocumentViewer";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,7 +25,6 @@ export const VerificationDrawer: React.FC<{ citationId: string; onClose: () => v
   const { profile } = useAuth();
   const [data, setData] = useState<VerificationResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showScorecard, setShowScorecard] = useState(false);
 
   useEffect(() => {
     // Strip brackets from citation id e.g. "[1]" -> "1"
@@ -81,9 +80,10 @@ export const VerificationDrawer: React.FC<{ citationId: string; onClose: () => v
         {data && (
           <div className={styles.claimContext}>
             <span className={styles.claimLabel}>Claim</span>
-            <p className={styles.claimText}>"{data.claim_text}"</p>
+            <p className={styles.claimText}>&quot;{data.claim_text}&quot;</p>
           </div>
         )}
+
 
         <div className={styles.mainContent}>
           {loading ? (

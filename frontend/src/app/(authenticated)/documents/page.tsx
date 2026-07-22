@@ -847,8 +847,10 @@ export default function DocumentsPage() {
                                     <div className={styles.entityValue}>
                                       <ReactMarkdown 
                                         remarkPlugins={[remarkGfm, remarkBreaks]}
-                                        components={{ p: ({node, ...props}) => <span {...props} /> }}
+                                        components={{ p: ({...props}) => <span {...props} /> }}
                                       >
+
+
                                         {ent.value}
                                       </ReactMarkdown>
                                     </div>

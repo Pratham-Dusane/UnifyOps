@@ -424,21 +424,22 @@ Provide a clear, well-structured answer with citation tags."""
                     "temperature": 0.2,
                     "max_tokens": 2000,
                 }
-                response = httpx.post(
+                groq_response = httpx.post(
                     "https://api.groq.com/openai/v1/chat/completions",
                     headers=headers,
                     json=payload,
                     timeout=30.0,
                 )
-                if response.status_code == 200:
-                    data = response.json()
+                if groq_response.status_code == 200:
+                    data = groq_response.json()
                     return data["choices"][0]["message"]["content"]
                 else:
                     print(
-                        f"[CopilotService] Groq returned status {response.status_code}"
+                        f"[CopilotService] Groq returned status {groq_response.status_code}"
                     )
             except Exception as e:
                 print(f"[CopilotService] Groq generation failed: {e}")
+
 
         return (
             "I'm currently unable to generate an answer because the AI service "
@@ -613,7 +614,7 @@ Provide ONLY the translated text. Do not add any introduction, greeting, or expl
             blocked_response = CopilotResponse(
                 answer=f"Blocked by Model Armor: {e.reason}",
                 citations=[],
-                confidence_score=0.0,
+                confidence_score=0,
                 is_low_confidence=True,
                 session_id=session_id,
                 has_uncited_claims=False,
@@ -624,8 +625,9 @@ Provide ONLY the translated text. Do not add any introduction, greeting, or expl
                 role="assistant",
                 content=blocked_response.answer,
                 citations=[],
-                confidence_score=0.0,
+                confidence_score=0,
             )
+
             store.add_turn_to_session(session_id, assistant_turn)
             return blocked_response
 

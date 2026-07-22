@@ -90,14 +90,7 @@ const storySteps = [
   { label: "Act", value: "RCA, audit, lessons", href: "/maintenance" },
 ];
 
-const substrateSignals = [
-  { label: "P&ID", value: "48 tags" },
-  { label: "SOP", value: "31 steps" },
-  { label: "WO", value: "92 events" },
-  { label: "Incidents", value: "12 cases" },
-  { label: "Clauses", value: "24 rules" },
-  { label: "Lessons", value: "16 fixes" },
-];
+
 
 // Persona-based widget visibility config
 const PERSONA_WIDGETS: Record<DemoLens, { stats: boolean; story: boolean; attention: boolean; evidence: boolean; security: boolean }> = {
@@ -140,8 +133,8 @@ export default function DashboardPage() {
   const [healthChecks, setHealthChecks] = useState(servicesList);
   const [totalDocs, setTotalDocs] = useState(0);
   const [attentionItems, setAttentionItems] = useState<AttentionItem[]>([]);
-  const [openGapsCount, setOpenGapsCount] = useState(0);
   const [completenessScore, setCompletenessScore] = useState(82.4);
+
   const [lessonPatternsCount, setLessonPatternsCount] = useState(3);
   const [selectedAsset, setSelectedAsset] = useState<AttentionItem | null>(fallbackAssets[0]);
   const [activeLens, setActiveLens] = useState<DemoLens>("plant_head");
@@ -225,6 +218,7 @@ export default function DashboardPage() {
     }
   }, [user, profile, loadDashboardData]);
 
+
   useEffect(() => {
     async function checkHealth() {
       const updated = await Promise.all(
@@ -245,13 +239,11 @@ export default function DashboardPage() {
   }, []);
 
   const assets = attentionItems.length > 0 ? attentionItems : fallbackAssets;
-  const highestRisk = Math.max(...assets.map((asset) => asset.attention_score), 0);
   const healthyCount = healthChecks.filter((s) => s.status === "healthy").length;
   const serviceHealthLabel = healthyCount > 0 ? `${healthyCount}/${healthChecks.length} live` : "demo mode";
   const docsForDisplay = totalDocs || 18;
-  const gapsForDisplay = openGapsCount || 3;
-  const conformancePct = Math.max(100 - gapsForDisplay * 7, 0);
   const graphLinks = docsForDisplay * 14 + assets.length * 9;
+
 
   const lens = lensCopy[activeLens];
   const riskNarrative = useMemo(() => {

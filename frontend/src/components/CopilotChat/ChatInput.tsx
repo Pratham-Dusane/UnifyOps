@@ -41,11 +41,23 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
   };
 
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
+  const [hasSpeechSupport, setHasSpeechSupport] = useState(false);
+  const recognitionRef = useRef<{ start: () => void; stop: () => void } | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const win = window as unknown as Record<string, new () => {
+        continuous: boolean;
+        interimResults: boolean;
+        lang: string;
+        onstart: () => void;
+        onend: () => void;
+        onresult: (event: { results: Array<Array<{ transcript: string }>> }) => void;
+        onerror: () => void;
+        start: () => void;
+        stop: () => void;
+      }>;
+      const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
       if (SpeechRecognition) {
         const rec = new SpeechRecognition();
         rec.continuous = false;
@@ -60,7 +72,7 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
           setIsListening(false);
         };
 
-        rec.onresult = (event: any) => {
+        rec.onresult = (event) => {
           const transcript = event.results[0][0].transcript;
           if (transcript) {
             setValue(transcript);
@@ -71,18 +83,21 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
           setIsListening(false);
         };
 
-        setRecognition(rec);
+        recognitionRef.current = rec;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setHasSpeechSupport(true);
       }
     }
   }, []);
 
+
   const toggleListening = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!recognition) return;
+    if (!recognitionRef.current) return;
     if (isListening) {
-      recognition.stop();
+      recognitionRef.current.stop();
     } else {
-      recognition.start();
+      recognitionRef.current.start();
     }
   };
 
@@ -101,7 +116,7 @@ export default function ChatInput({ onSend, isLoading }: ChatInputProps) {
           aria-label="Ask a question"
           id="copilot-query-input"
         />
-        {recognition && (
+        {hasSpeechSupport && (
           <button
             type="button"
             className={`${styles.micBtn} ${isListening ? styles.micBtnActive : ""}`}

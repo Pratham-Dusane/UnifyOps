@@ -260,9 +260,11 @@ function ScoreDriver({
    ────────────────────────────────────────── */
 export default function ComplianceDashboard() {
   const { user, profile } = useAuth();
-  const [clauses, setClauses] = useState<RegulatoryClause[]>([]);
+  const [, setClauses] = useState<RegulatoryClause[]>([]);
   const [gaps, setGaps] = useState<ComplianceGap[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
+
+
 
   // Interactive state
   const [selectedStandard, setSelectedStandard] = useState<RegulatoryStandard>(
@@ -307,9 +309,12 @@ export default function ComplianceDashboard() {
 
   useEffect(() => {
     if (user && profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadComplianceData();
     }
   }, [user, profile, loadComplianceData]);
+
+
 
   // Handle gap resolution
   const handleResolveGap = async (gapId: string) => {
@@ -740,8 +745,9 @@ export default function ComplianceDashboard() {
                     {selectedStandard.section}
                   </p>
                   <p className={styles.reportQuote}>
-                    "{selectedStandard.verbatimClause}"
+                    &quot;{selectedStandard.verbatimClause}&quot;
                   </p>
+
                 </div>
 
                 <div className={styles.reportSection}>

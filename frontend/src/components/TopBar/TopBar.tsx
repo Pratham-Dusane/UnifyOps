@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -33,7 +33,6 @@ const routeNames: Record<string, string> = {
 
 export default function TopBar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { user, profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
@@ -76,9 +75,12 @@ export default function TopBar() {
 
   useEffect(() => {
     if (user && profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadNotifications();
     }
   }, [user, profile, loadNotifications]);
+
+
 
   // Poll for notifications every 30 seconds
   useEffect(() => {

@@ -1,18 +1,18 @@
 import asyncio
-from typing import Dict, List
 import logging
+from typing import Dict, List, Optional
 
 logger = logging.getLogger("unifyops-agent-bus")
 
 
 class AgentEventBus:
-    def __init__(self):
+    def __init__(self) -> None:
         # request_id -> list of asyncio.Queue
         self._subscribers: Dict[str, List[asyncio.Queue]] = {}
         # Track start time to calculate offset
         self._start_times: Dict[str, float] = {}
 
-    def init_request(self, request_id: str):
+    def init_request(self, request_id: str) -> None:
         import time
 
         self._start_times[request_id] = time.time()
@@ -20,12 +20,12 @@ class AgentEventBus:
     def subscribe(self, request_id: str) -> asyncio.Queue:
         if request_id not in self._subscribers:
             self._subscribers[request_id] = []
-        q = asyncio.Queue()
+        q: asyncio.Queue = asyncio.Queue()
         self._subscribers[request_id].append(q)
         logger.debug(f"Subscribed to agent stream for {request_id}")
         return q
 
-    def unsubscribe(self, request_id: str, queue: asyncio.Queue):
+    def unsubscribe(self, request_id: str, queue: asyncio.Queue) -> None:
         if request_id in self._subscribers:
             if queue in self._subscribers[request_id]:
                 self._subscribers[request_id].remove(queue)
@@ -38,9 +38,9 @@ class AgentEventBus:
         request_id: str,
         agent_name: str,
         action_summary: str,
-        detail: dict = None,
-        metric: dict = None,
-    ):
+        detail: Optional[dict] = None,
+        metric: Optional[dict] = None,
+    ) -> None:
         """Broadcast a message to all subscribers of a request_id."""
         if request_id not in self._subscribers:
             return  # No active subscribers, drop the message

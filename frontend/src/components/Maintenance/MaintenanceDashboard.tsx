@@ -162,6 +162,9 @@ export default function MaintenanceDashboard() {
     }
   }, [user, selectedTag, loadTimeline, loadTagRcas]);
 
+
+
+
   const handleRunRca = async () => {
     if (!selectedTag || !rcaRequestText.trim() || isRcaGenerating) return;
     setIsRcaGenerating(true);
@@ -550,14 +553,18 @@ export default function MaintenanceDashboard() {
                         <label className={styles.formLabel}>Grounding Evidence & Citations</label>
                         <div className="flex flex-wrap gap-2 mt-2 bg-slate-50 p-4 border border-slate-200 rounded-lg">
                            {activeRca.citations && activeRca.citations.length > 0 ? (
-                             activeRca.citations.map((cite: any, i: number) => (
-                               <CitationChip 
-                                 key={i} 
-                                 citationId={cite.citation_id || `[${i+1}]`} 
-                                 sourceDocumentName={cite.document_name} 
-                               />
-                             ))
+                             activeRca.citations.map((cite: unknown, i: number) => {
+                               const c = cite as Record<string, unknown>;
+                               return (
+                                 <CitationChip 
+                                   key={i} 
+                                   citationId={(c.citation_id as string) || `[${i+1}]`} 
+                                   sourceDocumentName={c.document_name as string} 
+                                 />
+                               );
+                             })
                            ) : (
+
                              <span className="text-sm text-slate-500 italic">No citations linked to this draft.</span>
                            )}
                         </div>

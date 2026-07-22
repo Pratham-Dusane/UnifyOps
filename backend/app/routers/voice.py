@@ -45,7 +45,7 @@ async def speech_to_text(
         # Check if live GCP Speech API is configured
         if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
             try:
-                from google.cloud import speech
+                from google.cloud import speech  # type: ignore
 
                 client = speech.SpeechClient()
                 audio = speech.RecognitionAudio(content=content)
@@ -89,9 +89,10 @@ async def text_to_speech(
         # Check if live GCP TTS is configured
         if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
             try:
-                from google.cloud import texttospeech
+                from google.cloud import texttospeech  # type: ignore
 
                 client = texttospeech.TextToSpeechClient()
+
                 synthesis_input = texttospeech.SynthesisInput(text=body.text)
 
                 # Setup language codes

@@ -80,9 +80,10 @@ async def get_dashboard_analytics(
                 "unit": item.unit,
                 "attention_score": item.attention_score,
                 "signal_details": {
-                    "failure_count": item.failure_count,
-                    "evidence_explanation": item.evidence_explanation,
+                    "failure_count": item.signal_details.failure_count,
+                    "evidence_explanation": item.signal_details.evidence_explanation,
                 },
+
             }
             for item in attention_list[:5]
         ]

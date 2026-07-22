@@ -16,9 +16,10 @@ class SensitiveDataProtectionService:
         self.enabled = False
         if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
             try:
-                from google.cloud import dlp_v2
+                from google.cloud import dlp_v2  # type: ignore
 
                 self.client = dlp_v2.DlpServiceClient()
+
                 self.project = os.environ.get("GCP_PROJECT_ID", "unifyops")
                 self.enabled = True
             except Exception as e:

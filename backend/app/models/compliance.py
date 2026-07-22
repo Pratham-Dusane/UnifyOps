@@ -78,8 +78,9 @@ class AuditPackageRequest(BaseModel):
     """Payload to request audit evidence reports (FR-5.3.1)."""
 
     clause_ids: list[str] = Field(
-        min_items=1, description="List of regulatory clause IDs to package"
+        min_length=1, description="List of regulatory clause IDs to package"
     )
+
     plant_id: str | None = Field(default=None)
 
 

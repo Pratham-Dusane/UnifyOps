@@ -168,7 +168,8 @@ async def get_compliance_dashboard(
     check_types = ["missing_procedure", "stale_procedure", "unresolved_non_conformance"]
 
     for u in units:
-        row = {"unit": u}
+        row: dict[str, str | int] = {"unit": u}
+
         for ct in check_types:
             # Count open gaps matching check type and unit
             # For local prototype we distribute counts or filter by unit if equipment tag maps to unit

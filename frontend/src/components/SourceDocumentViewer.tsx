@@ -29,8 +29,9 @@ export const SourceDocumentViewer: React.FC<SourceDocumentViewerProps> = ({ docu
         <FileText className={styles.pdfIcon} size={64} />
         <p className={styles.pdfTitle}>PDF Viewer rendering page {document.page}</p>
         <p className={styles.pdfSubtitle}>
-          (Uses react-pdf under the hood. Bounding box overlay for claim: "{highlightedText}")
+          (Uses react-pdf under the hood. Bounding box overlay for claim: &quot;{highlightedText}&quot;)
         </p>
+
         {document.bbox && (
           <div className={styles.bboxOverlay}>
             Highlighted Region: [x:{document.bbox[0]}, y:{document.bbox[1]}, w:{document.bbox[2]}, h:{document.bbox[3]}]

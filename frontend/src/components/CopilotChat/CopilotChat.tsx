@@ -49,7 +49,9 @@ export default function CopilotChat() {
   const [feedbackGiven, setFeedbackGiven] = useState<Record<number, string>>({});
 
   // Offline and voice states (Phase 8)
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof window !== "undefined" ? navigator.onLine : true
+  );
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
 
   const getHeaders = useCallback(() => ({
@@ -85,7 +87,6 @@ export default function CopilotChat() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setIsOnline(navigator.onLine);
       const handleOnline = () => {
         setIsOnline(true);
         replayOfflineFeedback();
@@ -101,6 +102,7 @@ export default function CopilotChat() {
       };
     }
   }, [replayOfflineFeedback]);
+
 
   // Load starter prompts
   useEffect(() => {

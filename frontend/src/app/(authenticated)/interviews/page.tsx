@@ -73,9 +73,12 @@ export default function InterviewsPage() {
 
   useEffect(() => {
     if (user && profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadTopics();
     }
   }, [user, profile, loadTopics]);
+
+
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });

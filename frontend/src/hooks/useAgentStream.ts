@@ -4,7 +4,7 @@ export interface AgentLogEntry {
   timestamp_offset_ms: number;
   agent_name: string;
   action_summary: string;
-  detail?: any;
+  detail?: unknown;
   metric?: { label: string; value: string };
 }
 
@@ -14,11 +14,14 @@ export function useAgentStream(requestId: string | null) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!requestId) {
-      setLogs([]);
-      setIsComplete(false);
-      return;
-    }
+    if (!requestId) return;
+
+    // Reset state for new stream session
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLogs([]);
+    setIsComplete(false);
+    setError(null);
+
 
     const eventSource = new EventSource(`http://localhost:8000/api/agent-console/stream?request_id=${requestId}`);
 
@@ -48,5 +51,5 @@ export function useAgentStream(requestId: string | null) {
     };
   }, [requestId]);
 
-  return { logs, isComplete, error };
+  return { logs: requestId ? logs : [], isComplete: requestId ? isComplete : false, error };
 }

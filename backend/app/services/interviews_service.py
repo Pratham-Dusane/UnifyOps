@@ -222,6 +222,8 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
         if session.status != "completed":
             raise ValueError("Interview is not completed yet")
 
+        transcript = session.transcript or ""
+
         # 1. Create a DocumentRecord
         doc_id = str(uuid.uuid4())[:8]
         filename = f"captured_knowledge_{session_id}.md"
@@ -229,7 +231,7 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
             id=doc_id,
             filename=f"captured_knowledge/{filename}",
             original_filename=f"Captured Knowledge: {session.topic}",
-            file_size=len(session.transcript.encode("utf-8")),
+            file_size=len(transcript.encode("utf-8")),
             mime_type="text/markdown",
             doc_type=DocumentType.CAPTURED_KNOWLEDGE,
             classification_confidence=1.0,
@@ -245,7 +247,7 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
         try:
             # We treat the text as safety_procedure context to ensure rich extraction
             extracted = gemini_service.extract_entities(
-                session.transcript, "safety_procedure"
+                transcript, "safety_procedure"
             )
             entity_count = 0
             for ent in extracted:
@@ -283,7 +285,7 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
         # 3. Create Document Chunks
         try:
             # Split transcript by section (headings)
-            sections = session.transcript.split("\n## ")
+            sections = transcript.split("\n## ")
             chunk_count = 0
             for idx, sec in enumerate(sections):
                 if not sec.strip():
@@ -324,7 +326,10 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
             document_id=doc_id,
         )
 
-        return store.get_interview_session(session_id)
+        res_session = store.get_interview_session(session_id)
+        if not res_session:
+            raise ValueError("Failed to retrieve updated interview session")
+        return res_session
 
     # ──────────────────────────── Private Helpers ──────────────────────────
 
@@ -369,15 +374,18 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
                     "temperature": 0.25,
                     "max_tokens": 1500,
                 }
-                response = httpx.post(
+                groq_resp = httpx.post(
                     "https://api.groq.com/openai/v1/chat/completions",
                     headers=headers,
                     json=payload,
                     timeout=30.0,
                 )
-                if response.status_code == 200:
-                    data = response.json()
+                if groq_resp.status_code == 200:
+                    data = groq_resp.json()
                     return data["choices"][0]["message"]["content"]
+            except Exception as e:
+                print(f"[Interviews] Groq fallback failed: {e}")
+
             except Exception as e:
                 print(f"[Interviews] Groq fallback failed: {e}")
 

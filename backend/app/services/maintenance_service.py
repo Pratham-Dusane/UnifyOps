@@ -35,10 +35,11 @@ class MaintenanceService:
         self,
         org_id: str,
         equipment_tag: str,
-        event_type: str = None,
-        start_date: str = None,
-        end_date: str = None,
+        event_type: str | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
     ) -> EquipmentTimelineResponse:
+
         """
         Returns a sorted chronological timeline of enriched events for an equipment node (FR-4.1.1, FR-4.1.3).
         """
@@ -194,8 +195,9 @@ class MaintenanceService:
     # ──────────────────── 2. Predictive Maintenance Signals (FR-4.2) ──────────
 
     def get_needs_attention_list(
-        self, org_id: str, plant_id: str = None
+        self, org_id: str, plant_id: str | None = None
     ) -> list[NeedsAttentionItem]:
+
         """
         Calculates historical-based attention scores for all equipment and returns a ranked list (FR-4.2.3).
         """
@@ -348,8 +350,9 @@ Create a precise explanation (max 150 characters) stating the risk factors (e.g.
         user_uid: str,
         equipment_tag: str,
         failure_description: str,
-        request_id: str = None,
+        request_id: str | None = None,
     ) -> RCADraft:
+
         """
         Orchestrates an AI agent pipeline to generate a Root Cause Analysis (FR-4.3.1).
         Emits progress to AgentEventBus if request_id is provided.
