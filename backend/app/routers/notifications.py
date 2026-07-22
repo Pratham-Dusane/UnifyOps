@@ -102,7 +102,10 @@ async def mark_notification_as_read(
     success = store.mark_notification_read(notification_id)
     if not success:
         raise HTTPException(status_code=404, detail="Notification not found")
-    return {"message": "Notification marked as read", "notification_id": notification_id}
+    return {
+        "message": "Notification marked as read",
+        "notification_id": notification_id,
+    }
 
 
 @router.get("/preferences", response_model=NotificationPreference)
@@ -163,7 +166,9 @@ async def update_preferences(
     for pref_item in body.preferences:
         if pref_item.category == NotificationCategory.SAFETY_WARNING:
             # Check if completely disabled
-            all_channels_disabled = not (pref_item.in_app or pref_item.email or pref_item.sms)
+            all_channels_disabled = not (
+                pref_item.in_app or pref_item.email or pref_item.sms
+            )
             frequency_disabled = pref_item.frequency == NotificationFrequency.DISABLED
 
             if all_channels_disabled or frequency_disabled:

@@ -12,7 +12,9 @@ from app.services.document_ai import document_ai_service
 class OCRService:
     """Service to perform OCR text extraction from uploaded images."""
 
-    def extract_text_from_image(self, file_content: bytes, mime_type: str, filename: str = "") -> str:
+    def extract_text_from_image(
+        self, file_content: bytes, mime_type: str, filename: str = ""
+    ) -> str:
         """
         Extract text from raw image bytes using Document AI.
         Falls back to simulated string extraction if API is offline.
@@ -25,7 +27,9 @@ class OCRService:
                 if text.strip():
                     return text
             except Exception as e:
-                print(f"[OCRService] Document AI extraction failed: {e}. Falling back to simulation.")
+                print(
+                    f"[OCRService] Document AI extraction failed: {e}. Falling back to simulation."
+                )
 
         # Local simulation fallback (crucial for local testing and pytests)
         # Check filename or search in bytes for tag keywords
@@ -36,11 +40,13 @@ class OCRService:
             return "Asset Label: V-301. Type: Pressure Vessel. Unit: Storage."
         elif "he301" in fn_lower or "he-301" in fn_lower:
             return "Tag: HE-301. Unit: Crude Distillation Heat Exchanger."
-        
+
         # Check if ASCII bytes contain clear tags (useful if raw text is sent in binary)
         try:
             decoded = file_content.decode("utf-8", errors="ignore")
-            tags = re.findall(r"\b[P|V|HE|C|HX]\-?\d{3}[A-Z]?\b", decoded, re.IGNORECASE)
+            tags = re.findall(
+                r"\b[P|V|HE|C|HX]\-?\d{3}[A-Z]?\b", decoded, re.IGNORECASE
+            )
             if tags:
                 return f"Simulated tag plate scan: {', '.join(tags)}"
         except Exception:

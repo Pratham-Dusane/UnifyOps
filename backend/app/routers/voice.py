@@ -41,11 +41,12 @@ async def speech_to_text(
     """
     try:
         content = await file.read()
-        
+
         # Check if live GCP Speech API is configured
         if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
             try:
                 from google.cloud import speech
+
                 client = speech.SpeechClient()
                 audio = speech.RecognitionAudio(content=content)
                 config = speech.RecognitionConfig(
@@ -57,12 +58,16 @@ async def speech_to_text(
                     # Return first transcript match
                     return {"text": result.alternatives[0].transcript}
             except Exception as e:
-                print(f"[Voice Router] GCP Speech-to-Text failed: {e}. Falling back to simulation.")
+                print(
+                    f"[Voice Router] GCP Speech-to-Text failed: {e}. Falling back to simulation."
+                )
 
         # Local simulation fallback
         return {"text": "What should I check before touching pump P-204?"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Speech transcription failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Speech transcription failed: {str(e)}"
+        )
 
 
 class TTSRequest(BaseModel):
@@ -85,9 +90,10 @@ async def text_to_speech(
         if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
             try:
                 from google.cloud import texttospeech
+
                 client = texttospeech.TextToSpeechClient()
                 synthesis_input = texttospeech.SynthesisInput(text=body.text)
-                
+
                 # Setup language codes
                 lang_code = "en-US"
                 if body.language == "hi":
@@ -107,23 +113,27 @@ async def text_to_speech(
                 response = client.synthesize_speech(
                     input=synthesis_input, voice=voice, audio_config=audio_config
                 )
-                
+
                 return StreamingResponse(
                     io.BytesIO(response.audio_content),
                     media_type="audio/mpeg",
                 )
             except Exception as e:
-                print(f"[Voice Router] GCP Text-to-Speech failed: {e}. Falling back to simulation.")
+                print(
+                    f"[Voice Router] GCP Text-to-Speech failed: {e}. Falling back to simulation."
+                )
 
         # Local simulation fallback: generate a mock empty WAV header + audio payload
         # This keeps the browser from crashing on play and complies with manual testing.
-        wav_header = b'RIFF\x24\x08\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x40\x1f\x00\x00\x40\x1f\x00\x00\x01\x00\x08\x00data\x00\x08\x00\x00'
+        wav_header = b"RIFF\x24\x08\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x40\x1f\x00\x00\x40\x1f\x00\x00\x01\x00\x08\x00data\x00\x08\x00\x00"
         # Append some silence/dummy bytes
-        mock_wav = wav_header + b'\x80' * 2000
-        
+        mock_wav = wav_header + b"\x80" * 2000
+
         return StreamingResponse(
             io.BytesIO(mock_wav),
             media_type="audio/wav",
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Speech synthesis failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Speech synthesis failed: {str(e)}"
+        )

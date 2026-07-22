@@ -85,6 +85,7 @@ class CitationDocument(BaseModel):
 
 class CitationVerificationResponse(BaseModel):
     """Response model for Source Verification Drawer (Feature A)"""
+
     claim_text: str
     document: CitationDocument
     graph_path: list[GraphPathStep]

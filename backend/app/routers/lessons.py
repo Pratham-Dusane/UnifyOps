@@ -61,8 +61,14 @@ async def list_patterns(
             pass
 
     # Sort: candidates first, then confirmed, then dismissed
-    status_order = {PatternStatus.CANDIDATE: 0, PatternStatus.CONFIRMED: 1, PatternStatus.DISMISSED: 2}
-    patterns.sort(key=lambda p: (status_order.get(p.status, 3), p.created_at), reverse=False)
+    status_order = {
+        PatternStatus.CANDIDATE: 0,
+        PatternStatus.CONFIRMED: 1,
+        PatternStatus.DISMISSED: 2,
+    }
+    patterns.sort(
+        key=lambda p: (status_order.get(p.status, 3), p.created_at), reverse=False
+    )
 
     return patterns
 
@@ -91,7 +97,9 @@ async def confirm_pattern(
     if not pattern:
         raise HTTPException(status_code=404, detail="Pattern not found")
     if pattern.status != PatternStatus.CANDIDATE:
-        raise HTTPException(status_code=400, detail=f"Pattern is already {pattern.status.value}")
+        raise HTTPException(
+            status_code=400, detail=f"Pattern is already {pattern.status.value}"
+        )
 
     updated = store.update_lesson_pattern(
         pattern_id=pattern_id,
@@ -119,7 +127,9 @@ async def dismiss_pattern(
     if not pattern:
         raise HTTPException(status_code=404, detail="Pattern not found")
     if pattern.status != PatternStatus.CANDIDATE:
-        raise HTTPException(status_code=400, detail=f"Pattern is already {pattern.status.value}")
+        raise HTTPException(
+            status_code=400, detail=f"Pattern is already {pattern.status.value}"
+        )
 
     updated = store.update_lesson_pattern(
         pattern_id=pattern_id,
@@ -169,7 +179,11 @@ async def list_warnings(
     """List all warnings for the organisation (FR-6.3.2)."""
     warnings = store.list_pattern_warnings(x_user_org)
     # Sort: pending first, then by creation date
-    status_order = {WarningStatus.PENDING: 0, WarningStatus.ACKNOWLEDGED: 1, WarningStatus.ACTED_UPON: 2}
+    status_order = {
+        WarningStatus.PENDING: 0,
+        WarningStatus.ACKNOWLEDGED: 1,
+        WarningStatus.ACTED_UPON: 2,
+    }
     warnings.sort(key=lambda w: (status_order.get(w.status, 3), w.created_at))
     return warnings
 
@@ -226,14 +240,18 @@ def _auto_enrich_incidents(org_id: str) -> None:
 
     all_docs, _ = store.list_documents(org_id=org_id, page_size=1000)
     incident_docs = [
-        d for d in all_docs
-        if d.doc_type == DocumentType.INCIDENT_REPORT and d.pipeline_stage == PipelineStage.COMPLETED
+        d
+        for d in all_docs
+        if d.doc_type == DocumentType.INCIDENT_REPORT
+        and d.pipeline_stage == PipelineStage.COMPLETED
     ]
     for doc in incident_docs:
         existing = store.get_enrichment_by_document(doc.id)
         if not existing:
             try:
                 lessons_service.enrich_incident_document(org_id, doc.id)
-                print(f"[Lessons] Auto-enriched incident document: {doc.original_filename}")
+                print(
+                    f"[Lessons] Auto-enriched incident document: {doc.original_filename}"
+                )
             except Exception as e:
                 print(f"[Lessons] Enrichment failed for {doc.id}: {e}")

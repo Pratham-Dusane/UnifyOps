@@ -187,9 +187,7 @@ class CopilotService:
 
         return list(set(mentions))
 
-    def resolve_entity_ids(
-        self, org_id: str, mentions: list[str]
-    ) -> list[str]:
+    def resolve_entity_ids(self, org_id: str, mentions: list[str]) -> list[str]:
         """
         Resolve textual entity mentions to entity IDs in the store.
         Checks both value and normalised_value fields.
@@ -476,9 +474,7 @@ Provide a clear, well-structured answer with citation tags."""
 
             if source_id not in chunk_map:
                 # Hallucinated citation - this is a defect per FR-3.3.2
-                print(
-                    f"[CopilotService] Stripping hallucinated citation: {source_id}"
-                )
+                print(f"[CopilotService] Stripping hallucinated citation: {source_id}")
                 continue
 
             chunk, score = chunk_map[source_id]
@@ -534,15 +530,11 @@ Provide ONLY the translated text. Do not add any introduction, greeting, or expl
         # Simple proxy: count citation tags vs estimated sentence count
         sentences = [s.strip() for s in answer.split(".") if len(s.strip()) > 10]
         total_sentences = max(len(sentences), 1)
-        cited_sentences = sum(
-            1 for s in sentences if re.search(r"\[source_\d+\]", s)
-        )
+        cited_sentences = sum(1 for s in sentences if re.search(r"\[source_\d+\]", s))
         coverage_ratio = cited_sentences / total_sentences
 
         # Weighted combination
-        confidence = int(
-            (retrieval_component * 0.6) + (coverage_ratio * 100 * 0.4)
-        )
+        confidence = int((retrieval_component * 0.6) + (coverage_ratio * 100 * 0.4))
         return max(0, min(100, confidence))
 
     # ──────────────────── 6. Multi-Turn Context (FR-3.6) ──────────────────
@@ -625,14 +617,14 @@ Provide ONLY the translated text. Do not add any introduction, greeting, or expl
                 is_low_confidence=True,
                 session_id=session_id,
                 has_uncited_claims=False,
-                retrieval_count=0
+                retrieval_count=0,
             )
             # Log the blocked assistant response
             assistant_turn = ConversationTurn(
                 role="assistant",
                 content=blocked_response.answer,
                 citations=[],
-                confidence_score=0.0
+                confidence_score=0.0,
             )
             store.add_turn_to_session(session_id, assistant_turn)
             return blocked_response
@@ -646,7 +638,7 @@ Provide ONLY the translated text. Do not add any introduction, greeting, or expl
             "kn": "Kannada",
         }
         lang_name = lang_map.get(user_language.lower(), "English")
-        
+
         # Translate query to English for retrieval and entity parsing
         if lang_name != "English":
             query_for_retrieval = self._translate_text(resolved_query, "English")
@@ -671,7 +663,9 @@ Provide ONLY the translated text. Do not add any introduction, greeting, or expl
         answer_text, citations, has_uncited = self.generate_answer(
             query=query_for_retrieval,
             retrieved_chunks=retrieved,
-            conversation_history=conversation_history if len(conversation_history) > 0 else None,
+            conversation_history=conversation_history
+            if len(conversation_history) > 0
+            else None,
             user_role=user_role,
             user_language=user_language,
         )
@@ -740,7 +734,9 @@ Provide ONLY the translated text. Do not add any introduction, greeting, or expl
 
         total = len(logs)
         avg_conf = sum(item.confidence_score for item in logs) / total
-        low_conf = sum(1 for item in logs if item.confidence_score < LOW_CONFIDENCE_THRESHOLD)
+        low_conf = sum(
+            1 for item in logs if item.confidence_score < LOW_CONFIDENCE_THRESHOLD
+        )
 
         # Find recurring low-confidence query patterns
         low_conf_queries = [

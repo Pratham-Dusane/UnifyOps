@@ -60,15 +60,22 @@ class DataStore:
         self._regulatory_clauses: dict[str, RegulatoryClause] = {}  # keyed by clause_id
         self._compliance_gaps: dict[str, ComplianceGap] = {}  # keyed by gap_id
         # Phase 6 - Lessons Learned collections
-        self._incident_enrichments: dict[str, IncidentEnrichment] = {}  # keyed by enrichment id
+        self._incident_enrichments: dict[
+            str, IncidentEnrichment
+        ] = {}  # keyed by enrichment id
         self._lesson_patterns: dict[str, LessonPattern] = {}  # keyed by pattern_id
         self._pattern_warnings: dict[str, PatternWarning] = {}  # keyed by warning_id
         # Phase 7 - Knowledge Retention, Notifications & Analytics
-        self._interview_sessions: dict[str, InterviewSession] = {}  # keyed by session_id
-        self._notification_preferences: dict[str, NotificationPreference] = {}  # keyed by user_uid
-        self._notifications: dict[str, NotificationRecord] = {}  # keyed by notification_id
+        self._interview_sessions: dict[
+            str, InterviewSession
+        ] = {}  # keyed by session_id
+        self._notification_preferences: dict[
+            str, NotificationPreference
+        ] = {}  # keyed by user_uid
+        self._notifications: dict[
+            str, NotificationRecord
+        ] = {}  # keyed by notification_id
         self._model_armor_events: list[dict] = []  # Phase 9 security logging
-
 
         # Load persisted data on initialization (unless running tests)
         if os.environ.get("TESTING") != "1":
@@ -91,16 +98,10 @@ class DataStore:
                 "candidate_merges": [
                     m.model_dump() for m in self._candidate_merges.values()
                 ],
-                "sessions": [
-                    s.model_dump() for s in self._sessions.values()
-                ],
+                "sessions": [s.model_dump() for s in self._sessions.values()],
                 "feedback": self._feedback,
-                "query_logs": [
-                    q.model_dump() for q in self._query_logs
-                ],
-                "rca_drafts": [
-                    r.model_dump() for r in self._rca_drafts.values()
-                ],
+                "query_logs": [q.model_dump() for q in self._query_logs],
+                "rca_drafts": [r.model_dump() for r in self._rca_drafts.values()],
                 "regulatory_clauses": [
                     c.model_dump() for c in self._regulatory_clauses.values()
                 ],
@@ -122,9 +123,7 @@ class DataStore:
                 "notification_preferences": [
                     p.model_dump() for p in self._notification_preferences.values()
                 ],
-                "notifications": [
-                    n.model_dump() for n in self._notifications.values()
-                ],
+                "notifications": [n.model_dump() for n in self._notifications.values()],
                 "model_armor_events": self._model_armor_events,
             }
 
@@ -843,7 +842,6 @@ class DataStore:
                 "trend": [75.0, 78.5, 81.2, 84.0, score],
             }
 
-
     # ──────────────────────────── Copilot Sessions (FR-3.6) ────────────────
 
     def create_session(
@@ -971,7 +969,9 @@ class DataStore:
 
     # ──────────────────────────── Maintenance Advisor (Phase 4) ────────────
 
-    def get_events_by_equipment(self, org_id: str, equipment_tag: str) -> list[DocumentRecord]:
+    def get_events_by_equipment(
+        self, org_id: str, equipment_tag: str
+    ) -> list[DocumentRecord]:
         """
         Finds all documents (work orders, incidents, SOPs) linked to the given
         equipment tag via entity mentions (FR-4.1.1).
@@ -1045,41 +1045,54 @@ class DataStore:
                 del self._documents[doc_id]
 
             # 2. Remove all layout chunks belonging to this document
-            chunks_to_remove = [cid for cid, chk in self._chunks.items() if chk.document_id == doc_id]
+            chunks_to_remove = [
+                cid for cid, chk in self._chunks.items() if chk.document_id == doc_id
+            ]
             for cid in chunks_to_remove:
                 del self._chunks[cid]
 
             # 3. Remove all extracted entities for this document
-            entities_to_remove = [eid for eid, ent in self._entities.items() if ent.document_id == doc_id]
+            entities_to_remove = [
+                eid for eid, ent in self._entities.items() if ent.document_id == doc_id
+            ]
             for eid in entities_to_remove:
                 del self._entities[eid]
 
             # 4. Clean up any P&ID connections referencing deleted entities/document
             conns_to_remove = [
-                conn_id for conn_id, conn in self._connections.items()
-                if conn.document_id == doc_id or conn.from_entity_id in entities_to_remove or conn.to_entity_id in entities_to_remove
+                conn_id
+                for conn_id, conn in self._connections.items()
+                if conn.document_id == doc_id
+                or conn.from_entity_id in entities_to_remove
+                or conn.to_entity_id in entities_to_remove
             ]
             for conn_id in conns_to_remove:
                 del self._connections[conn_id]
 
             # 5. Clean up candidate merges referencing deleted entities
             merges_to_remove = [
-                mid for mid, merge in self._candidate_merges.items()
-                if merge.source_entity_id in entities_to_remove or merge.target_entity_id in entities_to_remove
+                mid
+                for mid, merge in self._candidate_merges.items()
+                if merge.source_entity_id in entities_to_remove
+                or merge.target_entity_id in entities_to_remove
             ]
             for mid in merges_to_remove:
                 del self._candidate_merges[mid]
 
             # 6. Clean up regulatory clauses referencing deleted document
             clauses_to_remove = [
-                cid for cid, clause in self._regulatory_clauses.items() if clause.document_id == doc_id
+                cid
+                for cid, clause in self._regulatory_clauses.items()
+                if clause.document_id == doc_id
             ]
             for cid in clauses_to_remove:
                 del self._regulatory_clauses[cid]
 
             # 7. Clean up compliance gaps referencing deleted clauses
             gaps_to_remove = [
-                gid for gid, gap in self._compliance_gaps.items() if gap.clause_id in clauses_to_remove
+                gid
+                for gid, gap in self._compliance_gaps.items()
+                if gap.clause_id in clauses_to_remove
             ]
             for gid in gaps_to_remove:
                 del self._compliance_gaps[gid]
@@ -1166,7 +1179,9 @@ class DataStore:
     def get_pattern_warning(self, warning_id: str) -> PatternWarning | None:
         return self._pattern_warnings.get(warning_id)
 
-    def update_pattern_warning(self, warning_id: str, **kwargs) -> PatternWarning | None:
+    def update_pattern_warning(
+        self, warning_id: str, **kwargs
+    ) -> PatternWarning | None:
         with self._lock:
             warn = self._pattern_warnings.get(warning_id)
             if warn:
@@ -1188,7 +1203,9 @@ class DataStore:
     def get_interview_session(self, session_id: str) -> InterviewSession | None:
         return self._interview_sessions.get(session_id)
 
-    def update_interview_session(self, session_id: str, **kwargs) -> InterviewSession | None:
+    def update_interview_session(
+        self, session_id: str, **kwargs
+    ) -> InterviewSession | None:
         with self._lock:
             session = self._interview_sessions.get(session_id)
             if session:
@@ -1203,10 +1220,14 @@ class DataStore:
         return [i for i in self._interview_sessions.values() if i.org_id == org_id]
 
     # ──────────────────────────── Notification Preferences (Phase 7.2) ──
-    def get_notification_preference(self, user_uid: str) -> NotificationPreference | None:
+    def get_notification_preference(
+        self, user_uid: str
+    ) -> NotificationPreference | None:
         return self._notification_preferences.get(user_uid)
 
-    def create_or_update_notification_preference(self, pref: NotificationPreference) -> None:
+    def create_or_update_notification_preference(
+        self, pref: NotificationPreference
+    ) -> None:
         with self._lock:
             self._notification_preferences[pref.user_uid] = pref
             self._save()
@@ -1217,9 +1238,12 @@ class DataStore:
             self._notifications[notif.id] = notif
             self._save()
 
-    def list_notifications(self, org_id: str, user_uid: str) -> list[NotificationRecord]:
+    def list_notifications(
+        self, org_id: str, user_uid: str
+    ) -> list[NotificationRecord]:
         return [
-            n for n in self._notifications.values()
+            n
+            for n in self._notifications.values()
             if n.org_id == org_id and n.user_uid == user_uid
         ]
 
@@ -1232,14 +1256,16 @@ class DataStore:
                 return True
             return False
 
-    def log_model_armor_event(self, source: str, status: str, prompt_snippet: str, block_reason: str) -> None:
+    def log_model_armor_event(
+        self, source: str, status: str, prompt_snippet: str, block_reason: str
+    ) -> None:
         with self._lock:
             event = {
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "source": source,
                 "status": status,  # "allowed" | "blocked"
                 "prompt_snippet": prompt_snippet,
-                "block_reason": block_reason
+                "block_reason": block_reason,
             }
             self._model_armor_events.append(event)
             # Cap logs size to prevent db.json bloating
@@ -1249,8 +1275,6 @@ class DataStore:
 
     def get_model_armor_events(self) -> list[dict]:
         return self._model_armor_events
-
-
 
 
 # Singleton instance

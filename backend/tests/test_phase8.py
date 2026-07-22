@@ -33,7 +33,7 @@ def test_speech_to_text():
     """Verify fallback Speech-to-Text transcription."""
     dummy_wav = b"RIFF\x24\x08\x00\x00WAVE"
     files = {"file": ("audio.wav", io.BytesIO(dummy_wav), "audio/wav")}
-    
+
     response = client.post("/api/v1/voice/stt", files=files, headers=HEADERS)
     assert response.status_code == 200
     assert "text" in response.json()
@@ -46,7 +46,7 @@ def test_text_to_speech():
         "text": "Check bearing temperature of motor P-204",
         "language": "hi",
     }
-    
+
     response = client.post("/api/v1/voice/tts", json=payload, headers=HEADERS)
     assert response.status_code == 200
     assert response.headers["content-type"] in ["audio/wav", "audio/mpeg"]
@@ -57,8 +57,10 @@ def test_camera_lookup_p204():
     """Verify camera equipment lookup fuzzy matching with P-204 tag name."""
     dummy_image = b"\x89PNG\r\n\x1a\n"
     files = {"file": ("p204_plate.png", io.BytesIO(dummy_image), "image/png")}
-    
-    response = client.post("/api/v1/maintenance/equipment/lookup-camera", files=files, headers=HEADERS)
+
+    response = client.post(
+        "/api/v1/maintenance/equipment/lookup-camera", files=files, headers=HEADERS
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["matched"] is True
@@ -71,8 +73,10 @@ def test_camera_lookup_no_tag():
     dummy_image = b"random image content"
     # Sending file with name that has no matching mock pattern or regex matchable strings
     files = {"file": ("random_photo.png", io.BytesIO(dummy_image), "image/png")}
-    
-    response = client.post("/api/v1/maintenance/equipment/lookup-camera", files=files, headers=HEADERS)
+
+    response = client.post(
+        "/api/v1/maintenance/equipment/lookup-camera", files=files, headers=HEADERS
+    )
     assert response.status_code == 200
     data = response.json()
     # It will fallback to the default tag plate pattern P-204 since the simulated OCR has a default

@@ -44,8 +44,12 @@ class RegulatoryClause(BaseModel):
     clause_number: str = Field(description="e.g. Section 12(a), Clause 4.2")
     verbatim_text: str = Field(description=" Verbatim legal/regulatory text")
     summary: str = Field(description="Gemini plain-language summary (FR-5.1.2)")
-    linked_procedures: list[str] = Field(default_factory=list, description="IDs of matching procedure docs")
-    linked_equipment_tags: list[str] = Field(default_factory=list, description="Associated equipment tags")
+    linked_procedures: list[str] = Field(
+        default_factory=list, description="IDs of matching procedure docs"
+    )
+    linked_equipment_tags: list[str] = Field(
+        default_factory=list, description="Associated equipment tags"
+    )
 
 
 class ComplianceGap(BaseModel):
@@ -54,13 +58,17 @@ class ComplianceGap(BaseModel):
     gap_id: str
     clause_id: str
     clause_number: str
-    regulatory_source: str = Field(default="OISD-STD-189", description="Name of the regulation document")
+    regulatory_source: str = Field(
+        default="OISD-STD-189", description="Name of the regulation document"
+    )
     check_type: CheckType
     details: str = Field(description="Failed check explanation text")
     evidence: str = Field(description="Supporting evidence context or lack thereof")
     severity: GapSeverity
     status: GapStatus = Field(default=GapStatus.OPEN)
-    resolution_notes: str | None = Field(default=None, description="Notes added when resolved (FR-5.2.4)")
+    resolution_notes: str | None = Field(
+        default=None, description="Notes added when resolved (FR-5.2.4)"
+    )
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     resolved_at: datetime | None = Field(default=None)
     resolved_by: str | None = Field(default=None)
@@ -69,7 +77,9 @@ class ComplianceGap(BaseModel):
 class AuditPackageRequest(BaseModel):
     """Payload to request audit evidence reports (FR-5.3.1)."""
 
-    clause_ids: list[str] = Field(min_items=1, description="List of regulatory clause IDs to package")
+    clause_ids: list[str] = Field(
+        min_items=1, description="List of regulatory clause IDs to package"
+    )
     plant_id: str | None = Field(default=None)
 
 
@@ -80,11 +90,17 @@ class AuditPackageResponse(BaseModel):
     title: str = Field(default="Audit Evidence Package")
     generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     generated_by: str
-    content_markdown: str = Field(description="Structured markdown report with citations")
-    files_included: list[str] = Field(default_factory=list, description="Original filenames of cited source files")
+    content_markdown: str = Field(
+        description="Structured markdown report with citations"
+    )
+    files_included: list[str] = Field(
+        default_factory=list, description="Original filenames of cited source files"
+    )
 
 
 class GapResolutionRequest(BaseModel):
     """Payload to resolve an open compliance gap (FR-5.2.4)."""
 
-    resolution_notes: str = Field(min_length=5, description="Verification reason explaining resolution")
+    resolution_notes: str = Field(
+        min_length=5, description="Verification reason explaining resolution"
+    )

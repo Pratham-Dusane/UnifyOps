@@ -44,9 +44,15 @@ async def health_check() -> HealthResponse:
 @router.get("/equipment/{tag}/timeline", response_model=EquipmentTimelineResponse)
 async def get_equipment_timeline(
     tag: str,
-    event_type: str = Query(default=None, description="Filter: work_order|incident|inspection|sop"),
-    start_date: str = Query(default=None, description="Filter: start timestamp in ISO format"),
-    end_date: str = Query(default=None, description="Filter: end timestamp in ISO format"),
+    event_type: str = Query(
+        default=None, description="Filter: work_order|incident|inspection|sop"
+    ),
+    start_date: str = Query(
+        default=None, description="Filter: start timestamp in ISO format"
+    ),
+    end_date: str = Query(
+        default=None, description="Filter: end timestamp in ISO format"
+    ),
     x_user_org: str = Header(..., description="User's organisation ID"),
 ) -> EquipmentTimelineResponse:
     """
@@ -155,7 +161,7 @@ async def approve_rca_draft(
         approved_at=datetime.now(timezone.utc),
     )
     if not updated:
-         raise HTTPException(status_code=500, detail="Failed to sign off RCA")
+        raise HTTPException(status_code=500, detail="Failed to sign off RCA")
     return updated
 
 
@@ -165,7 +171,11 @@ async def list_equipment_rcas(
     x_user_org: str = Header(..., description="User's organisation ID"),
 ) -> list[RCADraft]:
     """Retrieve all RCAs generated for a specific equipment tag."""
-    rcas = [r for r in store.list_rca_drafts(x_user_org) if r.equipment_tag.upper() == tag.upper()]
+    rcas = [
+        r
+        for r in store.list_rca_drafts(x_user_org)
+        if r.equipment_tag.upper() == tag.upper()
+    ]
     return rcas
 
 
@@ -197,13 +207,19 @@ async def lookup_equipment_via_camera(
 
         # Query existing equipment entities in organization
         all_ents = store.get_entities_by_org(x_user_org)
-        equip_entities = [e for e in all_ents if e.entity_type == EntityType.EQUIPMENT_TAG]
+        equip_entities = [
+            e for e in all_ents if e.entity_type == EntityType.EQUIPMENT_TAG
+        ]
 
         matched_entity = None
         for match in matches:
-            norm_match = match.upper().replace(" ", "").replace("-", "").replace("_", "")
+            norm_match = (
+                match.upper().replace(" ", "").replace("-", "").replace("_", "")
+            )
             for eq in equip_entities:
-                norm_eq = eq.value.upper().replace(" ", "").replace("-", "").replace("_", "")
+                norm_eq = (
+                    eq.value.upper().replace(" ", "").replace("-", "").replace("_", "")
+                )
                 if norm_match == norm_eq:
                     matched_entity = eq
                     break
@@ -232,4 +248,3 @@ async def lookup_equipment_via_camera(
             status_code=500,
             detail=f"Camera equipment lookup failed: {str(e)}",
         )
-

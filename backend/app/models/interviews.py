@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 class InterviewTopic(BaseModel):
     """A proposed topic for a knowledge capture interview based on query gaps."""
+
     topic: str
     criticality_score: int  # 0 to 100
     documented_depth: str  # "None" | "Thin" | "Medium"
@@ -19,6 +20,7 @@ class InterviewTopic(BaseModel):
 
 class InterviewTurn(BaseModel):
     """A single turn in an interview session."""
+
     role: str  # "agent" or "expert"
     content: str
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -26,6 +28,7 @@ class InterviewTurn(BaseModel):
 
 class InterviewSession(BaseModel):
     """An active or completed knowledge capture interview session."""
+
     session_id: str
     org_id: str
     user_uid: str
@@ -40,11 +43,13 @@ class InterviewSession(BaseModel):
 
 class InterviewRespondRequest(BaseModel):
     """Request payload to submit the expert's response to the active question."""
+
     response: str
 
 
 class InterviewRespondResponse(BaseModel):
     """Response payload containing the next question or final transcript synthesis."""
+
     session_id: str
     next_question: str | None = None
     transcript: str | None = None

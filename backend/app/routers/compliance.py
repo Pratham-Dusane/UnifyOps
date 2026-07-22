@@ -51,11 +51,13 @@ async def list_clauses(
             store._regulatory_clauses.clear()
             store._compliance_gaps.clear()
         from app.models.ingestion import DocumentType, PipelineStage
+
         all_docs, _ = store.list_documents(org_id=x_user_org, page_size=1000)
         reg_docs = [
             d
             for d in all_docs
-            if d.doc_type == DocumentType.REGULATORY and d.pipeline_stage == PipelineStage.COMPLETED
+            if d.doc_type == DocumentType.REGULATORY
+            and d.pipeline_stage == PipelineStage.COMPLETED
         ]
         for doc in reg_docs:
             try:
@@ -79,11 +81,13 @@ async def list_gaps(
             store._regulatory_clauses.clear()
             store._compliance_gaps.clear()
         from app.models.ingestion import DocumentType, PipelineStage
+
         all_docs, _ = store.list_documents(org_id=x_user_org, page_size=1000)
         reg_docs = [
             d
             for d in all_docs
-            if d.doc_type == DocumentType.REGULATORY and d.pipeline_stage == PipelineStage.COMPLETED
+            if d.doc_type == DocumentType.REGULATORY
+            and d.pipeline_stage == PipelineStage.COMPLETED
         ]
         for doc in reg_docs:
             try:
@@ -170,7 +174,8 @@ async def get_compliance_dashboard(
             # For local prototype we distribute counts or filter by unit if equipment tag maps to unit
             # For simplicity, we filter matching records
             count = sum(
-                1 for g in gaps
+                1
+                for g in gaps
                 if g.status == GapStatus.OPEN and g.check_type.value == ct
             )
             # Add some variance for visual display
@@ -179,8 +184,12 @@ async def get_compliance_dashboard(
 
     for g in gaps:
         if g.status == GapStatus.OPEN:
-            severity_counts[g.severity.value] = severity_counts.get(g.severity.value, 0) + 1
-            check_type_counts[g.check_type.value] = check_type_counts.get(g.check_type.value, 0) + 1
+            severity_counts[g.severity.value] = (
+                severity_counts.get(g.severity.value, 0) + 1
+            )
+            check_type_counts[g.check_type.value] = (
+                check_type_counts.get(g.check_type.value, 0) + 1
+            )
 
     return {
         "total_gaps": sum(1 for g in gaps if g.status == GapStatus.OPEN),
@@ -196,7 +205,10 @@ async def trigger_compliance_check(
 ):
     """Manually triggers compliance agent sweep."""
     gaps = compliance_service.run_compliance_gap_agent(x_user_org)
-    return {"message": f"Compliance check complete. Detected {len(gaps)} new gaps.", "gaps_count": len(gaps)}
+    return {
+        "message": f"Compliance check complete. Detected {len(gaps)} new gaps.",
+        "gaps_count": len(gaps),
+    }
 
 
 @router.post("/gaps/scan")
@@ -207,25 +219,41 @@ async def scan_gaps_for_standard(
 ):
     """Simulates a targeted gap scan for the Agent Console."""
     from app.core.agent_bus import agent_bus
-    
+
     agent_bus.init_request(request_id)
-    
+
     # 1. Ingestion Agent
-    agent_bus.emit(request_id, "Ingestion Agent", f"Extracting regulatory clause {standard_id}...")
+    agent_bus.emit(
+        request_id, "Ingestion Agent", f"Extracting regulatory clause {standard_id}..."
+    )
     await asyncio.sleep(0.5)
-    
+
     # 2. Graph Agent
-    agent_bus.emit(request_id, "Graph Agent", "Mapping linked SOPs and equipment", metric={"label": "sops", "value": "2"})
+    agent_bus.emit(
+        request_id,
+        "Graph Agent",
+        "Mapping linked SOPs and equipment",
+        metric={"label": "sops", "value": "2"},
+    )
     await asyncio.sleep(0.6)
-    
+
     # 3. Compliance Agent
-    agent_bus.emit(request_id, "Compliance Agent", "Cross-referencing work orders & inspections", detail={"scanned_wos": ["WO-2025-0441", "WO-2025-0442"]})
+    agent_bus.emit(
+        request_id,
+        "Compliance Agent",
+        "Cross-referencing work orders & inspections",
+        detail={"scanned_wos": ["WO-2025-0441", "WO-2025-0442"]},
+    )
     await asyncio.sleep(0.6)
-    
+
     # 4. Synthesis Agent
-    agent_bus.emit(request_id, "Synthesis Agent", "Generating compliance narrative and evidence package", metric={"label": "confidence", "value": "92%"})
+    agent_bus.emit(
+        request_id,
+        "Synthesis Agent",
+        "Generating compliance narrative and evidence package",
+        metric={"label": "confidence", "value": "92%"},
+    )
     await asyncio.sleep(0.4)
-    
+
     agent_bus.emit(request_id, "Synthesis Agent", "DONE")
     return {"status": "ok"}
-

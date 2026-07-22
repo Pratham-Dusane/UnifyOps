@@ -28,7 +28,9 @@ class LessonsLearnedService:
 
     # ──────────────────────── FR-6.1: Incident Enrichment ────────────────────────
 
-    def enrich_incident_document(self, org_id: str, document_id: str) -> IncidentEnrichment | None:
+    def enrich_incident_document(
+        self, org_id: str, document_id: str
+    ) -> IncidentEnrichment | None:
         """
         Parse an incident/near-miss document for structured fields.
         Uses text analysis to extract severity, contributing conditions,
@@ -58,7 +60,8 @@ class LessonsLearnedService:
 
         # Extract affected equipment from entity resolution
         equipment_entities = [
-            e for e in store._entities.values()
+            e
+            for e in store._entities.values()
             if e.document_id == document_id and e.entity_type.value == "equipment_tag"
         ]
         affected_equipment = list(set(e.value.upper() for e in equipment_entities))
@@ -90,20 +93,43 @@ class LessonsLearnedService:
         text_lower = text.lower()
 
         # Major indicators
-        major_keywords = ["fatality", "fatal", "explosion", "catastrophic", "critical injury",
-                          "hospitalization", "environmental release", "major spill"]
+        major_keywords = [
+            "fatality",
+            "fatal",
+            "explosion",
+            "catastrophic",
+            "critical injury",
+            "hospitalization",
+            "environmental release",
+            "major spill",
+        ]
         if any(k in text_lower for k in major_keywords):
             return IncidentSeverity.MAJOR
 
         # Serious indicators
-        serious_keywords = ["serious injury", "fire", "equipment failure", "shutdown",
-                            "unplanned outage", "leak", "significant damage", "structural failure"]
+        serious_keywords = [
+            "serious injury",
+            "fire",
+            "equipment failure",
+            "shutdown",
+            "unplanned outage",
+            "leak",
+            "significant damage",
+            "structural failure",
+        ]
         if any(k in text_lower for k in serious_keywords):
             return IncidentSeverity.SERIOUS
 
         # Near-miss indicators
-        near_miss_keywords = ["near miss", "near-miss", "close call", "potential",
-                              "could have", "averted", "narrowly"]
+        near_miss_keywords = [
+            "near miss",
+            "near-miss",
+            "close call",
+            "potential",
+            "could have",
+            "averted",
+            "narrowly",
+        ]
         if any(k in text_lower for k in near_miss_keywords):
             return IncidentSeverity.NEAR_MISS
 
@@ -113,20 +139,62 @@ class LessonsLearnedService:
         """Extract contributing conditions from incident text."""
         conditions = []
         condition_patterns = {
-            "inadequate_maintenance": ["maintenance overdue", "deferred maintenance", "delayed repair",
-                                       "worn", "corroded", "degraded", "aging"],
-            "procedural_violation": ["violated", "not followed", "bypassed", "skipped",
-                                     "without authorization", "ignored sop", "deviation from"],
-            "training_gap": ["untrained", "unfamiliar", "first time", "inadequate training",
-                             "no certification", "inexperienced"],
-            "equipment_design": ["design flaw", "design limitation", "not rated for",
-                                 "incorrect specification", "undersized"],
-            "environmental": ["weather", "temperature", "humidity", "corrosive environment",
-                              "high pressure", "extreme heat"],
-            "communication_failure": ["miscommunication", "not communicated", "handover failure",
-                                       "shift change", "unclear instructions"],
-            "human_error": ["operator error", "human error", "mistakenly", "accidentally",
-                            "incorrect operation", "wrong valve"],
+            "inadequate_maintenance": [
+                "maintenance overdue",
+                "deferred maintenance",
+                "delayed repair",
+                "worn",
+                "corroded",
+                "degraded",
+                "aging",
+            ],
+            "procedural_violation": [
+                "violated",
+                "not followed",
+                "bypassed",
+                "skipped",
+                "without authorization",
+                "ignored sop",
+                "deviation from",
+            ],
+            "training_gap": [
+                "untrained",
+                "unfamiliar",
+                "first time",
+                "inadequate training",
+                "no certification",
+                "inexperienced",
+            ],
+            "equipment_design": [
+                "design flaw",
+                "design limitation",
+                "not rated for",
+                "incorrect specification",
+                "undersized",
+            ],
+            "environmental": [
+                "weather",
+                "temperature",
+                "humidity",
+                "corrosive environment",
+                "high pressure",
+                "extreme heat",
+            ],
+            "communication_failure": [
+                "miscommunication",
+                "not communicated",
+                "handover failure",
+                "shift change",
+                "unclear instructions",
+            ],
+            "human_error": [
+                "operator error",
+                "human error",
+                "mistakenly",
+                "accidentally",
+                "incorrect operation",
+                "wrong valve",
+            ],
         }
 
         text_lower = text.lower()
@@ -142,9 +210,17 @@ class LessonsLearnedService:
 
     def _extract_actions(self, text: str) -> str:
         """Extract immediate actions taken from incident text."""
-        action_indicators = ["action taken", "corrective action", "immediately",
-                             "shut down", "isolated", "replaced", "repaired",
-                             "emergency response", "evacuated"]
+        action_indicators = [
+            "action taken",
+            "corrective action",
+            "immediately",
+            "shut down",
+            "isolated",
+            "replaced",
+            "repaired",
+            "emergency response",
+            "evacuated",
+        ]
         text_lower = text.lower()
         for indicator in action_indicators:
             if indicator in text_lower:
@@ -169,7 +245,7 @@ class LessonsLearnedService:
         for pattern in location_patterns:
             if pattern in text_lower:
                 idx = text_lower.index(pattern)
-                snippet = text[idx:idx + 30].strip()
+                snippet = text[idx : idx + 30].strip()
                 return snippet.split("\n")[0].strip()
         return "Unspecified"
 
@@ -220,7 +296,9 @@ class LessonsLearnedService:
                 IncidentSeverity.SERIOUS: 2,
                 IncidentSeverity.MAJOR: 3,
             }
-            worst_severity = max(incidents, key=lambda e: severity_order.get(e.severity, 0)).severity
+            worst_severity = max(
+                incidents, key=lambda e: severity_order.get(e.severity, 0)
+            ).severity
 
             pattern = LessonPattern(
                 pattern_id=f"pattern-{uuid.uuid4().hex[:8]}",
@@ -259,12 +337,18 @@ class LessonsLearnedService:
             all_conditions = []
             for e in incidents:
                 all_conditions.extend(e.contributing_conditions)
-            common_conditions = [c for c, cnt in Counter(all_conditions).items() if cnt >= 2]
+            common_conditions = [
+                c for c, cnt in Counter(all_conditions).items() if cnt >= 2
+            ]
 
             worst_severity = max(
                 incidents,
-                key=lambda e: {IncidentSeverity.NEAR_MISS: 0, IncidentSeverity.MINOR: 1,
-                               IncidentSeverity.SERIOUS: 2, IncidentSeverity.MAJOR: 3}.get(e.severity, 0)
+                key=lambda e: {
+                    IncidentSeverity.NEAR_MISS: 0,
+                    IncidentSeverity.MINOR: 1,
+                    IncidentSeverity.SERIOUS: 2,
+                    IncidentSeverity.MAJOR: 3,
+                }.get(e.severity, 0),
             ).severity
 
             pattern = LessonPattern(
@@ -290,13 +374,16 @@ class LessonsLearnedService:
 
     # ──────────────────────── FR-6.3: Proactive Warnings ────────────────────────
 
-    def check_trigger_warnings(self, org_id: str, new_doc_id: str | None = None) -> list[PatternWarning]:
+    def check_trigger_warnings(
+        self, org_id: str, new_doc_id: str | None = None
+    ) -> list[PatternWarning]:
         """
         Check confirmed patterns against recent activity and generate warnings.
         Called when new documents are ingested or on-demand.
         """
         confirmed_patterns = [
-            p for p in store.list_lesson_patterns(org_id)
+            p
+            for p in store.list_lesson_patterns(org_id)
             if p.status == PatternStatus.CONFIRMED
         ]
         if not confirmed_patterns:
@@ -310,17 +397,25 @@ class LessonsLearnedService:
             docs = [d for d in docs if d is not None]
         else:
             all_docs, _ = store.list_documents(org_id=org_id, page_size=10)
-            docs = [d for d in all_docs if d.doc_type in (DocumentType.WORK_ORDER, DocumentType.INCIDENT_REPORT)]
+            docs = [
+                d
+                for d in all_docs
+                if d.doc_type in (DocumentType.WORK_ORDER, DocumentType.INCIDENT_REPORT)
+            ]
 
         for pattern in confirmed_patterns:
             for doc in docs:
                 # Check if document's equipment tags match pattern's equipment tags
                 doc_entities = [
-                    e for e in store._entities.values()
-                    if e.document_id == doc.id and e.entity_type.value == "equipment_tag"
+                    e
+                    for e in store._entities.values()
+                    if e.document_id == doc.id
+                    and e.entity_type.value == "equipment_tag"
                 ]
                 doc_equipment = set(e.value.upper() for e in doc_entities)
-                pattern_equipment = set(t.upper() for t in pattern.contributing_equipment_tags)
+                pattern_equipment = set(
+                    t.upper() for t in pattern.contributing_equipment_tags
+                )
 
                 overlap = doc_equipment & pattern_equipment
                 if not overlap:
@@ -329,7 +424,8 @@ class LessonsLearnedService:
                 # Check for duplicate warnings (same pattern + same document)
                 existing_warnings = store.list_pattern_warnings(org_id)
                 already_warned = any(
-                    w.pattern_id == pattern.pattern_id and w.triggered_by_doc_id == doc.id
+                    w.pattern_id == pattern.pattern_id
+                    and w.triggered_by_doc_id == doc.id
                     for w in existing_warnings
                 )
                 if already_warned:
@@ -367,7 +463,9 @@ class LessonsLearnedService:
 
         results = []
         for p in patterns:
-            searchable = f"{p.shared_factor} {p.trigger_condition} {p.evidence_summary}".lower()
+            searchable = (
+                f"{p.shared_factor} {p.trigger_condition} {p.evidence_summary}".lower()
+            )
             searchable += " ".join(p.contributing_equipment_tags).lower()
             if q in searchable:
                 results.append(p)
@@ -382,9 +480,15 @@ class LessonsLearnedService:
         warnings = store.list_pattern_warnings(org_id)
         enrichments = store.list_incident_enrichments(org_id)
 
-        candidate_count = sum(1 for p in patterns if p.status == PatternStatus.CANDIDATE)
-        confirmed_count = sum(1 for p in patterns if p.status == PatternStatus.CONFIRMED)
-        dismissed_count = sum(1 for p in patterns if p.status == PatternStatus.DISMISSED)
+        candidate_count = sum(
+            1 for p in patterns if p.status == PatternStatus.CANDIDATE
+        )
+        confirmed_count = sum(
+            1 for p in patterns if p.status == PatternStatus.CONFIRMED
+        )
+        dismissed_count = sum(
+            1 for p in patterns if p.status == PatternStatus.DISMISSED
+        )
 
         pending_warnings = sum(1 for w in warnings if w.status == WarningStatus.PENDING)
         total_warnings = len(warnings)

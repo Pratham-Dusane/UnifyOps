@@ -49,7 +49,6 @@ class StartRequest(BaseModel):
 
 
 @router.post("/start", response_model=InterviewSession)
-
 async def start_interview(
     body: StartRequest,
     x_user_uid: str = Header(..., description="Firebase UID"),
@@ -63,7 +62,9 @@ async def start_interview(
             topic=body.topic,
         )
     except SecurityBlockException as sbe:
-        raise HTTPException(status_code=400, detail=f"Model Armor Security Block: {sbe.reason}")
+        raise HTTPException(
+            status_code=400, detail=f"Model Armor Security Block: {sbe.reason}"
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -85,7 +86,9 @@ async def respond_to_question(
     try:
         return interviews_service.respond_to_session(session_id, body.response)
     except SecurityBlockException as sbe:
-        raise HTTPException(status_code=400, detail=f"Model Armor Security Block: {sbe.reason}")
+        raise HTTPException(
+            status_code=400, detail=f"Model Armor Security Block: {sbe.reason}"
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

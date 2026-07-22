@@ -149,7 +149,9 @@ class TestPatternDetection:
         assert len(patterns) >= 1
 
         # At least one pattern should reference both incidents
-        has_multi_incident = any(len(p.contributing_incident_ids) >= 2 for p in patterns)
+        has_multi_incident = any(
+            len(p.contributing_incident_ids) >= 2 for p in patterns
+        )
         assert has_multi_incident
 
 
@@ -162,8 +164,16 @@ class TestPatternConfirmation:
     def test_confirm_and_dismiss_patterns(self):
         """Verify confirmation promotes candidate to confirmed, dismiss to dismissed."""
         # Seed incidents and detect
-        _seed_incident("inc-201", "inc_a.pdf", "Equipment failure due to deferred maintenance on P-204.")
-        _seed_incident("inc-202", "inc_b.pdf", "Corroded pump due to deferred maintenance on P-204.")
+        _seed_incident(
+            "inc-201",
+            "inc_a.pdf",
+            "Equipment failure due to deferred maintenance on P-204.",
+        )
+        _seed_incident(
+            "inc-202",
+            "inc_b.pdf",
+            "Corroded pump due to deferred maintenance on P-204.",
+        )
 
         client.post("/api/v1/lessons/detect", headers=HEADERS)
         patterns = store.list_lesson_patterns("lessons-org")
@@ -192,8 +202,18 @@ class TestPatternConfirmation:
         assert res2.status_code == 400
 
         # Test dismiss on a new pattern
-        _seed_incident("inc-203", "inc_c.pdf", "Near miss due to human error on valve V-100.", equipment_tag="V-100")
-        _seed_incident("inc-204", "inc_d.pdf", "Near miss due to operator error on valve V-100.", equipment_tag="V-100")
+        _seed_incident(
+            "inc-203",
+            "inc_c.pdf",
+            "Near miss due to human error on valve V-100.",
+            equipment_tag="V-100",
+        )
+        _seed_incident(
+            "inc-204",
+            "inc_d.pdf",
+            "Near miss due to operator error on valve V-100.",
+            equipment_tag="V-100",
+        )
         client.post("/api/v1/lessons/detect", headers=HEADERS)
 
         all_patterns = store.list_lesson_patterns("lessons-org")
@@ -216,15 +236,25 @@ class TestWarningTriggers:
     def test_warning_on_confirmed_pattern(self):
         """Verify warnings are generated when a confirmed pattern's equipment appears in a new doc."""
         # Seed incidents, detect, and confirm
-        _seed_incident("inc-301", "inc_maint_a.pdf", "Equipment failure due to deferred maintenance on P-204.")
-        _seed_incident("inc-302", "inc_maint_b.pdf", "Corroded seals due to deferred maintenance on pump P-204.")
+        _seed_incident(
+            "inc-301",
+            "inc_maint_a.pdf",
+            "Equipment failure due to deferred maintenance on P-204.",
+        )
+        _seed_incident(
+            "inc-302",
+            "inc_maint_b.pdf",
+            "Corroded seals due to deferred maintenance on pump P-204.",
+        )
 
         client.post("/api/v1/lessons/detect", headers=HEADERS)
 
         patterns = store.list_lesson_patterns("lessons-org")
         for p in patterns:
             if p.status == PatternStatus.CANDIDATE:
-                store.update_lesson_pattern(p.pattern_id, status=PatternStatus.CONFIRMED)
+                store.update_lesson_pattern(
+                    p.pattern_id, status=PatternStatus.CONFIRMED
+                )
 
         # Now seed a NEW work order on the same equipment P-204
         from datetime import datetime, timezone

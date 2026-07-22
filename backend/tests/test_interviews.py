@@ -61,11 +61,13 @@ def test_interviews_flow(client: TestClient) -> None:
     # 5. Second respond (expert reply)
     res_2 = client.post(
         f"/api/v1/interviews/sessions/{session_id}/respond",
-        json={"response": "The temperature peaked at 95°C and we isolation locked out."},
+        json={
+            "response": "The temperature peaked at 95°C and we isolation locked out."
+        },
         headers=headers,
     )
     assert res_2.status_code == 200
-    
+
     # 6. Third respond
     res_3 = client.post(
         f"/api/v1/interviews/sessions/{session_id}/respond",
@@ -77,7 +79,9 @@ def test_interviews_flow(client: TestClient) -> None:
     # 7. Fourth respond - should complete the interview and return a transcript
     res_4 = client.post(
         f"/api/v1/interviews/sessions/{session_id}/respond",
-        json={"response": "Make sure to clean the seal faces and check thermal expansion."},
+        json={
+            "response": "Make sure to clean the seal faces and check thermal expansion."
+        },
         headers=headers,
     )
     assert res_4.status_code == 200
@@ -104,7 +108,7 @@ def test_interviews_flow(client: TestClient) -> None:
     doc = store.get_document(doc_id)
     assert doc
     assert doc.doc_type == "captured_knowledge"
-    
+
     # Check chunks were generated
     chunks = store.get_chunks_by_document(doc_id)
     assert len(chunks) > 0

@@ -8,8 +8,10 @@ filtering prompt injections, jailbreaks, and sensitive data leakage.
 import os
 import re
 
+
 class SecurityBlockException(Exception):
     """Exception raised when Model Armor blocks a request."""
+
     def __init__(self, message: str, reason: str):
         super().__init__(message)
         self.reason = reason
@@ -73,11 +75,11 @@ class ModelArmorService:
                 source=agent_name,
                 status="blocked",
                 prompt_snippet=prompt_snippet,
-                block_reason=reason
+                block_reason=reason,
             )
             raise SecurityBlockException(
                 message="Security Block: The request was flagged as violating safety and security policies.",
-                reason=reason
+                reason=reason,
             )
 
         # Log allowed event for traffic telemetry (limited to snippets)
@@ -85,7 +87,7 @@ class ModelArmorService:
             source=agent_name,
             status="allowed",
             prompt_snippet=prompt_snippet,
-            block_reason=""
+            block_reason="",
         )
 
         return text

@@ -44,6 +44,7 @@ class InterviewsService:
         try:
             # Fetch low confidence query gaps from copilot service
             from app.services.copilot_service import copilot_service
+
             analytics = copilot_service.get_analytics(org_id)
             gaps = analytics.get("top_gaps", [])
 
@@ -52,12 +53,16 @@ class InterviewsService:
                 _occurrence = gap.get("occurrence_count", 1)
                 avg_conf = gap.get("avg_confidence", 50.0)
 
-
                 # Heuristic scoring
                 criticality = 60
-                if any(x in query_pattern.lower() for x in ["leak", "trip", "failure", "emergency", "shut"]):
+                if any(
+                    x in query_pattern.lower()
+                    for x in ["leak", "trip", "failure", "emergency", "shut"]
+                ):
                     criticality += 20
-                if any(x in query_pattern.lower() for x in ["p-204", "he-301", "c-201"]):
+                if any(
+                    x in query_pattern.lower() for x in ["p-204", "he-301", "c-201"]
+                ):
                     criticality += 15
                 criticality = min(95, criticality)
 
@@ -126,16 +131,16 @@ Ask the first, highly targeted, technically precise question to start the interv
             org_id=org_id,
             user_uid=user_uid,
             topic=topic,
-            turns=[
-                InterviewTurn(role="agent", content=first_question)
-            ],
+            turns=[InterviewTurn(role="agent", content=first_question)],
             status="active",
         )
 
         store.create_interview_session(session)
         return session
 
-    def respond_to_session(self, session_id: str, response_text: str) -> InterviewRespondResponse:
+    def respond_to_session(
+        self, session_id: str, response_text: str
+    ) -> InterviewRespondResponse:
         """
         FR-7.1.2: Submit expert answer, check loop count, and get next question or final synthesized transcript.
         """
@@ -239,7 +244,9 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
         # 2. Extract Entities from the transcript text using Gemini
         try:
             # We treat the text as safety_procedure context to ensure rich extraction
-            extracted = gemini_service.extract_entities(session.transcript, "safety_procedure")
+            extracted = gemini_service.extract_entities(
+                session.transcript, "safety_procedure"
+            )
             entity_count = 0
             for ent in extracted:
                 try:
@@ -252,7 +259,8 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
                     document_id=doc_id,
                     entity_type=etype_enum,
                     value=ent["value"],
-                    normalised_value=ent.get("normalised_value") or ent["value"].upper().replace(" ", "_"),
+                    normalised_value=ent.get("normalised_value")
+                    or ent["value"].upper().replace(" ", "_"),
                     confidence=float(ent.get("confidence", 0.95)),
                     org_id=session.org_id,
                 )
@@ -260,12 +268,15 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
                 # Resolve equipment tags so that they are linked in the graph
                 if etype_enum == EntityType.EQUIPMENT_TAG:
                     from app.routers.ingestion import resolve_equipment_entity
+
                     resolve_equipment_entity(entity, session.org_id, "")
 
                 store.create_entity(entity)
                 entity_count += 1
-            
-            store.update_document_stage(doc_id, PipelineStage.COMPLETED, entity_count=entity_count)
+
+            store.update_document_stage(
+                doc_id, PipelineStage.COMPLETED, entity_count=entity_count
+            )
         except Exception as e:
             print(f"[Interviews] Failed to extract entities from transcript: {e}")
 
@@ -299,8 +310,10 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
                 )
                 store.create_chunk(chunk)
                 chunk_count += 1
-            
-            store.update_document_stage(doc_id, PipelineStage.COMPLETED, chunk_count=chunk_count)
+
+            store.update_document_stage(
+                doc_id, PipelineStage.COMPLETED, chunk_count=chunk_count
+            )
         except Exception as e:
             print(f"[Interviews] Failed to chunk transcript: {e}")
 
@@ -325,11 +338,14 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
         if gemini_service.enabled:
             try:
                 import google.generativeai as genai
+
                 model = genai.GenerativeModel("gemini-2.0-flash")
                 response = model.generate_content(prompt)
                 if response.text:
                     # Screen output response
-                    model_armor_service.screen_interaction(response.text, "interview-agent")
+                    model_armor_service.screen_interaction(
+                        response.text, "interview-agent"
+                    )
                     return response.text
             except Exception as e:
                 # Re-raise if it was a security block, otherwise print failure
@@ -342,6 +358,7 @@ Provide ONLY the final markdown text. Do not include any chat introductions or c
         if groq_key:
             try:
                 import httpx
+
                 headers = {
                     "Authorization": f"Bearer {groq_key}",
                     "Content-Type": "application/json",

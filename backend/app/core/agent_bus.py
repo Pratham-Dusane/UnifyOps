@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger("unifyops-agent-bus")
 
+
 class AgentEventBus:
     def __init__(self):
         # request_id -> list of asyncio.Queue
@@ -13,6 +14,7 @@ class AgentEventBus:
 
     def init_request(self, request_id: str):
         import time
+
         self._start_times[request_id] = time.time()
 
     def subscribe(self, request_id: str) -> asyncio.Queue:
@@ -31,28 +33,36 @@ class AgentEventBus:
                 del self._subscribers[request_id]
         logger.debug(f"Unsubscribed from agent stream for {request_id}")
 
-    def emit(self, request_id: str, agent_name: str, action_summary: str, detail: dict = None, metric: dict = None):
+    def emit(
+        self,
+        request_id: str,
+        agent_name: str,
+        action_summary: str,
+        detail: dict = None,
+        metric: dict = None,
+    ):
         """Broadcast a message to all subscribers of a request_id."""
         if request_id not in self._subscribers:
-            return # No active subscribers, drop the message
-        
+            return  # No active subscribers, drop the message
+
         import time
-        
+
         start_time = self._start_times.get(request_id, time.time())
         offset_ms = int((time.time() - start_time) * 1000)
-        
+
         payload = {
             "timestamp_offset_ms": offset_ms,
             "agent_name": agent_name,
             "action_summary": action_summary,
             "detail": detail,
-            "metric": metric
+            "metric": metric,
         }
-        
+
         for q in self._subscribers[request_id]:
             try:
                 q.put_nowait(payload)
             except asyncio.QueueFull:
                 pass
+
 
 agent_bus = AgentEventBus()

@@ -55,7 +55,9 @@ class GeminiService:
                 )
 
                 # Screen output response
-                model_armor_service.screen_interaction(response.text, "entity-extractor")
+                model_armor_service.screen_interaction(
+                    response.text, "entity-extractor"
+                )
 
                 try:
                     entities = json.loads(response.text)

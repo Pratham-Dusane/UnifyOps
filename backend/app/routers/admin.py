@@ -82,8 +82,9 @@ async def get_dashboard_analytics(
                 "signal_details": {
                     "failure_count": item.failure_count,
                     "evidence_explanation": item.evidence_explanation,
-                }
-            } for item in attention_list[:5]
+                },
+            }
+            for item in attention_list[:5]
         ]
 
         # 4. Compliance Gaps
@@ -97,17 +98,20 @@ async def get_dashboard_analytics(
         # 6. Security Telemetry (Phase 9)
         ma_events = store.get_model_armor_events()
         blocked_count = sum(1 for e in ma_events if e.get("status") == "blocked")
-        
+
         sensitive_docs = [
-            d for d in store._documents.values()
-            if d.org_id == x_user_org and getattr(d, "sensitive_data_status", "") == "redacted"
+            d
+            for d in store._documents.values()
+            if d.org_id == x_user_org
+            and getattr(d, "sensitive_data_status", "") == "redacted"
         ]
         sensitive_details = [
             {
                 "id": d.id,
                 "name": d.original_filename,
                 "types": getattr(d, "sensitive_data_types", []),
-            } for d in sensitive_docs
+            }
+            for d in sensitive_docs
         ]
 
         # Provide sensible fallback for hackathon demo
@@ -168,4 +172,3 @@ async def get_dashboard_analytics(
             status_code=500,
             detail=f"Failed to compile dashboard analytics: {str(e)}",
         )
-

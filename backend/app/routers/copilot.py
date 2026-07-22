@@ -51,7 +51,9 @@ async def query_copilot(
     x_user_role: str = Header(default="viewer", description="User's role"),
     x_user_plant: str = Header(default="", description="User's plant ID"),
     x_user_department: str = Header(default="", description="User's department"),
-    x_user_language: str = Header(default="en", description="User's preferred language"),
+    x_user_language: str = Header(
+        default="en", description="User's preferred language"
+    ),
 ) -> CopilotResponse:
     """
     Main copilot query endpoint (FR-3.1.1).
@@ -179,7 +181,9 @@ async def get_analytics(
     return copilot_service.get_analytics(x_user_org)
 
 
-@router.get("/citations/{citation_id}/verification", response_model=CitationVerificationResponse)
+@router.get(
+    "/citations/{citation_id}/verification", response_model=CitationVerificationResponse
+)
 async def get_citation_verification(
     citation_id: str,
     x_user_org: str = Header(..., description="User's organisation ID"),
@@ -197,14 +201,26 @@ async def get_citation_verification(
             url="/api/v1/ingestion/documents/doc-wo-402/download",
             page=1,
             bbox=None,
-            char_range=[120, 240]
+            char_range=[120, 240],
         ),
         graph_path=[
-            GraphPathStep(node_id="sop-14", node_type="SOP", edge_label=None, step_order=0),
-            GraphPathStep(node_id="equip-p204", node_type="Equipment", edge_label="GOVERNS", step_order=1),
-            GraphPathStep(node_id="inc-0091", node_type="Incident", edge_label="FLAGGED_BY", step_order=2)
+            GraphPathStep(
+                node_id="sop-14", node_type="SOP", edge_label=None, step_order=0
+            ),
+            GraphPathStep(
+                node_id="equip-p204",
+                node_type="Equipment",
+                edge_label="GOVERNS",
+                step_order=1,
+            ),
+            GraphPathStep(
+                node_id="inc-0091",
+                node_type="Incident",
+                edge_label="FLAGGED_BY",
+                step_order=2,
+            ),
         ],
         confidence_score=0.91,
         grounding_threshold=0.78,
-        reasoning_summary="Matched via semantic similarity to SOP-14 §3.2, corroborated by 2 linked work orders."
+        reasoning_summary="Matched via semantic similarity to SOP-14 §3.2, corroborated by 2 linked work orders.",
     )

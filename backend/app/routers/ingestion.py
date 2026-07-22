@@ -351,7 +351,7 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
     for p_txt in page_texts:
         p_clean, _ = sdp_service.scan_and_mask(p_txt)
         clean_page_texts.append(p_clean)
-        
+
     full_text = clean_text
     page_texts = clean_page_texts
 
@@ -700,6 +700,7 @@ async def simulate_pipeline_task(doc_id: str, org_id: str, filename: str) -> Non
     if inferred_type == DocumentType.REGULATORY:
         try:
             from app.services.compliance_service import compliance_service
+
             compliance_service.segment_regulatory_document(org_id, doc_id)
             print(f"[Pipeline] Segmented regulatory clauses for document: {doc_id}")
         except Exception as e:
@@ -938,7 +939,9 @@ async def delete_document(
         raise HTTPException(status_code=404, detail="Document not found")
 
     store.delete_document(document_id)
-    return {"message": f"Document {document_id} and all its cascading records deleted successfully."}
+    return {
+        "message": f"Document {document_id} and all its cascading records deleted successfully."
+    }
 
 
 @router.patch("/documents/{document_id}/stage", response_model=DocumentRecord)
@@ -1157,10 +1160,12 @@ async def download_unredacted_document(
 
     # Enforce role restriction (FR-9.1.3)
     role_lower = x_user_role.lower()
-    if not ("admin" in role_lower or "supervisor" in role_lower or "manager" in role_lower):
+    if not (
+        "admin" in role_lower or "supervisor" in role_lower or "manager" in role_lower
+    ):
         raise HTTPException(
             status_code=403,
-            detail="Forbidden: Standard operators or viewers are not permitted to download the unredacted source files containing PII."
+            detail="Forbidden: Standard operators or viewers are not permitted to download the unredacted source files containing PII.",
         )
 
     try:
@@ -1168,8 +1173,11 @@ async def download_unredacted_document(
         return StreamingResponse(
             io.BytesIO(file_content),
             media_type=doc.mime_type,
-            headers={"Content-Disposition": f"attachment; filename={doc.original_filename}"}
+            headers={
+                "Content-Disposition": f"attachment; filename={doc.original_filename}"
+            },
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve file from storage: {e}")
-
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve file from storage: {e}"
+        )

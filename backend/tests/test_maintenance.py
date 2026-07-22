@@ -256,8 +256,12 @@ class TestTimelineAPI:
 
 
 class TestAttentionSignals:
-    @patch("app.services.maintenance_service.maintenance_service._synthesize_evidence_summary")
-    def test_attention_score_calculation(self, mock_summary: MagicMock, client: TestClient) -> None:
+    @patch(
+        "app.services.maintenance_service.maintenance_service._synthesize_evidence_summary"
+    )
+    def test_attention_score_calculation(
+        self, mock_summary: MagicMock, client: TestClient
+    ) -> None:
         _seed_maint_data()
         mock_summary.return_value = "Test risk warning text."
 
@@ -268,23 +272,29 @@ class TestAttentionSignals:
         assert res.status_code == 200
         data = res.json()
         assert len(data) > 0
-        
+
         # Verify fields (FR-4.2.3, FR-4.2.1)
         item = data[0]
         assert item["equipment_tag"] == "P-204"
         assert item["attention_score"] > 0
         assert item["signal_details"]["failure_count"] >= 2
-        assert item["signal_details"]["evidence_explanation"] == "Test risk warning text."
+        assert (
+            item["signal_details"]["evidence_explanation"] == "Test risk warning text."
+        )
 
 
 # ─────────────────────── RCA Agent Draft & Approval ─────────────
 
 
 class TestRCAAgentWorkflow:
-    @patch("app.services.maintenance_service.maintenance_service._call_gemini_structured_rca")
-    def test_generate_and_approve_rca(self, mock_gemini: MagicMock, client: TestClient) -> None:
+    @patch(
+        "app.services.maintenance_service.maintenance_service._call_gemini_structured_rca"
+    )
+    def test_generate_and_approve_rca(
+        self, mock_gemini: MagicMock, client: TestClient
+    ) -> None:
         _seed_maint_data()
-        
+
         mock_gemini.return_value = {
             "immediate_cause": "Improper casing alignment.",
             "five_whys": [
@@ -292,10 +302,10 @@ class TestRCAAgentWorkflow:
                 "Coupling friction occurred.",
                 "Bearing wore down.",
                 "Lubrication schedule was missed.",
-                "No preventative alerts were sent."
+                "No preventative alerts were sent.",
             ],
             "contributing_factors": "Lack of lubrication [source_1].",
-            "corrective_actions": "Realign pump casing [source_1]."
+            "corrective_actions": "Realign pump casing [source_1].",
         }
 
         # 1. Generate RCA
@@ -303,7 +313,7 @@ class TestRCAAgentWorkflow:
             "/api/v1/maintenance/rca/generate",
             json={
                 "equipment_tag": "P-204",
-                "failure_description": "Vibration trip during startup"
+                "failure_description": "Vibration trip during startup",
             },
             headers=HEADERS,
         )
@@ -320,16 +330,10 @@ class TestRCAAgentWorkflow:
             f"/api/v1/maintenance/rca/{rca_id}/approve",
             json={
                 "immediate_cause": "Verified casing misalignment.",
-                "five_whys": [
-                    "Modified Why 1",
-                    "Why 2",
-                    "Why 3",
-                    "Why 4",
-                    "Why 5"
-                ],
+                "five_whys": ["Modified Why 1", "Why 2", "Why 3", "Why 4", "Why 5"],
                 "contributing_factors": "Lack of alignment inspections.",
                 "corrective_actions": "Realign pump.",
-                "reviewer_notes": "All checks approved."
+                "reviewer_notes": "All checks approved.",
             },
             headers=HEADERS,
         )
@@ -339,7 +343,9 @@ class TestRCAAgentWorkflow:
         assert approved["approved_by"] == USER_UID
         assert approved["five_whys"][0] == "Modified Why 1"
         # Original backup remains unchanged
-        assert approved["original_draft_backup"]["five_whys"][0] == "Pump shaft vibrated."
+        assert (
+            approved["original_draft_backup"]["five_whys"][0] == "Pump shaft vibrated."
+        )
 
         # 3. List RCAs for equipment (assert it includes the approved one)
         list_res = client.get(

@@ -8,6 +8,7 @@ with local regex/rule fallbacks for development and testing.
 import os
 import re
 
+
 class SensitiveDataProtectionService:
     """Manages PII identification, masking, and role-based data redaction."""
 
@@ -16,11 +17,14 @@ class SensitiveDataProtectionService:
         if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
             try:
                 from google.cloud import dlp_v2
+
                 self.client = dlp_v2.DlpServiceClient()
                 self.project = os.environ.get("GCP_PROJECT_ID", "unifyops")
                 self.enabled = True
             except Exception as e:
-                print(f"[SDP Service] Failed to initialize GCP DLP client: {e}. Running in local simulation mode.")
+                print(
+                    f"[SDP Service] Failed to initialize GCP DLP client: {e}. Running in local simulation mode."
+                )
 
     def scan_and_mask(self, text: str) -> tuple[str, list[str]]:
         """
@@ -33,7 +37,9 @@ class SensitiveDataProtectionService:
         processed_text = text
 
         # 1. Emails (Redact)
-        email_pattern = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
+        email_pattern = re.compile(
+            r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+        )
         emails = email_pattern.findall(processed_text)
         if emails:
             info_types.append("EMAIL_ADDRESS")
@@ -41,7 +47,9 @@ class SensitiveDataProtectionService:
 
         # 2. Phone Numbers (Mask)
         # Matches formats like +91-98765-43210, +1 (555) 123-4567, 9876543210
-        phone_pattern = re.compile(r"(?:\+?\d{1,4}[-.\s]?)?\(?\d{2,5}\)?[-.\s]?\d{2,5}[-.\s]?\d{2,5}\b")
+        phone_pattern = re.compile(
+            r"(?:\+?\d{1,4}[-.\s]?)?\(?\d{2,5}\)?[-.\s]?\d{2,5}[-.\s]?\d{2,5}\b"
+        )
         phones = phone_pattern.findall(processed_text)
         if phones:
             info_types.append("PHONE_NUMBER")
@@ -60,22 +68,52 @@ class SensitiveDataProtectionService:
         # We wrap names in a special marker so they can be cleaned dynamically at query-time.
         name_markers = [
             r"\b[A-Z][a-z]+ [A-Z][a-z]+\b",  # First Last
-            r"\b[A-Z][a-z]+ [A-Z]\. [A-Z][a-z]+\b"  # First M. Last
+            r"\b[A-Z][a-z]+ [A-Z]\. [A-Z][a-z]+\b",  # First M. Last
         ]
-        
+
         # Avoid matching common titles as parts of names by lowercasing them in a temporary text for scanning
         temp_text = processed_text
-        titles_to_lower = ["Operator", "Supervisor", "Engineer", "Technician", "Manager", "Please", "Contact", "Verify"]
+        titles_to_lower = [
+            "Operator",
+            "Supervisor",
+            "Engineer",
+            "Technician",
+            "Manager",
+            "Please",
+            "Contact",
+            "Verify",
+        ]
         for title in titles_to_lower:
             temp_text = re.sub(rf"\b{title}\b", title.lower(), temp_text)
 
         # Avoid matching common document terms, titles or equipment units
         ignored_names = {
-            "UnifyOps", "P&ID", "Plant", "CDU", "SOP", "RCA", "Incident", "Tata", "Steel", 
-            "Crude", "Reflux", "Operator", "Supervisor", "Engineer", "Technician", "Manager",
-            "Please", "Contact", "Verify", "Report", "Audit", "Safety", "Loto", "Lockout"
+            "UnifyOps",
+            "P&ID",
+            "Plant",
+            "CDU",
+            "SOP",
+            "RCA",
+            "Incident",
+            "Tata",
+            "Steel",
+            "Crude",
+            "Reflux",
+            "Operator",
+            "Supervisor",
+            "Engineer",
+            "Technician",
+            "Manager",
+            "Please",
+            "Contact",
+            "Verify",
+            "Report",
+            "Audit",
+            "Safety",
+            "Loto",
+            "Lockout",
         }
-        
+
         names_found = []
         for marker in name_markers:
             for match in re.finditer(marker, temp_text):
@@ -93,7 +131,9 @@ class SensitiveDataProtectionService:
                 # Replace only plain text with role-restricted markers
                 # (Ensure we don't wrap an already wrapped name)
                 pattern = rf"(?<!\[\[SENSITIVE_PERSON:)\b{re.escape(name)}\b"
-                processed_text = re.sub(pattern, f"[[SENSITIVE_PERSON:{name}]]", processed_text)
+                processed_text = re.sub(
+                    pattern, f"[[SENSITIVE_PERSON:{name}]]", processed_text
+                )
 
         return processed_text, list(set(info_types))
 
@@ -103,7 +143,11 @@ class SensitiveDataProtectionService:
         If role is admin or supervisor, returns raw names. Otherwise, masks names.
         """
         role_lower = str(role).lower()
-        has_access = "admin" in role_lower or "supervisor" in role_lower or "manager" in role_lower
+        has_access = (
+            "admin" in role_lower
+            or "supervisor" in role_lower
+            or "manager" in role_lower
+        )
 
         def replace_match(match):
             name = match.group(1)

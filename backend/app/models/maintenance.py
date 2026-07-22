@@ -29,9 +29,15 @@ class TimelineEvent(BaseModel):
     title: str = Field(description="Display title of the event")
     timestamp: datetime
     description: str = Field(default="")
-    failure_mode: str | None = Field(default=None, description="Extracted failure mode (FR-4.1.2)")
-    parts_replaced: list[str] = Field(default_factory=list, description="Extracted replaced parts (FR-4.1.2)")
-    downtime_hours: float | None = Field(default=None, description="Downtime duration in hours (FR-4.1.2)")
+    failure_mode: str | None = Field(
+        default=None, description="Extracted failure mode (FR-4.1.2)"
+    )
+    parts_replaced: list[str] = Field(
+        default_factory=list, description="Extracted replaced parts (FR-4.1.2)"
+    )
+    downtime_hours: float | None = Field(
+        default=None, description="Downtime duration in hours (FR-4.1.2)"
+    )
     document_id: str = Field(description="Source document ID for citation/details")
     document_name: str = Field(default="", description="Name of source document")
 
@@ -54,8 +60,12 @@ class AttentionSignal(BaseModel):
     recurrence_interval_months: float | None = Field(default=None)
     months_since_last_service: float = Field(description="Elapsed time since last WO")
     failure_count: int = Field(default=0, description="Total recorded failures")
-    severity_incidents_count: int = Field(default=0, description="Linked incident count")
-    evidence_explanation: str = Field(description="Human-readable explanation of risk (FR-4.2.2)")
+    severity_incidents_count: int = Field(
+        default=0, description="Linked incident count"
+    )
+    evidence_explanation: str = Field(
+        description="Human-readable explanation of risk (FR-4.2.2)"
+    )
 
 
 class NeedsAttentionItem(BaseModel):
@@ -75,9 +85,15 @@ class NeedsAttentionItem(BaseModel):
 class RCARequest(BaseModel):
     """Request to generate a draft Root Cause Analysis (FR-4.3.1)."""
 
-    equipment_tag: str = Field(min_length=2, description="Target equipment tag e.g. P-204")
-    failure_description: str = Field(min_length=5, description="Brief description of current failure")
-    request_id: str | None = Field(default=None, description="Optional ID for Agent Console SSE streaming")
+    equipment_tag: str = Field(
+        min_length=2, description="Target equipment tag e.g. P-204"
+    )
+    failure_description: str = Field(
+        min_length=5, description="Brief description of current failure"
+    )
+    request_id: str | None = Field(
+        default=None, description="Optional ID for Agent Console SSE streaming"
+    )
 
 
 class RCADraft(BaseModel):
@@ -87,11 +103,21 @@ class RCADraft(BaseModel):
     equipment_tag: str
     failure_description: str
     generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    immediate_cause: str = Field(default="", description="Immediate operational trigger of failure")
-    five_whys: list[str] = Field(default_factory=list, description="5-Whys logical breakdown steps")
-    contributing_factors: str = Field(default="", description="Cited human/process/equipment contributors")
-    corrective_actions: str = Field(default="", description="Recommended preventative actions")
-    citations: list[dict] = Field(default_factory=list, description="Citations to source documents")
+    immediate_cause: str = Field(
+        default="", description="Immediate operational trigger of failure"
+    )
+    five_whys: list[str] = Field(
+        default_factory=list, description="5-Whys logical breakdown steps"
+    )
+    contributing_factors: str = Field(
+        default="", description="Cited human/process/equipment contributors"
+    )
+    corrective_actions: str = Field(
+        default="", description="Recommended preventative actions"
+    )
+    citations: list[dict] = Field(
+        default_factory=list, description="Citations to source documents"
+    )
     status: str = Field(default="draft", description="draft | approved")
     approved_by: str | None = Field(default=None)
     approved_at: datetime | None = Field(default=None)

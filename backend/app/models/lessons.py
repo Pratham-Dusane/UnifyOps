@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 # ──────────────────────── Enums ────────────────────────
 
+
 class IncidentSeverity(str, Enum):
     NEAR_MISS = "near_miss"
     MINOR = "minor"
@@ -33,8 +34,10 @@ class WarningStatus(str, Enum):
 
 # ──────────────────────── Models ────────────────────────
 
+
 class IncidentEnrichment(BaseModel):
     """Structured enrichment extracted from an incident/near-miss document (FR-6.1)."""
+
     id: str
     document_id: str
     org_id: str
@@ -50,6 +53,7 @@ class IncidentEnrichment(BaseModel):
 
 class LessonPattern(BaseModel):
     """A detected cross-incident failure pattern (FR-6.2)."""
+
     pattern_id: str
     org_id: str
     shared_factor: str  # Plain-language description of the common thread
@@ -66,6 +70,7 @@ class LessonPattern(BaseModel):
 
 class PatternWarning(BaseModel):
     """A proactive warning pushed when a confirmed pattern's trigger fires (FR-6.3)."""
+
     warning_id: str
     pattern_id: str
     org_id: str
@@ -80,16 +85,20 @@ class PatternWarning(BaseModel):
 
 # ──────────────────────── Request/Response ────────────────────────
 
+
 class PatternConfirmRequest(BaseModel):
     """Request body for confirming a candidate pattern."""
+
     reviewer_notes: str = ""
 
 
 class PatternSearchRequest(BaseModel):
     """Request body for searching patterns."""
+
     query: str
 
 
 class WarningAcknowledgeRequest(BaseModel):
     """Request body for acknowledging a warning."""
+
     action: WarningStatus = WarningStatus.ACKNOWLEDGED

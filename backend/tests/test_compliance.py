@@ -151,7 +151,9 @@ class TestCascadingDelete:
 
 class TestClauseIngestion:
     @patch("app.services.compliance_service.compliance_service._summarize_clause")
-    def test_clause_segmentation(self, mock_summary: MagicMock, client: TestClient) -> None:
+    def test_clause_segmentation(
+        self, mock_summary: MagicMock, client: TestClient
+    ) -> None:
         _seed_compliance_data()
         mock_summary.return_value = "Lock out breakers before repair."
 
@@ -182,6 +184,7 @@ class TestClauseIngestion:
 
         # Trigger service segmentation manually
         from app.services.compliance_service import compliance_service
+
         clauses = compliance_service.segment_regulatory_document(ORG_ID, "doc-reg-001")
 
         assert len(clauses) >= 1
@@ -196,12 +199,15 @@ class TestClauseIngestion:
 
 class TestComplianceGapChecking:
     @patch("app.services.compliance_service.compliance_service._summarize_clause")
-    def test_gap_detection_agent(self, mock_summary: MagicMock, client: TestClient) -> None:
+    def test_gap_detection_agent(
+        self, mock_summary: MagicMock, client: TestClient
+    ) -> None:
         _seed_compliance_data()
         mock_summary.return_value = "Lock out breakers."
 
         # Setup regulatory clause linked to a stale procedure and an equipment tag
         from app.models.compliance import RegulatoryClause
+
         clause = RegulatoryClause(
             id="clause-test-01",
             document_id="doc-reg-fake",
@@ -231,11 +237,17 @@ class TestComplianceGapChecking:
 
         # Check types triggered:
         # 1. Stale procedure (proc created 400 days ago)
-        stale_gap = next(g for g in gaps if g["check_type"] == CheckType.STALE_PROCEDURE.value)
+        stale_gap = next(
+            g for g in gaps if g["check_type"] == CheckType.STALE_PROCEDURE.value
+        )
         assert stale_gap["severity"] == GapSeverity.MEDIUM.value
 
         # 2. Unresolved non-conformance (incident report for P-204 exists)
-        conformance_gap = next(g for g in gaps if g["check_type"] == CheckType.UNRESOLVED_NON_CONFORMANCE.value)
+        conformance_gap = next(
+            g
+            for g in gaps
+            if g["check_type"] == CheckType.UNRESOLVED_NON_CONFORMANCE.value
+        )
         assert conformance_gap["severity"] == GapSeverity.HIGH.value
 
         # Resolve a gap (FR-5.2.4)
@@ -259,6 +271,7 @@ class TestAuditPackageCompile:
 
         # Seed regulatory clause
         from app.models.compliance import RegulatoryClause
+
         clause = RegulatoryClause(
             id="clause-test-02",
             document_id="doc-reg-fake",

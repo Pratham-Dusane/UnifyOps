@@ -25,7 +25,6 @@ class DocumentType(str, Enum):
     UNKNOWN = "unknown"  # Unclassified
 
 
-
 class PipelineStage(str, Enum):
     """Stages in the ingestion pipeline."""
 
